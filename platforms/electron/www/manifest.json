@@ -1,0 +1,11 @@
+{
+  "background_color": "#FFF",
+  "display": "standalone",
+  "orientation": "any",
+  "start_url": "index.html",
+  "name": "u4a_sns",
+  "short_name": "u4a_sns",
+  "version": "com.u4a_sns.app",
+  "description": "Sample Apache Cordova App",
+  "author": "Apache Cordova Team"
+}

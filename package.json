@@ -25,6 +25,9 @@
     }
   },
   "dependencies": {
-    "@electron/remote": "^2.0.8"
+    "@electron/remote": "^2.0.8",
+    "http": "^0.0.1-security",
+    "open": "^8.4.0",
+    "youtube-api": "^3.0.1"
   }
 }

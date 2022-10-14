@@ -82,10 +82,7 @@ let oAPP = {};
 
                         part: "snippet,status",
 
-
-
                         // Create the readable stream to upload the video 
-
                         media: {
 
                             body: oAPP.fs.createReadStream('C:\\Tmp\\emart_video1.mp4', {

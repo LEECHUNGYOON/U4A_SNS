@@ -12,6 +12,8 @@ window.oAPP = {};
     oAPP.app = oAPP.remote.app;
     oAPP.apppath = oAPP.app.getAppPath();
     oAPP.path = oAPP.remote.require('path');
+    oAPP.fs = oAPP.remote.require('fs');
+    oAPP.mimetype = require('mime-types');
 
     /************************************************************************
      * SNS

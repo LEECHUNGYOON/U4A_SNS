@@ -2,7 +2,15 @@
 let oFaceBook = {};
 
 
-oFaceBook.send = (o) => {};
+oFaceBook.send = (o) => {
+
+    return new Promise((resolve, reject) => {
+        
+        resolve();
+
+    });
+
+};
 
 
 

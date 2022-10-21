@@ -39,6 +39,7 @@ const scheme = cdvElectronSettings.scheme;
 const hostname = cdvElectronSettings.hostname;
 const isFileProtocol = scheme === 'file';
 
+process.env.NTBA_FIX_319 = 1;
 
 const remote = require('@electron/remote/main');
 remote.initialize();

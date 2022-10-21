@@ -1,8 +1,17 @@
 let oKakao = {};
 
-oKakao.send = (o) => {};
+oKakao.send = (oParams, cb) => {
+
+    if (!oAPP.oChoiceInfo || !oAPP.oChoiceInfo.KAKAO) {
+
+        //Callback 
+        cb(oParams);
+        return;
+
+    }
 
 
 
+};
 
 module.exports = oKakao;

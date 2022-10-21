@@ -2,11 +2,12 @@ window.oAPP = {};
 
 ((oAPP) => {
     "use strict";
-
     oAPP.fn = {};
+    oAPP.auth = {};
+    oAPP.conf = {};
 
     /************************************************************************
-     * Electron & npm Library
+     * Electron & NPM Library
      ************************************************************************/
     oAPP.remote = require('@electron/remote');
     oAPP.app = oAPP.remote.app;
@@ -14,6 +15,14 @@ window.oAPP = {};
     oAPP.path = oAPP.remote.require('path');
     oAPP.fs = oAPP.remote.require('fs');
     oAPP.mimetype = require('mime-types');
+
+    /************************************************************************
+     * Authentication Info
+     ************************************************************************/
+    let sAuthPath = oAPP.path.join(oAPP.apppath, "auth");
+
+    oAPP.auth.facebook = require(oAPP.path.join(sAuthPath, "facebook-auth.json"));
+    oAPP.auth.youtube = require(oAPP.path.join(sAuthPath, "youtube-auth.json"));   
 
     /************************************************************************
      * SNS
@@ -24,6 +33,15 @@ window.oAPP = {};
     oAPP.youtube = require(oAPP.path.join(sJsPath, "youtube.js"));
     oAPP.instagram = require(oAPP.path.join(sJsPath, "instagram.js"));
     oAPP.kakao = require(oAPP.path.join(sJsPath, "kakao.js"));
+    oAPP.telegram = require(oAPP.path.join(sJsPath, "telegram.js"));
+
+    /************************************************************************
+     * Config Info
+     ************************************************************************/
+    oAPP.conf.server_port = 1977; // node server port
+
+
+
 
 
     /************************************************************************

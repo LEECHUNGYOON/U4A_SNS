@@ -28,6 +28,8 @@
     "@electron/remote": "^2.0.8",
     "http": "^0.0.1-security",
     "mime-types": "^2.1.35",
+    "mongodb": "^4.11.0",
+    "node-telegram-bot-api": "^0.59.0",
     "open": "^8.4.0",
     "youtube-api": "^3.0.1"
   }

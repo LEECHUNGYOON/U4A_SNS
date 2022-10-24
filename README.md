@@ -6,6 +6,7 @@
 	"TITLE": "",    //제목 
 	"TYPE" : "",    //문서 유형
 	"DESC" : "",    //내역 
+	"SAMPLE_URL": "", //샘플 URL
 	"IMAGE": {
 		"URL" :"",   //대표 이미지 URL
 		"T_URL":[],  //서브 이미지 URL 

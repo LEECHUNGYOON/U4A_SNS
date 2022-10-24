@@ -31,6 +31,7 @@
     "mongodb": "^4.11.0",
     "node-telegram-bot-api": "^0.59.0",
     "open": "^8.4.0",
+    "random-key": "^0.3.2",
     "youtube-api": "^3.0.1"
   }
 }

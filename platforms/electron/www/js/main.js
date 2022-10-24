@@ -56,6 +56,47 @@ let oAPP = parent.oAPP;
                 },
                 BUSYTXD: "잠시만 기다려 주십시오...", // Busy default Text
                 BUSYTXT: "",
+                TYPEKEY: "ETC", // 선택한 모듈의 키값  // 모듈 종류
+                TYPELIST: [{
+                        KEY: "ETC",
+                        TEXT: "기타(공통)"
+                    }, {
+                        KEY: "FI",
+                        TEXT: "FI"
+                    },
+                    {
+                        KEY: "CO",
+                        TEXT: "CO"
+                    },
+                    {
+                        KEY: "SD",
+                        TEXT: "SD"
+                    },
+                    {
+                        KEY: "MM",
+                        TEXT: "MM"
+                    },
+                    {
+                        KEY: "PP",
+                        TEXT: "PP"
+                    },
+                    {
+                        KEY: "PM",
+                        TEXT: "PM"
+                    },
+                    {
+                        KEY: "QM",
+                        TEXT: "QM"
+                    },
+                    {
+                        KEY: "PS",
+                        TEXT: "PS"
+                    },
+                    {
+                        KEY: "HR",
+                        TEXT: "HR"
+                    },
+                ],
             },
             SNS: {
                 TITLE: "",
@@ -75,6 +116,23 @@ let oAPP = parent.oAPP;
                 HASHTAG: []
             }
         };
+
+        let RANDOMKEY = oAPP.randomkey,
+            aHashTempData = [];
+
+        for (let i = 0; i < 1; i++) {
+
+            let sRandomKey = RANDOMKEY.generateBase30(10),
+                oRowData = {
+                    KEY: sRandomKey,
+                    TAG: ""
+                };
+
+            aHashTempData.push(oRowData);
+
+        }
+
+        oAPP.mDefaultModel.SNS.HASHTAG = aHashTempData;
 
         let oModelData = jQuery.extend(true, {}, oAPP.mDefaultModel);
 
@@ -104,22 +162,22 @@ let oAPP = parent.oAPP;
             aPageContent = oAPP.fn.getPageContent(),
             oPage = new sap.m.Page({
 
-                title: "U4A SNS Manager",
+                // title: "U4A SNS Manager",
                 titleAlignment: sap.m.TitleAlignment.Center,
                 enableScrolling: false,
 
-                // customHeader: new sap.m.Bar({                 
-                //     contentMiddle: [
-                //         new sap.m.Title({
-                //             text: "U4A SNS Manager"
-                //         })
-                //     ],
-                //     // contentRight: [
-                //     //     new sap.m.Title({
-                //     //         text: "U4A SNS Manager"
-                //     //     })
-                //     // ]
-                // }),
+                customHeader: new sap.m.Bar({
+                    contentMiddle: [
+                        new sap.m.Title({
+                            text: "U4A SNS Manager"
+                        })
+                    ],
+                    contentRight: [
+                        new sap.m.Button({
+                            icon: "sap-icon://settings"
+                        })
+                    ]
+                }),
 
                 content: aPageContent
 
@@ -289,8 +347,38 @@ let oAPP = parent.oAPP;
                                 }),
                                 fields: [
 
-                                    new sap.m.Input({
-                                        value: "{/SNS/TYPE}",
+                                    new sap.m.Select("typeSelect", {
+                                        // selectedKey: "{/PRC/TYPEKEY}",
+                                        change: (oEvent) => {
+
+                                            let oSelect = oEvent.getSource(),
+                                                oSelectModel = oSelect.getModel(),
+                                                oSelectedItem = oEvent.getParameter("selectedItem"),
+                                                sSelectedText = oSelectedItem.getText();
+
+                                            oSelectModel.setProperty("/SNS/TYPE", sSelectedText);
+
+                                        },
+                                        items: {
+                                            path: "/PRC/TYPELIST",
+                                            template: new sap.ui.core.ListItem({
+                                                key: "{KEY}",
+                                                text: "{TEXT}"
+                                            })
+                                        }
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
+
+                                        let oModel = this.getModel(),
+                                            aTypeList = oModel.getProperty("/PRC/TYPELIST");
+
+                                        let oFind = aTypeList.find(elem => elem.KEY == TYPEKEY);
+                                        if (oFind) {
+                                            oModel.setProperty("/SNS/TYPE", oFind.TEXT);
+                                            oModel.refresh();
+                                        }
+
+                                        return TYPEKEY;
+
                                     })
 
                                 ]
@@ -306,6 +394,18 @@ let oAPP = parent.oAPP;
                                         width: "100%",
                                         rows: 20,
                                         value: "{/SNS/DESC}"
+                                    })
+                                ]
+                            }),
+
+                            new sap.ui.layout.form.FormElement({
+                                label: new sap.m.Label({
+                                    design: sap.m.LabelDesign.Bold,
+                                    text: "Sample URL"
+                                }),
+                                fields: [
+                                    new sap.m.Input({
+                                        value: "{/SNS/SAMPLE_URL}",
                                     })
                                 ]
                             }),
@@ -557,19 +657,152 @@ let oAPP = parent.oAPP;
 
                 ]
 
+            }),
+
+            oHashTable = new sap.ui.table.Table("hashTable", {
+
+                // properties
+                alternateRowColors: true,
+                visibleRowCount: 5,
+
+                // aggregations
+                columns: [
+                    new sap.ui.table.Column({
+                        // hAlign: sap.ui.core.HorizontalAlign.Center,
+                        label: new sap.m.Label({
+                            design: sap.m.LabelDesign.Bold,
+                            text: "Hash Tag"
+                        }),
+                        template: new sap.m.Input({
+                            value: "{TAG}"
+                        })
+                    })
+                ],
+
+                extension: new sap.m.Bar({
+                    contentLeft: [
+                        new sap.m.Button({
+                            icon: "sap-icon://add",
+                            type: sap.m.ButtonType.Emphasized,
+                            press: oAPP.fn.addHashTag
+                        }),
+                        new sap.m.Button({
+                            icon: "sap-icon://less",
+                            type: sap.m.ButtonType.Negative,
+                            press: oAPP.fn.delHashTag
+                        }),
+                    ]
+                }),
+
+                rows: {
+                    path: "HASHTAG"
+                }
+
+            }).bindElement("/SNS"),
+
+            oPanel4 = new sap.m.Panel({
+                backgroundDesign: sap.m.BackgroundDesign.Transparent,
+                headerToolbar: new sap.m.Toolbar({
+                    content: [
+                        new sap.m.Title({
+                            text: "4. Hash Tag"
+                        }),
+                    ]
+                }),
+
+                content: [
+
+                    oHashTable
+
+                ]
+
             });
 
         return [
 
-            oPanel1,
+            oPanel1, // 본문
 
-            oPanel2,
+            oPanel2, // Youtube 동영상 첨부
 
-            oPanel3
+            oPanel3, // 대표 이미지 첨부
+
+            oPanel4 // Hash Tag
 
         ];
 
     }; // end of oAPP.fn.getSnsPageContent
+
+    /************************************************************************
+     * Hash Tag 추가하기
+     ************************************************************************/
+    oAPP.fn.addHashTag = () => {
+
+        let oHashTable = sap.ui.getCore().byId("hashTable");
+        if (!oHashTable) {
+            return;
+        }
+
+        let RANDOMKEY = oAPP.randomkey,
+            sRandomKey = RANDOMKEY.generateBase30(10),
+            oNewRow = {
+                KEY: sRandomKey,
+                TAG: ""
+            };
+
+        let oTableModel = oHashTable.getModel(),
+            aTableData = oTableModel.getProperty("/SNS/HASHTAG");
+
+        if (!aTableData || aTableData.length <= 0) {
+            oTableModel.setProperty("/SNS/HASHTAG", [oNewRow]);
+            return;
+        }
+
+        aTableData.push(oNewRow);
+
+        oTableModel.refresh();
+
+    }; // end of oAPP.fn.addHashTag
+
+    /************************************************************************
+     * Hash Tag 삭제하기
+     ************************************************************************/
+    oAPP.fn.delHashTag = () => {
+
+        let oHashTable = sap.ui.getCore().byId("hashTable");
+        if (!oHashTable) {
+            return;
+        }
+
+        let aSelIdx = oHashTable.getSelectedIndices(),
+            iSelLenth = aSelIdx.length;
+
+        if (iSelLenth <= 0) {
+            return;
+        }
+
+        let oTableModel = oHashTable.getModel(),
+            aTableData = jQuery.extend(true, [], oTableModel.getProperty("/SNS/HASHTAG"));
+
+        for (var i = 0; i < iSelLenth; i++) {
+
+            var iSelIdx = aSelIdx[i],
+                oCtx = oHashTable.getContextByIndex(iSelIdx),
+                sKey = oCtx.getObject("KEY"),
+                iFindIndex = aTableData.findIndex((DATA) => DATA.KEY == sKey);
+
+            if (iFindIndex < 0) {
+                continue;
+            }
+
+            aTableData.splice(iFindIndex, 1);
+
+        }
+
+        oTableModel.setProperty("/SNS/HASHTAG", aTableData);
+
+        oHashTable.clearSelection();
+
+    }; // end of oAPP.fn.delHashTag
 
     /************************************************************************
      * SNS 미리보기 부분 페이지 Content 영역 UI 그리기
@@ -824,6 +1057,22 @@ let oAPP = parent.oAPP;
     }; // end of oAPP.fn.imageFileSelect
 
     /************************************************************************
+     * 테이블에 추가한 해시태그 정보 구하기
+     ************************************************************************/
+    oAPP.fn.getHashTagList = () => {
+
+        let oHashTable = sap.ui.getCore().byId("hashTable");
+        if (!oHashTable) {
+            return;
+        }
+
+        let oTableModel = oHashTable.getModel();
+
+        return oTableModel.getObject("/SNS/HASHTAG");
+
+    }; // end of oAPP.fn.getHashTagList
+
+    /************************************************************************
      * 게시글 SNS에 전송
      ************************************************************************/
     oAPP.fn.sendPost = () => {
@@ -864,12 +1113,16 @@ let oAPP = parent.oAPP;
         TY_IFDATA.TITLE = oSns.TITLE;
         TY_IFDATA.TYPE = oSns.TYPE;
         TY_IFDATA.DESC = oSns.DESC;
+        TY_IFDATA.SAMPLE_URL = oSns.SAMPLE_URL;
         TY_IFDATA.IMAGE.URL = oSns.IMAGE.URL;
         TY_IFDATA.IMAGE.DATA = oSns.IMAGE.DATA;
         TY_IFDATA.VIDEO.URL = oSns.VIDEO.URL;
         TY_IFDATA.VIDEO.FPATH = oSns.VIDEO.LURL;
+        TY_IFDATA.HASHTAG = oAPP.fn.getHashTagList() || [];
 
-        oAPP.setBusy(true);
+        debugger;
+
+        // oAPP.setBusy(true);
 
         oAPP.fn.sendSNS(TY_IFDATA).then((oResult) => {
 
@@ -902,19 +1155,17 @@ let oAPP = parent.oAPP;
         // 6. kakao
 
         return new Promise((resolve, reject) => {
-            debugger;
 
             oAPP.setBusyMsg("Youtube 전송중...");
 
             oAPP.youtube.send(TY_IFDATA, (TY_IFDATA) => {
 
-                debugger;
-
                 oAPP.setBusyMsg("Facebook 전송중...");
 
                 oAPP.facebook.send(TY_IFDATA, (TY_IFDATA) => {
 
-                    debugger;
+                    return;
+
 
                     oAPP.setBusyMsg("Instagram 전송중...");
 
@@ -922,7 +1173,7 @@ let oAPP = parent.oAPP;
 
                         oAPP.setBusyMsg("telegram 전송중...");
 
-                        oAPP.telegram.send(TY_IFDATA, () => {
+                        oAPP.telegram.send(TY_IFDATA, (TY_IFDATA) => {
 
                             resolve();
 

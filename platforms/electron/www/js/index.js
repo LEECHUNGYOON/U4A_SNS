@@ -15,6 +15,7 @@ window.oAPP = {};
     oAPP.path = oAPP.remote.require('path');
     oAPP.fs = oAPP.remote.require('fs');
     oAPP.mimetype = require('mime-types');
+    oAPP.randomkey = require("random-key");
 
     /************************************************************************
      * Authentication Info

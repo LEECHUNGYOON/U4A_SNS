@@ -22,6 +22,15 @@ oFaceBook.send = (oParams, cb) => {
     }
 
     // oParams.VIDEO.URL = "https://youtu.be/S1j3i3Wxh7M";
+    
+    debugger;
+
+    let sMessage = oFaceBook.getMessage(oParams);
+
+    
+
+    return;
+
 
     let sPath = `${PAGEID}/feed`,
         sMethod = "POST",
@@ -104,6 +113,18 @@ oFaceBook.send = (oParams, cb) => {
         return sBody;
 
     } // end of fnGetBodyText
+
+};
+
+oFaceBook.getMessage = (oParams) => {
+
+    debugger;
+
+    let sMsg = "[제목] \n";
+    sMsg += oParams.TITLE + "\n\n";
+    // sMsg += 
+    
+
 
 };
 

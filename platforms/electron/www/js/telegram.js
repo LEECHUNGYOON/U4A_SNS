@@ -74,15 +74,12 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
 
 }
 
-
-
-
 /* ================================================================= */
 /* Export Module Function 
 /* ================================================================= */
-exports.send = function (sParams, CB) {
+exports.send = function(sParams, oChoiceInfo, CB) {
 
-    if (!oAPP.oChoiceInfo || !oAPP.oChoiceInfo.TELEGRAM) {
+    if (!oChoiceInfo || !oChoiceInfo.TELEGRAM) {
 
         //Callback 
         CB(sParams);
@@ -95,7 +92,7 @@ exports.send = function (sParams, CB) {
         MongDB_HOST = 'mongodb://118.34.215.175:27017';
 
     //몽고 DB에 전체 사용자 정보 얻기 
-    MongClinet.connect(MongDB_HOST, function (err, db) {
+    MongClinet.connect(MongDB_HOST, function(err, db) {
 
         if (err) {
             CB(sParams);
@@ -105,7 +102,7 @@ exports.send = function (sParams, CB) {
         var dbo = db.db("TELEGRAM");
         var query = {};
 
-        dbo.collection("USER_INFO").find(query).toArray(function (err, result) {
+        dbo.collection("USER_INFO").find(query).toArray(function(err, result) {
             debugger;
             db.close();
             if (err) {

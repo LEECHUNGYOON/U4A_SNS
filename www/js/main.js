@@ -29,12 +29,77 @@ let oAPP = parent.oAPP;
 
         debugger;
 
-        //oAPP.oChoiceInfo["FACEBOOK"] = true;
+        let aSnsData;
 
+        // 파라미터가 JSON 구조인지 확인
+        try {
+
+            aSnsData = JSON.parse(oData.param[0].value);
+
+        } catch (error) {
+
+            oRes.send({
+                RETCD: "E",
+                RTMSG: "JSON Parse Error!"
+            });
+
+            return;
+        }
+
+        // 파라미터 타입이 Array인지 확인
+        if (aSnsData instanceof Array == false) {
+
+            oRes.send({
+                RETCD: "E",
+                RTMSG: "Array 형식이 아닙니다!"
+            });
+
+            return;
+        }
+
+        let iSnsDataLength = aSnsData,
+            aSnsPromise = [];
+
+        for (var i = 0; i < iSnsDataLength; i++) {
+
+            var oChoiceInfo = {};
+
+            // 전송할 SNS 선택 정보를 글로벌 변수에 매핑한다.
+            var oSnsData = aSnsData[i],
+                aSnsType = oSnsData.T_SNSTYP,
+                iSnsTypeLength = aSnsType.length;
+
+            for (var j = 0; j < iSnsTypeLength; j++) {
+
+                oChoiceInfo[aSnsType[i]] = true;
+
+            }
+
+            var oSnsInfo = oSnsData.APPINFO;
+
+            aSnsPromise.push(oAPP.fn.sendSNS(oSnsInfo, oChoiceInfo));
+
+        }
+
+        Promise.all(aSnsPromise).then(function() {
+
+            debugger;
+
+            oRes.send({
+                RETCD: "S",
+                RTMSG: "전송 완료!"
+            });
+
+        }).catch(function(oErr) {
+
+            oRes.send({
+                RETCD: "E",
+                RTMSG: "전송 오류!"
+            });
+
+        });
 
     }; // end of oAPP.server.onReq
-
-
 
     /************************************************************************
      * UI5 Bootstrap Init
@@ -42,6 +107,8 @@ let oAPP = parent.oAPP;
     oAPP.fn.attachInit = () => {
 
         sap.ui.getCore().attachInit(() => {
+            
+            oAPP.jQuery = jQuery;
 
             jQuery.sap.require("sap.m.MessageBox");
 
@@ -277,6 +344,14 @@ let oAPP = parent.oAPP;
                                                 text: "Instagram",
                                                 selected: "{/PRC/CHOICE/INSTAGRAM}"
                                             }),
+                                            new sap.m.CheckBox({
+                                                text: "Kakao Story",
+                                                selected: "{/PRC/CHOICE/KAKAO_STORY}"
+                                            }),
+                                            new sap.m.CheckBox({
+                                                text: "Telegram",
+                                                selected: "{/PRC/CHOICE/TELEGRAM}"
+                                            }),
                                             new sap.m.Button({
                                                 icon: "sap-icon://paper-plane",
                                                 text: "Send Post",
@@ -284,7 +359,14 @@ let oAPP = parent.oAPP;
                                                 press: () => {
 
                                                     sap.m.MessageBox.confirm("해당 게시글을 SNS에 전송하시겠습니까?", {
-                                                        title: "Confirm", // default
+                                                        title: "Confirm", // default                                                        
+                                                        styleClass: "", // default
+                                                        actions: [sap.m.MessageBox.Action.OK,
+                                                            sap.m.MessageBox.Action.CANCEL
+                                                        ], // default
+                                                        emphasizedAction: sap.m.MessageBox.Action.OK, // default
+                                                        initialFocus: null, // default
+                                                        textDirection: sap.ui.core.TextDirection.Inherit, // default
                                                         onClose: (sAction) => {
 
                                                             if (sAction !== sap.m.MessageBox.Action.OK) {
@@ -295,13 +377,7 @@ let oAPP = parent.oAPP;
                                                             oAPP.fn.sendPost();
 
                                                         }, // default
-                                                        styleClass: "", // default
-                                                        actions: [sap.m.MessageBox.Action.OK,
-                                                            sap.m.MessageBox.Action.CANCEL
-                                                        ], // default
-                                                        emphasizedAction: sap.m.MessageBox.Action.OK, // default
-                                                        initialFocus: null, // default
-                                                        textDirection: sap.ui.core.TextDirection.Inherit // default
+
                                                     });
 
                                                 } // end of press
@@ -341,7 +417,6 @@ let oAPP = parent.oAPP;
         return [
 
             oPage
-
 
         ];
 
@@ -402,7 +477,7 @@ let oAPP = parent.oAPP;
                                                 text: "{TEXT}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -490,7 +565,7 @@ let oAPP = parent.oAPP;
                                     new sap.m.Input({
                                         value: "{/SNS/VIDEO/URL}",
                                     })
-                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                         if (iIndex !== 0) {
 
@@ -523,7 +598,7 @@ let oAPP = parent.oAPP;
                                             oAPP.fn.videoFileSelect();
                                         }
                                     })
-                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                         if (iIndex !== 1) {
 
@@ -601,7 +676,7 @@ let oAPP = parent.oAPP;
                                     new sap.m.Input({
                                         value: "{/SNS/IMAGE/URL}",
                                     })
-                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                         if (iIndex !== 0) {
 
@@ -637,12 +712,15 @@ let oAPP = parent.oAPP;
                                             oAPP.fn.imageFileSelect();
                                         }
                                     })
-                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                         if (iIndex !== 1) {
 
                                             // 입력된 값 초기화
                                             this.setValue("");
+
+                                            // Blob 파일 정보를 지운다.
+                                            sap.ui.getCore().getModel().setProperty("/SNS/IMAGE/DATA", "");
 
                                             // 미리보기쪽 이미지를 지운다.
                                             sap.ui.getCore().getModel().setProperty("/PREV/IMAGE/URL", "");
@@ -762,7 +840,7 @@ let oAPP = parent.oAPP;
 
             oPanel3, // 대표 이미지 첨부
 
-            oPanel4 // Hash Tag
+            oPanel4, // Hash Tag
 
         ];
 
@@ -969,7 +1047,7 @@ let oAPP = parent.oAPP;
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function () {
+        reader.onloadend = function() {
 
             var base64data = reader.result;
 
@@ -1116,6 +1194,16 @@ let oAPP = parent.oAPP;
      ************************************************************************/
     oAPP.fn.sendPost = () => {
 
+        // 전송할 SNS 선택 구조
+        let oChoice = sap.ui.getCore().getModel().getProperty("/PRC/CHOICE");
+
+        // 체크박스가 하나도 선택 되어 있지 않다면 오류 메시지 출력
+
+
+
+
+
+
         var TY_IFDATA = {
 
             "TITLE": "", //제목 
@@ -1137,16 +1225,7 @@ let oAPP = parent.oAPP;
 
         debugger;
 
-        let oChoice = sap.ui.getCore().getModel().getProperty("/PRC/CHOICE");
-
-        // SNS 전송 대상 선택 정보가 있으면 지우고 모델 기준으로 다시 설정
-        if (oAPP.oChoiceInfo) {
-            delete oAPP.oChoiceInfo;
-        }
-
-        oAPP.oChoiceInfo = oChoice;
-
-        // 파라미터 구조 매핑
+        // SNS 전송할 구조
         let oSns = sap.ui.getCore().getModel().getProperty("/SNS");
 
         TY_IFDATA.TITLE = oSns.TITLE;
@@ -1159,11 +1238,12 @@ let oAPP = parent.oAPP;
         TY_IFDATA.VIDEO.FPATH = oSns.VIDEO.LURL;
         TY_IFDATA.HASHTAG = oAPP.fn.getHashTagList() || [];
 
-        debugger;
-
         // oAPP.setBusy(true);
 
-        oAPP.fn.sendSNS(TY_IFDATA).then((oResult) => {
+        // SNS 일괄 전송!!
+        oAPP.fn.sendSNS(TY_IFDATA, oChoice).then((oResult) => {
+
+            debugger;
 
             oAPP.setBusyMsg("완료!");
 
@@ -1183,41 +1263,50 @@ let oAPP = parent.oAPP;
 
     }; // end of oAPP.fn.sendPost
 
-    oAPP.fn.sendSNS = (TY_IFDATA) => {
+    /************************************************************************
+     * SNS 일괄 전송
+     ************************************************************************/
+    oAPP.fn.sendSNS = (TY_IFDATA, oChoiceInfo) => {
 
         // 순서
-        // 1. 텔레그램
+        // 1. telegram
         // 2. youtube
         // 3. facebook
         // 4. instagram
-        // 5. telegram
-        // 6. kakao
+        // 5. kakao story
+        // 6. telegram
 
         return new Promise((resolve, reject) => {
 
             oAPP.setBusyMsg("Youtube 전송중...");
 
-            oAPP.youtube.send(TY_IFDATA, (TY_IFDATA) => {
+            oAPP.youtube.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
                 oAPP.setBusyMsg("Facebook 전송중...");
 
-                oAPP.facebook.send(TY_IFDATA, (TY_IFDATA) => {
+                oAPP.facebook.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+
+                    debugger;
 
                     return;
 
-
                     oAPP.setBusyMsg("Instagram 전송중...");
 
-                    oAPP.instagram.send(TY_IFDATA, (TY_IFDATA) => {
+                    oAPP.instagram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                        oAPP.setBusyMsg("telegram 전송중...");
+                        oAPP.setBusyMsg("Kakao Story 전송중...");
 
-                        oAPP.telegram.send(TY_IFDATA, (TY_IFDATA) => {
+                        oAPP.kakao.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                            resolve();
+                            oAPP.setBusyMsg("telegram 전송중...");
+
+                            oAPP.telegram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+
+                                resolve();
+
+                            });
 
                         });
-
 
                     });
 
@@ -1312,6 +1401,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기
+
+
+
+
 
     oAPP.server.serverOn();
 

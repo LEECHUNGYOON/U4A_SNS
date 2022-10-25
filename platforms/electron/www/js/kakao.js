@@ -1,16 +1,16 @@
 let oKakao = {};
 
-oKakao.send = (oParams, cb) => {
 
-    if (!oAPP.oChoiceInfo || !oAPP.oChoiceInfo.KAKAO) {
+
+oKakao.send = (oParams, oChoiceInfo, cb) => {
+
+    if (!oChoiceInfo || !oChoiceInfo.KAKAO_STORY) {
 
         //Callback 
         cb(oParams);
         return;
 
     }
-
-
 
 };
 

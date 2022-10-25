@@ -101,11 +101,11 @@ function Lfn_serverClose() {
 /* ================================================================= */
 /* Export Module Function 
 /* ================================================================= */
-exports.send = function (sParams, CB) {
+exports.send = function(sParams, oChoiceInfo, CB) {
 
     debugger;
 
-    if (!oAPP.oChoiceInfo || !oAPP.oChoiceInfo.YOUTUBE) {
+    if (!oChoiceInfo || !oChoiceInfo.YOUTUBE) {
 
         //Callback 
         CB(sParams);
@@ -154,7 +154,7 @@ exports.send = function (sParams, CB) {
 
 
     //HTTP 서버 생성
-    oServer = http.createServer(function (req, res) {
+    oServer = http.createServer(function(req, res) {
 
         debugger;
 
@@ -298,7 +298,7 @@ exports.send = function (sParams, CB) {
         });
 
 
-    }).listen(oAPP.conf.server_port);
+    }).listen(oAPP.conf.youtube_server_port);
 
     //인증 JSON 정보 
     var CREDENTIALS = oAPP.auth.youtube;

@@ -17,6 +17,7 @@ window.oAPP = {};
     oAPP.fs = oAPP.remote.require('fs');
     oAPP.mimetype = require('mime-types');
     oAPP.randomkey = require("random-key");
+    oAPP.ip = require('ip');
 
     /************************************************************************
      * Authentication Info
@@ -50,13 +51,15 @@ window.oAPP = {};
     /************************************************************************
      * Config Info
      ************************************************************************/
-    oAPP.conf.server_port = 1977; // node server port
+    oAPP.conf.localServerIP = oAPP.ip.address();
+    oAPP.conf.localServerPort = 1333;
 
+    oAPP.conf.youtube_server_port = 1977; // node server port
 
     /************************************************************************
      * HttpServer 
      ************************************************************************/
-    oAPP.server = require(oAPP.path.join(sJsPath, "CreateServer.js"));    
+    oAPP.server = require(oAPP.path.join(sJsPath, "CreateServer.js"));
 
     /************************************************************************
      * APP 구동 시작

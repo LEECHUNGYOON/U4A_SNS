@@ -1,8 +1,8 @@
 let oFaceBook = {};
 
-/*****************************************
+/************************************************************************
  * Facebook APP 정보 및 인증 토큰
- *****************************************/
+ ************************************************************************/
 const
     APPID = oAPP.auth.facebook.app_id,
     PAGEID = oAPP.auth.facebook.page_id,
@@ -10,9 +10,11 @@ const
     PAGETOKEN = atob(oAPP.auth.facebook.page_token);
 
 
-oFaceBook.send = (oParams, cb) => {
+oFaceBook.send = (oParams, oChoiceInfo, cb) => {
 
-    if (!oAPP.oChoiceInfo || !oAPP.oChoiceInfo.FACEBOOK) {
+    debugger;
+
+    if (!oChoiceInfo || !oChoiceInfo.FACEBOOK) {
 
         //Callback 
         cb(oParams);
@@ -21,10 +23,6 @@ oFaceBook.send = (oParams, cb) => {
     }
 
     // oParams.VIDEO.URL = "https://youtu.be/S1j3i3Wxh7M";
-
-    debugger;
-
-    let sMessage = getMessage(oParams);
 
     // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
     if (oParams.VIDEO.URL !== "") {
@@ -36,7 +34,7 @@ oFaceBook.send = (oParams, cb) => {
     }
 
     // 이미지가 URL로 있거나 Blob로 있을 경우
-    if (oParams.IMAGE.URL !== "" || oParams.IMAGE.DATA instanceof Blob == true) {
+    if (oParams.IMAGE.URL !== "" || oParams.IMAGE.DATA !== "") {
 
         sendPhoto(oParams, cb);
 
@@ -64,32 +62,36 @@ function sendFeed(oParams, cb) {
             message: sMessage
         };
 
-    // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
+    // // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
     if (oParams.VIDEO.URL !== "") {
         oOptions.link = oParams.VIDEO.URL;
     }
 
-    // FB.api(
-    //     sPath,
-    //     sMethod,
-    //     oOptions,
-    //     function (res) {
+    const FB = oAPP.FB;
 
-    //         if (res && res.error) {
+    FB.api(
+        sPath,
+        sMethod,
+        oOptions,
+        function(res) {
 
-    //             console.error(res.error.message);
+            debugger;
 
-    //             reject(res.error.message);
+            if (res && res.error) {
 
-    //             return;
-    //         }
+                // 오류 수집
 
-    //         resolve();
 
-    //     }
-    // );
 
-    cb(oParams);
+
+
+                console.error(res.error.message);
+
+            }
+
+            cb(oParams);
+
+        });
 
 } // end of sendPost
 
@@ -107,7 +109,7 @@ function sendPhoto(oParams, cb) {
         };
 
     // 이미지 URL이 존재하는 경우
-    if (oParams.IMAGE.URL != "") {
+    if (oParams.IMAGE.URL !== "") {
 
         oOptions.url = oParams.IMAGE.URL;
 
@@ -127,19 +129,26 @@ function sendPhoto(oParams, cb) {
 
     }
 
-    // 이미지가 BASE64로 존재하는 경우
-    if (oParams.IMAGE.DATA != "" || oParams.IMAGE.DATA instanceof Blob) {
+    // 이미지가 Blob로 존재하는 경우
+    if (oParams.IMAGE.DATA !== "") {
 
         oOptions.source = oParams.IMAGE.DATA;
         // oOptions.url = oParams.IMAGE.DATA;
 
-        let oResult = sendAPIFormData(sPath, sMethod, oOptions);
+        sendAPIFormData(sPath, sMethod, oOptions).then(() => {
 
-        debugger;
+            cb(oParams);
+
+        }).catch((oErr) => {
+
+            // 오류 메시지 수집
+
+            cb(oParams);
+
+
+        });;
 
     }
-
-
 
 } // end of sendPhoto
 
@@ -199,7 +208,7 @@ function sendAPI(sPath, sMethod, oOptions) {
             sPath,
             sMethod,
             oOptions,
-            function (res) {
+            function(res) {
 
                 debugger;
 
@@ -221,29 +230,50 @@ function sendAPI(sPath, sMethod, oOptions) {
 
 } // end of _send
 
-async function sendAPIFormData(sPath, sMethod, oOptions) {
+function sendAPIFormData(sPath, sMethod, oOptions) {
 
-    debugger;
+    return new Promise((resolve, reject) => {
 
-    // oOptions = {
-    //     access_token: `${PAGETOKEN}`,
-    //     message: sMessage,
-    // };
- 
-    const formData = new FormData();
-    
-    formData.append('access_token', oOptions.access_token);
-    formData.append('source', oOptions.source);
-    formData.append('message', oOptions.message);
+        debugger;
 
-    let sUrl = `https://graph.facebook.com/${PAGEID}/photos`;
+        const oFormData = new FormData();
 
-    let response = await fetch(sUrl, {
-        body: formData,
-        method: 'post'
+        oFormData.append('access_token', oOptions.access_token);
+        oFormData.append('source', oOptions.source);
+        oFormData.append('message', oOptions.message);
+
+        let sUrl = `https://graph.facebook.com/${sPath}`;
+
+        oAPP.jQuery.ajax({
+            url: sUrl,
+            processData: false, // 데이터 객체를 문자열로 바꿀지에 대한 값이다. true면 일반문자...
+            contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
+            data: oFormData, //위에서 선언한 fromdata
+            type: sMethod,
+            success: function(result) {
+
+                console.log(result);
+
+                resolve();
+
+            },
+            error: function(e) {
+
+                console.log(e);
+
+                reject(e);
+
+            }
+        });
+
+
+        // let response = await fetch(sUrl, {
+        //     body: formData,
+        //     method: 'post'
+        // });
+
+        // return await response.json();
     });
-
-    return await response.json();
 
 }
 

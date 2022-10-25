@@ -1,16 +1,19 @@
 let oInstagram = {};
 
+/************************************************************************
+ * Facebook APP 정보 및 인증 토큰
+ ************************************************************************/
 const
     APPID = oAPP.auth.facebook.app_id,
     PAGEID = oAPP.auth.facebook.page_id,
     USERTOKEN = oAPP.auth.facebook.user_token,
     PAGETOKEN = oAPP.auth.facebook.page_token;
 
-oInstagram.send = (oParams, cb) => {
+oInstagram.send = (oParams, oChoiceInfo, cb) => {
 
     const FB = oAPP.FB;
 
-    if (!oAPP.oChoiceInfo || !oAPP.oChoiceInfo.INSTAGRAM) {
+    if (!oChoiceInfo || !oChoiceInfo.INSTAGRAM) {
 
         //Callback 
         cb(oParams);

@@ -40,38 +40,46 @@ var TY_IFDATA = {
 // 
 /* ================================================================= */
 
-var http       = null,
-    qs         = null,
+var http = null,
+    qs = null,
     Multiparty = null;
 
-var IP   = "192.168.0.7",
-    PORT = 1333;
+// var IP = "192.168.0.7",
+//     PORT = 1333;
+
+var IP = oAPP.conf.localServerIP,
+    PORT = oAPP.conf.localServerPort;
 
 //http 서버 생성 
 //파라메터 => remote       : electron 리모트 오브젝트 
 //           cb_req       : 요청 이벤트 발생시 callBack 함수 
 //           cb_success   : 서버 정상 생성시 callBack 함수 
 //           cb_error     : 오류 발생시 callBack 함수
-exports.createServer = function(remote, cb_req, cb_success, cb_error){
+exports.createServer = function(remote, cb_req, cb_success, cb_error) {
 
-    http       = remote.require('http');
-    qs         = remote.require('querystring');
+    http = remote.require('http');
+    qs = remote.require('querystring');
     Multiparty = remote.require('multiparty');
-    
+
     try {
-        
+
         //서버 생성 
-        http.createServer( async function(req, res) {
+        http.createServer(async function(req, res) {
 
             //서비스 점검
-            if(!onChkService(req, res)){ cb_error(); return; }
+            if (!onChkService(req, res)) {
+                cb_error();
+                return;
+            }
 
-    
+
             //요청 서비스 정보 추출 - 서비스 PATH , 파라메터
             var sINFO = await onServiceInfo(req, res);
 
-            
-            res.writeHead(200, { 'Access-Control-Allow-Origin': '*' });
+
+            res.writeHead(200, {
+                'Access-Control-Allow-Origin': '*'
+            });
 
             //요청 Call back 
             //파라메터 => sINFO : 요청 서비스 정보 
@@ -81,12 +89,12 @@ exports.createServer = function(remote, cb_req, cb_success, cb_error){
 
             //res.end('aaa');
 
-        }).listen(PORT, IP, cb_success);    
+        }).listen(PORT, IP, cb_success);
 
 
     } catch (error) {
         cb_error(error);
-        
+
     }
 
 };
@@ -97,43 +105,54 @@ exports.createServer = function(remote, cb_req, cb_success, cb_error){
 /*=================================================*/
 
 //서비스 점검
-function onChkService (req, res){
+function onChkService(req, res) {
 
     var T_path = req.url.split("?");
-    var Lurl = T_path[0].replace("/","");
+    var Lurl = T_path[0].replace("/", "");
 
-        if(Lurl === ""){ 
-            
-            //요청 유형이 ajax(비동기통신) 여부 점검
-            if(onChkAjax(req)){
-                res.writeHead(500, { 'Access-Control-Allow-Origin': '*', 'Error': 'X' });
-                res.end("page not found");
+    if (Lurl === "") {
 
-            }else{
-                res.writeHead(500, { 'Access-Control-Allow-Origin': '*', 'Error': 'X' });
-                res.end("page not found");
+        //요청 유형이 ajax(비동기통신) 여부 점검
+        if (onChkAjax(req)) {
+            res.writeHead(500, {
+                'Access-Control-Allow-Origin': '*',
+                'Error': 'X'
+            });
+            res.end("page not found");
 
-            }
-            
-            return false; 
-        
+        } else {
+            res.writeHead(500, {
+                'Access-Control-Allow-Origin': '*',
+                'Error': 'X'
+            });
+            res.end("page not found");
+
         }
 
-    return true; 
+        return false;
+
+    }
+
+    return true;
 
 }
 
 
 //요청 유형이 ajax(비동기통신) 여부 점검
-function onChkAjax (req, res){
+function onChkAjax(req, res) {
 
-    if(typeof req.headers["access-control-request-headers"] !== "undefined" ) { return true; }
+    if (typeof req.headers["access-control-request-headers"] !== "undefined") {
+        return true;
+    }
 
-    var isAJAX  = false;
+    var isAJAX = false;
     for (var i = 0; i < req.rawHeaders.length; i++) {
         var LVal = req.rawHeaders[i];
-        if(LVal === "Access-Control-Request-Headers"){ isAJAX = true; break; }
-        
+        if (LVal === "Access-Control-Request-Headers") {
+            isAJAX = true;
+            break;
+        }
+
     }
 
     return isAJAX;
@@ -142,110 +161,127 @@ function onChkAjax (req, res){
 
 
 //요청 서비스 정보 추출 - 서비스 PATH , 파라메터
-function onServiceInfo (req, res){
+function onServiceInfo(req, res) {
 
-        var T_path = req.url.split("?");
-        var retData = {};
-            retData.PATH  = T_path[0];
-            retData.PARAM = [];
+    var T_path = req.url.split("?");
+    var retData = {};
+    retData.PATH = T_path[0];
+    retData.PARAM = [];
 
-        switch (onGetMethod(req)) {
-            case "GET": //GET 방식 파라메터 정보 얻기
-                if(typeof T_path[1] === "undefined"){ return retData; }
+    switch (onGetMethod(req)) {
+        case "GET": //GET 방식 파라메터 정보 얻기
+            if (typeof T_path[1] === "undefined") {
+                return retData;
+            }
 
+            var Params = qs.parse(T_path[1]);
+
+            for (var prop in Params) {
+
+                var sLine = {};
+                sLine.NAME = prop;
+                sLine.VALUE = Params[prop];
+                retData.PARAM.push(sLine);
+
+            }
+
+            return retData;
+
+        case "POST": //POST 방식 파라메터 정보 얻기
+
+            //만일 POST 방식일 경우라도 URL 뒤 파라메터 정보 존재여부 확인
+            if (typeof T_path[1] !== "undefined") {
                 var Params = qs.parse(T_path[1]);
-            
+
                 for (var prop in Params) {
-                    
+
                     var sLine = {};
-                        sLine.NAME  = prop;
-                        sLine.VALUE = Params[prop];
+                    sLine.NAME = prop;
+                    sLine.VALUE = Params[prop];
+                    retData.PARAM.push(sLine);
+
+                }
+            }
+
+            return new Promise(function(resolve, reject) {
+
+                var oForm = new Multiparty.Form();
+                oForm.parse(req, (err, fields, files) => {
+
+                    if (err) {
+                        resolve(retData);
+                    }
+
+                    for (var prop in fields) {
+
+                        var sLine = {};
+                        sLine.NAME = prop;
+                        sLine.VALUE = fields[prop][0];
                         retData.PARAM.push(sLine);
 
-                }
-
-                return retData;
-
-            case "POST": //POST 방식 파라메터 정보 얻기
-
-                //만일 POST 방식일 경우라도 URL 뒤 파라메터 정보 존재여부 확인
-                if(typeof T_path[1] !== "undefined"){
-                    var Params = qs.parse(T_path[1]);
-                    
-                    for (var prop in Params) {
-                        
-                        var sLine = {};
-                            sLine.NAME  = prop;
-                            sLine.VALUE = Params[prop];
-                            retData.PARAM.push(sLine);
-
                     }
-                }
 
-                return new Promise(function(resolve, reject) {
-
-                    var oForm = new Multiparty.Form();
-                        oForm.parse(req, (err, fields, files)=>{
-
-                            if(err){ resolve(retData); }
-
-                            for (var prop in fields) {
-                    
-                                var sLine = {};
-                                    sLine.NAME  = prop;
-                                    sLine.VALUE = fields[prop][0];
-                                    retData.PARAM.push(sLine);
-            
-                            }
-
-                            resolve(retData);
-
-                        });
+                    resolve(retData);
 
                 });
 
-            default:
+            });
 
-                //요청 유형이 ajax(비동기통신) 여부 점검
-                if(onChkAjax(req)){
-                    res.writeHead(500, { 'Access-Control-Allow-Origin': '*', 'Error': 'X' });
-                    res.end("bad request");
+        default:
 
-                }else{
-                    res.writeHead(500, { 'Access-Control-Allow-Origin': '*', 'Error': 'X' });
-                    res.end("bad request");
+            //요청 유형이 ajax(비동기통신) 여부 점검
+            if (onChkAjax(req)) {
+                res.writeHead(500, {
+                    'Access-Control-Allow-Origin': '*',
+                    'Error': 'X'
+                });
+                res.end("bad request");
 
-                }
-                
-                return;
-        }
+            } else {
+                res.writeHead(500, {
+                    'Access-Control-Allow-Origin': '*',
+                    'Error': 'X'
+                });
+                res.end("bad request");
+
+            }
+
+            return;
+    }
 
 }
 
 
 //요청 Method 정보 추출
-function onGetMethod (req){
+function onGetMethod(req) {
 
     var Lmethod = req.method;
 
-    if(req.method === "GET"){ return Lmethod = "GET"; }
-    if(req.method === "POST"){ return Lmethod = "POST"; }
+    if (req.method === "GET") {
+        return Lmethod = "GET";
+    }
+    if (req.method === "POST") {
+        return Lmethod = "POST";
+    }
 
     for (var i = 0; i < req.rawHeaders.length; i++) {
         var LVal = req.rawHeaders[i];
-        if(LVal === "POST"){ Lmethod = "POST"; break; }
-        
+        if (LVal === "POST") {
+            Lmethod = "POST";
+            break;
+        }
+
     }
 
-    if(Lmethod !== "GET" && Lmethod !== "POST"){
+    if (Lmethod !== "GET" && Lmethod !== "POST") {
 
-        if(typeof req.headers['access-control-request-method'] !== "undefined"){
+        if (typeof req.headers['access-control-request-method'] !== "undefined") {
             Lmethod = req.headers['access-control-request-method'];
 
         }
-    
+
     }
 
     return Lmethod;
-    
+
 }

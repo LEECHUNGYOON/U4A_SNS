@@ -43,20 +43,26 @@ var TY_IFDATA = {
 /* ================================================================= */
 
 //텔레그램 고객 전체에 메시지 전송
-async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB){
+async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
 
-    if(USER_INFO.length == 0){ return; }
+    if (USER_INFO.length == 0) {
+        return;
+    }
 
-    let TelegramBot   = oAPP.remote.require("node-telegram-bot-api"),
+    let TelegramBot = oAPP.remote.require("node-telegram-bot-api"),
         TelegramToken = "5631746596:AAG-Mxhmig-yVId7NP_0RzJj1QBDlBXXmVc";
-    
 
-    let BOT = new TelegramBot(TelegramToken, {polling: true});
-    
+
+    let BOT = new TelegramBot(TelegramToken, {
+        polling: true
+    });
+
     for (let index = 0; index < USER_INFO.length; index++) {
         var sUserInfo = USER_INFO[index];
 
-        if(sParams.DESC === ""){ continue; }
+        if (sParams.DESC === "") {
+            continue;
+        }
         await BOT.sendMessage(sUserInfo.chat_id, sParams.DESC);
 
     }
@@ -68,39 +74,55 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB){
 
 }
 
- 
+
 
 
 /* ================================================================= */
 /* Export Module Function 
 /* ================================================================= */
-exports.send = function(sParams, CB){
+exports.send = function (sParams, CB) {
 
-    const remote       = oAPP.remote,
-          MongClinet   = oAPP.remote.require('mongodb').MongoClient,
-          MongDB_HOST  = 'mongodb://118.34.215.175:27017';
-         
-        //몽고 DB에 전체 사용자 정보 얻기 
-        MongClinet.connect(MongDB_HOST, function(err, db) {
-     
-            if (err) { CB(sParams); return; }
+    if (!oAPP.oChoiceInfo || !oAPP.oChoiceInfo.TELEGRAM) {
 
-            var dbo   = db.db("TELEGRAM");
-            var query = {};
-            
-            dbo.collection("USER_INFO").find(query).toArray(function(err, result) {
-                debugger;
-                db.close();
-                if(err){ CB(sParams); return; }
+        //Callback 
+        CB(sParams);
+        return;
 
-                if(result.length == 0){ return; }
+    }
 
-                //텔레그램 고객 전체에 메시지 전송
-                Lfn_sendTelegramMsg(result, sParams, CB);
+    const remote = oAPP.remote,
+        MongClinet = oAPP.remote.require('mongodb').MongoClient,
+        MongDB_HOST = 'mongodb://118.34.215.175:27017';
 
-            });
+    //몽고 DB에 전체 사용자 정보 얻기 
+    MongClinet.connect(MongDB_HOST, function (err, db) {
+
+        if (err) {
+            CB(sParams);
+            return;
+        }
+
+        var dbo = db.db("TELEGRAM");
+        var query = {};
+
+        dbo.collection("USER_INFO").find(query).toArray(function (err, result) {
+            debugger;
+            db.close();
+            if (err) {
+                CB(sParams);
+                return;
+            }
+
+            if (result.length == 0) {
+                return;
+            }
+
+            //텔레그램 고객 전체에 메시지 전송
+            Lfn_sendTelegramMsg(result, sParams, CB);
 
         });
+
+    });
 
 
 };

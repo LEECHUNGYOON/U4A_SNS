@@ -4,6 +4,39 @@ let oAPP = parent.oAPP;
     "use strict";
 
     /************************************************************************
+     * Server Background 실행 모드
+     ************************************************************************/
+    oAPP.server.serverOn = () => {
+
+        oAPP.server.createServer(
+            oAPP.remote,
+            oAPP.server.onReq,
+            () => {
+
+            },
+            () => {
+
+
+
+            });
+
+    }; // end of oAPP.server.serverOn
+
+    /************************************************************************
+     * 서버로 요청 받을 경우
+     ************************************************************************/
+    oAPP.server.onReq = (oData, oReq, oRes) => {
+
+        debugger;
+
+        //oAPP.oChoiceInfo["FACEBOOK"] = true;
+
+
+    }; // end of oAPP.server.onReq
+
+
+
+    /************************************************************************
      * UI5 Bootstrap Init
      ************************************************************************/
     oAPP.fn.attachInit = () => {
@@ -34,12 +67,6 @@ let oAPP = parent.oAPP;
 
         oAPP.mDefaultModel = {
             PRC: {
-                SUBJECT : {
-                    TITLE : "[제목]",
-                    TYPE : "[모듈(업무)]",
-                    DESC : "[상세설명]",
-                    SAMPLE_URL: "[Sample URL]"
-                },
                 MSGPOP: { // Message Popover 구조
                     BTNICO: "sap-icon://message-popup",
                     MSGCNT: "0",
@@ -49,6 +76,7 @@ let oAPP = parent.oAPP;
                         RTMSG: "" // msg
                     }]
                 },
+                SUBJECT: oAPP.subject,
                 VIDEO: {
                     RDBIDX: 0,
                 },
@@ -59,6 +87,8 @@ let oAPP = parent.oAPP;
                     YOUTUBE: true,
                     FACEBOOK: true,
                     INSTAGRAM: true,
+                    KAKAO_STORY: true,
+                    TELEGRAM: true
                 },
                 BUSYTXD: "잠시만 기다려 주십시오...", // Busy default Text
                 BUSYTXT: "",
@@ -337,7 +367,7 @@ let oAPP = parent.oAPP;
                             new sap.ui.layout.form.FormElement({
                                 label: new sap.m.Label({
                                     design: sap.m.LabelDesign.Bold,
-                                    text: "제목"
+                                    text: "{/PRC/SUBJECT/TITLE}" // "제목"
                                 }),
                                 fields: [
                                     new sap.m.Input({
@@ -349,7 +379,7 @@ let oAPP = parent.oAPP;
                             new sap.ui.layout.form.FormElement({
                                 label: new sap.m.Label({
                                     design: sap.m.LabelDesign.Bold,
-                                    text: "모듈(업무)"
+                                    text: "{/PRC/SUBJECT/TYPE}" // "모듈(업무)"
                                 }),
                                 fields: [
 
@@ -393,7 +423,7 @@ let oAPP = parent.oAPP;
                             new sap.ui.layout.form.FormElement({
                                 label: new sap.m.Label({
                                     design: sap.m.LabelDesign.Bold,
-                                    text: "상세설명"
+                                    text: "{/PRC/SUBJECT/DESC}" // "상세설명"
                                 }),
                                 fields: [
                                     new sap.m.TextArea({
@@ -407,7 +437,7 @@ let oAPP = parent.oAPP;
                             new sap.ui.layout.form.FormElement({
                                 label: new sap.m.Label({
                                     design: sap.m.LabelDesign.Bold,
-                                    text: "Sample URL"
+                                    text: "{/PRC/SUBJECT/SAMPLE_URL}" // "Sample URL"
                                 }),
                                 fields: [
                                     new sap.m.Input({
@@ -677,7 +707,7 @@ let oAPP = parent.oAPP;
                         // hAlign: sap.ui.core.HorizontalAlign.Center,
                         label: new sap.m.Label({
                             design: sap.m.LabelDesign.Bold,
-                            text: "Hash Tag"
+                            text: `Hash Tag       ex) #U4A #UI5`
                         }),
                         template: new sap.m.Input({
                             value: "{TAG}"
@@ -944,7 +974,10 @@ let oAPP = parent.oAPP;
             var base64data = reader.result;
 
             if (typeof fnCallback === "function") {
-                fnCallback(base64data);
+                fnCallback({
+                    base64data: base64data,
+                    blob: oImgFileBlob
+                });
             }
 
         }
@@ -1046,13 +1079,13 @@ let oAPP = parent.oAPP;
             // 현재 선택한 경로 저장
             oAPP._filedownPath = sFilePath;
 
-            oAPP.fn.readImageLocalDir(sFilePath, (sImgSrc) => {
+            oAPP.fn.readImageLocalDir(sFilePath, (oResult) => {
 
                 sap.ui.getCore().getModel().setProperty("/SNS/IMAGE/LURL", sFilePath);
 
-                sap.ui.getCore().getModel().setProperty("/SNS/IMAGE/DATA", sImgSrc);
+                sap.ui.getCore().getModel().setProperty("/SNS/IMAGE/DATA", oResult.blob);
 
-                sap.ui.getCore().getModel().setProperty("/PREV/IMAGE/URL", sImgSrc);
+                sap.ui.getCore().getModel().setProperty("/PREV/IMAGE/URL", oResult.base64data);
 
                 oAPP.setBusy(false);
 
@@ -1276,6 +1309,11 @@ let oAPP = parent.oAPP;
 })(oAPP);
 
 document.addEventListener("DOMContentLoaded", () => {
+
+
+    // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기
+
+    oAPP.server.serverOn();
 
     oAPP.fn.attachInit();
 

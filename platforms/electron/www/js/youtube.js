@@ -103,8 +103,6 @@ function Lfn_serverClose() {
 /* ================================================================= */
 exports.send = function(sParams, oChoiceInfo, CB) {
 
-    debugger;
-
     if (!oChoiceInfo || !oChoiceInfo.YOUTUBE) {
 
         //Callback 

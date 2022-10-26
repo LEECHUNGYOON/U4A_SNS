@@ -1,7 +1,3 @@
-const {
-    promises
-} = require("stream");
-
 let oInstagram = {};
 
 /************************************************************************
@@ -13,7 +9,14 @@ const
     USERTOKEN = atob(oAPP.auth.facebook.user_token),
     PAGETOKEN = atob(oAPP.auth.facebook.page_token);
 
+const
+    WINDOW = global.document.ws_frame;
+
 oInstagram.send = (oParams, oChoiceInfo, cb) => {
+
+    delete WINDOW.FB;
+
+    window.jQuery = WINDOW.jQuery;
 
     if (!oChoiceInfo || !oChoiceInfo.INSTAGRAM) {
 
@@ -23,12 +26,49 @@ oInstagram.send = (oParams, oChoiceInfo, cb) => {
 
     }
 
-    // 동영상 URL 경로가 있을 경우
-    if (oParams.VIDEO.URL !== "") {
+    // facebook Library Load
+    getLoadLibrary().then(() => {
 
+        // 동영상 URL 경로가 있을 경우
+        if (oParams.VIDEO.URL !== "") {
+
+            getAccount().then((oAccInfo) => {
+
+                sendVideo(oParams, oAccInfo, cb);
+
+            }).catch((oErr) => {
+
+                // 공통 에러
+                onError(oParams, oErr, cb);
+
+            });
+
+            return;
+
+        }
+
+        // 이미지가 없다면 오류찍고 빠져나간다.
+        if (!oParams.IMAGE.URL) {
+
+            // 오류메시지 수집
+
+            var oErr = {
+                RETCD: "E",
+                ETMSG: "[INSTAGRAM] 이미지 URL은 필수 입니다!!"
+            }
+
+            // 공통 에러
+            onError(oParams, oErr, cb);
+
+            return;
+
+        }
+
+        // [일반 본문 전송]
+        // - 이미지는 필수 및 URL Path 방식만 가능함.    
         getAccount().then((oAccInfo) => {
 
-            sendVideo(oParams, oAccInfo, cb);
+            sendPost(oParams, oAccInfo, cb);
 
         }).catch((oErr) => {
 
@@ -37,41 +77,35 @@ oInstagram.send = (oParams, oChoiceInfo, cb) => {
 
         });
 
-        return;
-
-    }
-
-    // 이미지가 없다면 오류찍고 빠져나간다.
-    if (!oParams.IMAGE.URL) {
-
-        // 오류메시지 수집
-
-        var oErr = {
-            RETCD: "E",
-            ETMSG: "[INSTAGRAM] 이미지 URL은 필수 입니다!!"
-        }
-
-        // 공통 에러
-        onError(oParams, oErr, cb);
-
-        return;
-
-    }
-
-    // [일반 본문 전송]
-    // - 이미지는 필수 및 URL Path 방식만 가능함.    
-    getAccount().then((oAccInfo) => {
-
-        sendPost(oParams, oAccInfo, cb);
-
-    }).catch((oErr) => {
-
-        // 공통 에러
-        onError(oParams, oErr, cb);
-
     });
 
 }; // end of oInstagram.send
+
+/************************************************************************
+ * 페이스북 라이브러리 Load
+ ************************************************************************/
+function getLoadLibrary() {
+
+    return new Promise((resolve) => {
+
+        jQuery.getScript(oAPP.fbUrl, function(data, textStatus, jqxhr) {
+
+            WINDOW.FB.init({
+                appId: oAPP.auth.facebook.app_id,
+                autoLogAppEvents: true,
+                xfbml: true,
+                cookie: true,
+                version: 'v15.0'
+            });
+
+            resolve();
+
+        });
+
+    });
+
+} // end of getLoadLibrary
+
 
 /************************************************************************
  * Instagram Account 정보 구하기
@@ -82,9 +116,7 @@ function getAccount() {
 
         let sUrl = `${PAGEID}?fields=instagram_business_account&access_token=${PAGETOKEN}`;
 
-        const FB = oAPP.jQuery.extend(true, {}, oAPP.FB);
-        // const FB = oAPP.FB;
-        // const FB = oAPP.FB;
+        const FB = WINDOW.FB;
 
         FB.api(sUrl, "GET",
             (res) => {
@@ -123,9 +155,8 @@ function getAccount() {
  ************************************************************************/
 function sendVideo(oParams, oAccInfo, cb) {
 
-    // const FB = oAPP.FB;
-    const FB = oAPP.jQuery.extend(true, {}, oAPP.FB);
-    
+    const FB = WINDOW.FB;
+
     let sCaption = getMessage(oParams), // 본문 구성
         sInstaAccId = oAccInfo.InstaAccId, // insta 계정 Id
         sUrl = `${sInstaAccId}/media`; // 호출 API
@@ -167,7 +198,7 @@ function sendVideo(oParams, oAccInfo, cb) {
 
 function sendPost(oParams, oAccInfo, cb) {
 
-    const FB = oAPP.jQuery.extend(true, {}, oAPP.FB);
+    const FB = WINDOW.FB;
 
     let sCaption = getMessage(oParams), // 본문 구성
         sInstaAccId = oAccInfo.InstaAccId, // insta 계정 Id
@@ -199,8 +230,7 @@ function sendPost(oParams, oAccInfo, cb) {
  ************************************************************************/
 function sendStatus(oParams, oAccInfo, oRes, cb) {
 
-    const FB = oAPP.jQuery.extend(true, {}, oAPP.FB);
-    // const FB = oAPP.FB;
+    const FB = WINDOW.FB;
 
     let sId = oRes.id,
         sUrl = `${sId}?fields=status_code&access_token=${PAGETOKEN}`; // 호출 API
@@ -272,8 +302,7 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
  ************************************************************************/
 function sendPublish(oParams, oAccInfo, oRes, cb) {
 
-    const FB = oAPP.jQuery.extend(true, {}, oAPP.FB);
-    // const FB = oAPP.FB;
+    const FB = WINDOW.FB;
 
     let sInstaAccId = oAccInfo.InstaAccId, // insta 계정 Id
         sUrl = `${sInstaAccId}/media_publish`; // 호출 API

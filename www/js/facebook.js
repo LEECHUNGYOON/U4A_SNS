@@ -9,7 +9,14 @@ const
     USERTOKEN = atob(oAPP.auth.facebook.user_token),
     PAGETOKEN = atob(oAPP.auth.facebook.page_token);
 
+const
+    WINDOW = global.document.ws_frame;
+
 oFaceBook.send = (oParams, oChoiceInfo, cb) => {
+
+    delete WINDOW.FB;
+
+    window.jQuery = WINDOW.jQuery;
 
     if (!oChoiceInfo || !oChoiceInfo.FACEBOOK) {
 
@@ -19,38 +26,65 @@ oFaceBook.send = (oParams, oChoiceInfo, cb) => {
 
     }
 
-    // oParams.VIDEO.URL = "https://youtu.be/S1j3i3Wxh7M";
+    // facebook Library Load
+    getLoadLibrary().then(() => {
 
-    // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
-    if (oParams.VIDEO.URL !== "") {
+        // oParams.VIDEO.URL = "https://youtu.be/S1j3i3Wxh7M";
 
+        // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
+        if (oParams.VIDEO.URL !== "") {
+
+            sendFeed(oParams, cb);
+
+            return;
+
+        }
+
+        // 이미지가 URL로 있거나 Blob로 있을 경우
+        if (oParams.IMAGE.URL !== "" || oParams.IMAGE.DATA !== "") {
+
+            sendPhoto(oParams, cb);
+
+            return;
+
+        }
+
+        // 나머지는 본문만 전송
         sendFeed(oParams, cb);
 
-        return;
-
-    }
-
-    // 이미지가 URL로 있거나 Blob로 있을 경우
-    if (oParams.IMAGE.URL !== "" || oParams.IMAGE.DATA !== "") {
-
-        sendPhoto(oParams, cb);
-
-        return;
-
-    }
-
-    // 나머지는 본문만 전송
-    sendFeed(oParams, cb);
-
+    });
 
 }; // end of oFaceBook.send
+
+/************************************************************************
+ * 페이스북 라이브러리 Load
+ ************************************************************************/
+function getLoadLibrary() {
+
+    return new Promise((resolve) => {
+
+        jQuery.getScript(oAPP.fbUrl, function(data, textStatus, jqxhr) {
+
+            WINDOW.FB.init({
+                appId: oAPP.auth.facebook.app_id,
+                autoLogAppEvents: true,
+                xfbml: true,
+                cookie: true,
+                version: 'v15.0'
+            });
+
+            resolve();
+
+        });
+
+    });
+
+}
 
 /************************************************************************
  * 게시글 올리기
  ************************************************************************/
 function sendFeed(oParams, cb) {
-
-    debugger;
 
     let sPath = `${PAGEID}/feed`,
         sMethod = "POST",
@@ -65,15 +99,13 @@ function sendFeed(oParams, cb) {
         oOptions.link = oParams.VIDEO.URL;
     }
 
-    const FB = oAPP.FB;
+    const FB = WINDOW.FB;
 
     FB.api(
         sPath,
         sMethod,
         oOptions,
-        function (res) {
-
-            debugger;
+        function(res) {
 
             if (res && res.error) {
 
@@ -198,17 +230,13 @@ function sendAPI(sPath, sMethod, oOptions) {
 
     return new Promise((resolve, reject) => {
 
-        debugger;
-
-        const FB = oAPP.FB;
+        const FB = WINDOW.FB;
 
         FB.api(
             sPath,
             sMethod,
             oOptions,
-            function (res) {
-
-                debugger;
+            function(res) {
 
                 if (res && res.error) {
 
@@ -240,20 +268,20 @@ function sendAPIFormData(sPath, sMethod, oOptions) {
 
         let sUrl = `https://graph.facebook.com/${sPath}`;
 
-        oAPP.jQuery.ajax({
+        jQuery.ajax({
             url: sUrl,
             processData: false, // 데이터 객체를 문자열로 바꿀지에 대한 값이다. true면 일반문자...
             contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
             data: oFormData, //위에서 선언한 fromdata
             type: sMethod,
-            success: function (result) {
+            success: function(result) {
 
                 console.log(result);
 
                 resolve();
 
             },
-            error: function (e) {
+            error: function(e) {
 
                 console.log(e);
 
@@ -262,15 +290,8 @@ function sendAPIFormData(sPath, sMethod, oOptions) {
             }
         });
 
-
-        // let response = await fetch(sUrl, {
-        //     body: formData,
-        //     method: 'post'
-        // });
-
-        // return await response.json();
     });
 
-}
+} // end of sendAPIFormData
 
 module.exports = oFaceBook;

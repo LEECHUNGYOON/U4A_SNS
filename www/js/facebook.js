@@ -9,10 +9,7 @@ const
     USERTOKEN = atob(oAPP.auth.facebook.user_token),
     PAGETOKEN = atob(oAPP.auth.facebook.page_token);
 
-
 oFaceBook.send = (oParams, oChoiceInfo, cb) => {
-
-    debugger;
 
     if (!oChoiceInfo || !oChoiceInfo.FACEBOOK) {
 
@@ -45,11 +42,12 @@ oFaceBook.send = (oParams, oChoiceInfo, cb) => {
     // 나머지는 본문만 전송
     sendFeed(oParams, cb);
 
+
 }; // end of oFaceBook.send
 
-/*****************************************
+/************************************************************************
  * 게시글 올리기
- *****************************************/
+ ************************************************************************/
 function sendFeed(oParams, cb) {
 
     debugger;
@@ -73,7 +71,7 @@ function sendFeed(oParams, cb) {
         sPath,
         sMethod,
         oOptions,
-        function(res) {
+        function (res) {
 
             debugger;
 
@@ -152,9 +150,9 @@ function sendPhoto(oParams, cb) {
 
 } // end of sendPhoto
 
-/*****************************************
+/************************************************************************
  * 게시글 본문 구성하기
- *****************************************/
+ ************************************************************************/
 function getMessage(oParams) {
 
     let oSubJect = oAPP.subject;
@@ -208,7 +206,7 @@ function sendAPI(sPath, sMethod, oOptions) {
             sPath,
             sMethod,
             oOptions,
-            function(res) {
+            function (res) {
 
                 debugger;
 
@@ -234,8 +232,6 @@ function sendAPIFormData(sPath, sMethod, oOptions) {
 
     return new Promise((resolve, reject) => {
 
-        debugger;
-
         const oFormData = new FormData();
 
         oFormData.append('access_token', oOptions.access_token);
@@ -250,14 +246,14 @@ function sendAPIFormData(sPath, sMethod, oOptions) {
             contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
             data: oFormData, //위에서 선언한 fromdata
             type: sMethod,
-            success: function(result) {
+            success: function (result) {
 
                 console.log(result);
 
                 resolve();
 
             },
-            error: function(e) {
+            error: function (e) {
 
                 console.log(e);
 

@@ -25,7 +25,7 @@ let oAPP = parent.oAPP;
     /************************************************************************
      * 서버로 요청 받을 경우
      ************************************************************************/
-    oAPP.server.onReq = (oData, oReq, oRes) => {
+    oAPP.server.onReq = async (oData, oReq, oRes) => {
 
         debugger;
 
@@ -57,8 +57,7 @@ let oAPP = parent.oAPP;
             return;
         }
 
-        let iSnsDataLength = aSnsData,
-            aSnsPromise = [];
+        let iSnsDataLength = aSnsData.length;
 
         for (var i = 0; i < iSnsDataLength; i++) {
 
@@ -77,26 +76,13 @@ let oAPP = parent.oAPP;
 
             var oSnsInfo = oSnsData.APPINFO;
 
-            aSnsPromise.push(oAPP.fn.sendSNS(oSnsInfo, oChoiceInfo));
+            await oAPP.fn.sendSNS(oSnsInfo, oChoiceInfo);
 
         }
 
-        Promise.all(aSnsPromise).then(function() {
-
-            debugger;
-
-            oRes.send({
-                RETCD: "S",
-                RTMSG: "전송 완료!"
-            });
-
-        }).catch(function(oErr) {
-
-            oRes.send({
-                RETCD: "E",
-                RTMSG: "전송 오류!"
-            });
-
+        oRes.send({
+            RETCD: "S",
+            RTMSG: "전송 완료!"
         });
 
     }; // end of oAPP.server.onReq
@@ -107,7 +93,7 @@ let oAPP = parent.oAPP;
     oAPP.fn.attachInit = () => {
 
         sap.ui.getCore().attachInit(() => {
-            
+
             oAPP.jQuery = jQuery;
 
             jQuery.sap.require("sap.m.MessageBox");
@@ -477,7 +463,7 @@ let oAPP = parent.oAPP;
                                                 text: "{TEXT}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -565,7 +551,7 @@ let oAPP = parent.oAPP;
                                     new sap.m.Input({
                                         value: "{/SNS/VIDEO/URL}",
                                     })
-                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                         if (iIndex !== 0) {
 
@@ -598,7 +584,7 @@ let oAPP = parent.oAPP;
                                             oAPP.fn.videoFileSelect();
                                         }
                                     })
-                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                         if (iIndex !== 1) {
 
@@ -676,7 +662,7 @@ let oAPP = parent.oAPP;
                                     new sap.m.Input({
                                         value: "{/SNS/IMAGE/URL}",
                                     })
-                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                         if (iIndex !== 0) {
 
@@ -712,7 +698,7 @@ let oAPP = parent.oAPP;
                                             oAPP.fn.imageFileSelect();
                                         }
                                     })
-                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                         if (iIndex !== 1) {
 
@@ -1047,7 +1033,7 @@ let oAPP = parent.oAPP;
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function() {
+        reader.onloadend = function () {
 
             var base64data = reader.result;
 
@@ -1238,12 +1224,26 @@ let oAPP = parent.oAPP;
         TY_IFDATA.VIDEO.FPATH = oSns.VIDEO.LURL;
         TY_IFDATA.HASHTAG = oAPP.fn.getHashTagList() || [];
 
+        oAPP.setBusy(true);
+
+
+        // debugger;
+
+        // for(var i = 0; i < 3; i++){
+
+        //     (async function(){
+
+        //         await oAPP.fn.sendSNS(TY_IFDATA, oChoice);
+
+        //     })();
+
+        // }
+
         // oAPP.setBusy(true);
+        // return;
 
         // SNS 일괄 전송!!
-        oAPP.fn.sendSNS(TY_IFDATA, oChoice).then((oResult) => {
-
-            debugger;
+        oAPP.fn.sendSNS(TY_IFDATA, oChoice, (oResult) => {
 
             oAPP.setBusyMsg("완료!");
 
@@ -1266,7 +1266,7 @@ let oAPP = parent.oAPP;
     /************************************************************************
      * SNS 일괄 전송
      ************************************************************************/
-    oAPP.fn.sendSNS = (TY_IFDATA, oChoiceInfo) => {
+    oAPP.fn.sendSNS = (TY_IFDATA, oChoiceInfo, cb) => {
 
         // 순서
         // 1. telegram
@@ -1276,35 +1276,51 @@ let oAPP = parent.oAPP;
         // 5. kakao story
         // 6. telegram
 
-        return new Promise((resolve, reject) => {
+        oAPP.setBusyMsg("Youtube 전송중...");
 
-            oAPP.setBusyMsg("Youtube 전송중...");
+        console.log("Youtube 시작");
 
-            oAPP.youtube.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+        oAPP.youtube.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                oAPP.setBusyMsg("Facebook 전송중...");
+            oAPP.setBusyMsg("Facebook 전송중...");
 
-                oAPP.facebook.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+            console.log("Youtube 종료");
+
+            console.log("페이스북 시작");
+
+            oAPP.facebook.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+
+                console.log("페이스북 종료");
+
+                oAPP.setBusyMsg("Instagram 전송중...");
+
+                console.log("인스타그램 시작");
+
+                oAPP.instagram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+
+                    console.log("인스타그램 종료");
+
+                    oAPP.setBusyMsg("Kakao Story 전송중...");
+
+                    console.log("카카오 시작");
 
                     debugger;
 
-                    return;
+                    oAPP.kakao.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                    oAPP.setBusyMsg("Instagram 전송중...");
+                        console.log("카카오 종료");
 
-                    oAPP.instagram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                        oAPP.setBusyMsg("telegram 전송중...");
 
-                        oAPP.setBusyMsg("Kakao Story 전송중...");
+                        console.log("텔레그램 시작");
+                        debugger;
+                        oAPP.telegram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                            debugger;
+                            console.log("텔레그램 종료");
 
-                        oAPP.kakao.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                            cb();
 
-                            oAPP.setBusyMsg("telegram 전송중...");
-
-                            oAPP.telegram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
-
-                                resolve();
-
-                            });
+                            return;
 
                         });
 

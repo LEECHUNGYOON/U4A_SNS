@@ -300,7 +300,7 @@ exports.send = function(sParams, oChoiceInfo, CB) {
 
     }).listen(oAPP.conf.youtube_server_port);
 
-    //인증 JSON 정보 
+    //인증 JSON 정보     
     var CREDENTIALS = oAPP.auth.youtube;
 
     let oauth = Youtube.authenticate({

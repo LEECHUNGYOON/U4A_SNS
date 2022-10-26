@@ -11,45 +11,61 @@ const
 
 
 oFaceBook.send = (oParams, oChoiceInfo, cb) => {
-
+   
     debugger;
 
-    if (!oChoiceInfo || !oChoiceInfo.FACEBOOK) {
+    oAPP.jQuery.getScript("https://connect.facebook.net/en_US/sdk.js", function (data, textStatus, jqxhr) {
 
-        //Callback 
-        cb(oParams);
+        debugger;
+
+        FB.init({
+            appId: oAPP.auth.facebook.app_id,
+            autoLogAppEvents: true,
+            xfbml: true,
+            cookie: true,
+            version: 'v15.0'
+        });
+        
         return;
 
-    }
+        if (!oChoiceInfo || !oChoiceInfo.FACEBOOK) {
 
-    // oParams.VIDEO.URL = "https://youtu.be/S1j3i3Wxh7M";
+            //Callback 
+            cb(oParams);
+            return;
 
-    // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
-    if (oParams.VIDEO.URL !== "") {
+        }
 
+        // oParams.VIDEO.URL = "https://youtu.be/S1j3i3Wxh7M";
+
+        // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
+        if (oParams.VIDEO.URL !== "") {
+
+            sendFeed(oParams, cb);
+
+            return;
+
+        }
+
+        // 이미지가 URL로 있거나 Blob로 있을 경우
+        if (oParams.IMAGE.URL !== "" || oParams.IMAGE.DATA !== "") {
+
+            sendPhoto(oParams, cb);
+
+            return;
+
+        }
+
+        // 나머지는 본문만 전송
         sendFeed(oParams, cb);
 
-        return;
-
-    }
-
-    // 이미지가 URL로 있거나 Blob로 있을 경우
-    if (oParams.IMAGE.URL !== "" || oParams.IMAGE.DATA !== "") {
-
-        sendPhoto(oParams, cb);
-
-        return;
-
-    }
-
-    // 나머지는 본문만 전송
-    sendFeed(oParams, cb);
+    });
 
 }; // end of oFaceBook.send
 
-/*****************************************
+/************************************************************************
  * 게시글 올리기
- *****************************************/
+ ************************************************************************/
 function sendFeed(oParams, cb) {
 
     debugger;
@@ -73,7 +89,7 @@ function sendFeed(oParams, cb) {
         sPath,
         sMethod,
         oOptions,
-        function(res) {
+        function (res) {
 
             debugger;
 
@@ -152,9 +168,9 @@ function sendPhoto(oParams, cb) {
 
 } // end of sendPhoto
 
-/*****************************************
+/************************************************************************
  * 게시글 본문 구성하기
- *****************************************/
+ ************************************************************************/
 function getMessage(oParams) {
 
     let oSubJect = oAPP.subject;
@@ -208,7 +224,7 @@ function sendAPI(sPath, sMethod, oOptions) {
             sPath,
             sMethod,
             oOptions,
-            function(res) {
+            function (res) {
 
                 debugger;
 
@@ -234,8 +250,6 @@ function sendAPIFormData(sPath, sMethod, oOptions) {
 
     return new Promise((resolve, reject) => {
 
-        debugger;
-
         const oFormData = new FormData();
 
         oFormData.append('access_token', oOptions.access_token);
@@ -250,14 +264,14 @@ function sendAPIFormData(sPath, sMethod, oOptions) {
             contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
             data: oFormData, //위에서 선언한 fromdata
             type: sMethod,
-            success: function(result) {
+            success: function (result) {
 
                 console.log(result);
 
                 resolve();
 
             },
-            error: function(e) {
+            error: function (e) {
 
                 console.log(e);
 

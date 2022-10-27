@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "@electron/remote": "^2.0.8",
+    "@octokit/core": "^4.1.0",
     "electron-updater": "^5.3.0",
     "http": "^0.0.1-security",
     "ip": "^2.0.0",

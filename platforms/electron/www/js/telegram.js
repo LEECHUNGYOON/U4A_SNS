@@ -37,11 +37,7 @@ var TY_IFDATA = {
 // 
 /* ================================================================= */
 const
-    TelegramBot = oAPP.remote.require("node-telegram-bot-api"),
-    TelegramToken = "5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ",
-    BOT = new TelegramBot(TelegramToken, {
-        polling: true
-    });
+    BOT = oAPP.telegramBOT;
 
 /* ================================================================= */
 /* 내부 펑션 
@@ -56,20 +52,20 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
         return;
     }
 
-    await BOT.sendMessage("-1001817590912", sParams.DESC);
-    CB(sParams);
+    // await BOT.sendMessage("-1001817590912", sParams.DESC);
+    // CB(sParams);
 
-    return;
+    // return;
 
     for (let index = 0; index < USER_INFO.length; index++) {
         var sUserInfo = USER_INFO[index];
 
-        if (sUserInfo.chat_id === "-1001817590912") {
-            await BOT.sendMessage(sUserInfo.chat_id, sParams.DESC);
-            break;
-        }
+        // if (sUserInfo.chat_id === "-1001817590912") {
+        //     await BOT.sendMessage(sUserInfo.chat_id, sParams.DESC);
+        //     break;
+        // }
 
-        continue;
+        // continue;
 
         if (sParams.DESC === "") {
             continue;
@@ -98,23 +94,10 @@ exports.send = function (sParams, oChoiceInfo, CB) {
 
     }
 
-
-    //[임시]
-    var tt = JSON.parse('[{"chat_id":"-1001817590912","first_name":"U4A BOT","last_name":"U4A 채널 전송 채팅 ID"},{"chat_id":5311179178,"first_name":"성호","last_name":"홍"},{"chat_id":2141804045,"first_name":"eun seop","last_name":"park"},{"chat_id":498542502,"first_name":"CHUNGYOON","last_name":"LEE"},{"chat_id":2142197003,"first_name":"영선","last_name":"홍"},{"chat_id":5653627299,"first_name":"혜정","last_name":"윤"},{"chat_id":5750732267,"first_name":"SEONGEUN","last_name":"HONG"}]');
-
-    Lfn_sendTelegramMsg(tt, sParams, CB);
-
-
-    return;
-
-
-
-
-
-
-    const remote = oAPP.remote,
-        MongClinet = oAPP.remote.require('mongodb').MongoClient,
-        MongDB_HOST = 'mongodb://118.34.215.175:27017';
+    const
+        remote = oAPP.remote,
+        MongClinet = oAPP.MongClinet,
+        MongDB_HOST = oAPP.MongDB_HOST;
 
     //몽고 DB에 전체 사용자 정보 얻기 
     MongClinet.connect(MongDB_HOST, function (err, db) {

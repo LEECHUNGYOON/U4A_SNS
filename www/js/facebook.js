@@ -6,15 +6,17 @@ let oFaceBook = {};
 const
     APPID = oAPP.auth.facebook.app_id,
     PAGEID = oAPP.auth.facebook.page_id,
-    USERTOKEN = atob(oAPP.auth.facebook.user_token),
-    PAGETOKEN = atob(oAPP.auth.facebook.page_token);
+    USERTOKEN = oAPP.auth.facebook.user_token,
+    PAGETOKEN = oAPP.auth.facebook.page_token;
 
 const
     WINDOW = global.document.ws_frame;
 
 oFaceBook.send = (oParams, oChoiceInfo, cb) => {
 
-    delete WINDOW.FB;
+    console.log("페이스북 진입");
+
+    debugger;
 
     window.jQuery = WINDOW.jQuery;
 
@@ -26,60 +28,31 @@ oFaceBook.send = (oParams, oChoiceInfo, cb) => {
 
     }
 
-    // facebook Library Load
-    getLoadLibrary().then(() => {
+    // oParams.VIDEO.URL = "https://youtu.be/S1j3i3Wxh7M";
 
-        // oParams.VIDEO.URL = "https://youtu.be/S1j3i3Wxh7M";
+    // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
+    if (oParams.VIDEO.URL !== "") {
 
-        // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
-        if (oParams.VIDEO.URL !== "") {
-
-            sendFeed(oParams, cb);
-
-            return;
-
-        }
-
-        // 이미지가 URL로 있거나 Blob로 있을 경우
-        if (oParams.IMAGE.URL !== "" || oParams.IMAGE.DATA !== "") {
-
-            sendPhoto(oParams, cb);
-
-            return;
-
-        }
-
-        // 나머지는 본문만 전송
         sendFeed(oParams, cb);
 
-    });
+        return;
+
+    }
+
+    // 이미지가 URL로 있거나 Blob로 있을 경우
+    if (oParams.IMAGE.URL !== "" || oParams.IMAGE.DATA !== "") {
+
+        sendPhoto(oParams, cb);
+
+        return;
+
+    }
+
+    // 나머지는 본문만 전송
+    sendFeed(oParams, cb);
+
 
 }; // end of oFaceBook.send
-
-/************************************************************************
- * 페이스북 라이브러리 Load
- ************************************************************************/
-function getLoadLibrary() {
-
-    return new Promise((resolve) => {
-
-        jQuery.getScript(oAPP.fbUrl, function(data, textStatus, jqxhr) {
-
-            WINDOW.FB.init({
-                appId: oAPP.auth.facebook.app_id,
-                autoLogAppEvents: true,
-                xfbml: true,
-                cookie: true,
-                version: 'v15.0'
-            });
-
-            resolve();
-
-        });
-
-    });
-
-}
 
 /************************************************************************
  * 게시글 올리기
@@ -88,40 +61,39 @@ function sendFeed(oParams, cb) {
 
     let sPath = `${PAGEID}/feed`,
         sMethod = "POST",
-        sMessage = getMessage(oParams),
-        oOptions = {
-            access_token: `${PAGETOKEN}`,
-            message: sMessage
-        };
+        sMessage = getMessage(oParams);
+
+    let oFormData = new FormData();
+    oFormData.append("access_token", PAGETOKEN);
+    oFormData.append("message", sMessage);
 
     // // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
     if (oParams.VIDEO.URL !== "") {
-        oOptions.link = oParams.VIDEO.URL;
+        oFormData.append("link", oParams.VIDEO.URL);
     }
 
-    const FB = WINDOW.FB;
+    let sUrl = oAPP.fbApi + "/" + sPath;
 
-    FB.api(
-        sPath,
-        sMethod,
-        oOptions,
-        function(res) {
-
-            if (res && res.error) {
-
-                // 오류 수집
-
-
-
-
-
-                console.error(res.error.message);
-
-            }
+    jQuery.ajax({
+        url: sUrl,
+        processData: false, // 데이터 객체를 문자열로 바꿀지에 대한 값이다. true면 일반문자...
+        contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
+        data: oFormData, // 위에서 선언한 fromdata
+        type: sMethod,
+        success: function (result) {
 
             cb(oParams);
 
-        });
+        },
+        error: function (e) {
+
+            console.error(e);
+
+            cb(oParams);
+
+        }
+
+    });
 
 } // end of sendPost
 
@@ -132,26 +104,37 @@ function sendPhoto(oParams, cb) {
 
     let sPath = `${PAGEID}/photos`,
         sMethod = "POST",
-        sMessage = getMessage(oParams),
-        oOptions = {
-            access_token: `${PAGETOKEN}`,
-            message: sMessage,
-        };
+        sMessage = getMessage(oParams);
+
+    let oFormData = new FormData();
+    oFormData.append("access_token", PAGETOKEN);
+    oFormData.append("message", sMessage);
+
+    let sUrl = oAPP.fbApi + "/" + sPath;
 
     // 이미지 URL이 존재하는 경우
     if (oParams.IMAGE.URL !== "") {
 
-        oOptions.url = oParams.IMAGE.URL;
+        oFormData.append("url", oParams.IMAGE.URL);
 
-        sendAPI(sPath, sMethod, oOptions).then(() => {
+        jQuery.ajax({
+            url: sUrl,
+            processData: false,
+            contentType: false,
+            data: oFormData,
+            type: sMethod,
+            success: function (result) {
 
-            cb(oParams);
+                cb(oParams);
 
-        }).catch((oErr) => {
+            },
+            error: function (e) {
 
-            // 오류 메시지 수집
+                console.error(e);
 
-            cb(oParams);
+                cb(oParams);
+
+            }
 
         });
 
@@ -162,21 +145,30 @@ function sendPhoto(oParams, cb) {
     // 이미지가 Blob로 존재하는 경우
     if (oParams.IMAGE.DATA !== "") {
 
-        oOptions.source = oParams.IMAGE.DATA;
-        // oOptions.url = oParams.IMAGE.DATA;
+        oFormData.append("source", oParams.IMAGE.DATA);
 
-        sendAPIFormData(sPath, sMethod, oOptions).then(() => {
+        jQuery.ajax({
+            url: sUrl,
+            processData: false, // 데이터 객체를 문자열로 바꿀지에 대한 값이다. true면 일반문자...
+            contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
+            data: oFormData, // 위에서 선언한 fromdata
+            type: sMethod,
+            success: function (result) {
 
-            cb(oParams);
+                cb(oParams);
 
-        }).catch((oErr) => {
+            },
+            error: function (e) {
 
-            // 오류 메시지 수집
+                console.error(e);
 
-            cb(oParams);
+                cb(oParams);
 
+            }
 
-        });;
+        });
+
+        return;
 
     }
 
@@ -222,76 +214,5 @@ function getMessage(oParams) {
     return sMsg;
 
 }; // end of getMessage
-
-/*****************************************
- * 페이스북 게시 공통 API 호출
- *****************************************/
-function sendAPI(sPath, sMethod, oOptions) {
-
-    return new Promise((resolve, reject) => {
-
-        const FB = WINDOW.FB;
-
-        FB.api(
-            sPath,
-            sMethod,
-            oOptions,
-            function(res) {
-
-                if (res && res.error) {
-
-                    console.error(res.error.message);
-
-                    reject(res.error.message);
-
-                    return;
-                }
-
-                resolve();
-
-            }
-        );
-
-    });
-
-} // end of _send
-
-function sendAPIFormData(sPath, sMethod, oOptions) {
-
-    return new Promise((resolve, reject) => {
-
-        const oFormData = new FormData();
-
-        oFormData.append('access_token', oOptions.access_token);
-        oFormData.append('source', oOptions.source);
-        oFormData.append('message', oOptions.message);
-
-        let sUrl = `https://graph.facebook.com/${sPath}`;
-
-        jQuery.ajax({
-            url: sUrl,
-            processData: false, // 데이터 객체를 문자열로 바꿀지에 대한 값이다. true면 일반문자...
-            contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
-            data: oFormData, //위에서 선언한 fromdata
-            type: sMethod,
-            success: function(result) {
-
-                console.log(result);
-
-                resolve();
-
-            },
-            error: function(e) {
-
-                console.log(e);
-
-                reject(e);
-
-            }
-        });
-
-    });
-
-} // end of sendAPIFormData
 
 module.exports = oFaceBook;

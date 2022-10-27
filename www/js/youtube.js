@@ -101,7 +101,7 @@ function Lfn_serverClose() {
 /* ================================================================= */
 /* Export Module Function 
 /* ================================================================= */
-exports.send = function(sParams, oChoiceInfo, CB) {
+exports.send = function (sParams, oChoiceInfo, CB) {
 
     if (!oChoiceInfo || !oChoiceInfo.YOUTUBE) {
 
@@ -152,7 +152,7 @@ exports.send = function(sParams, oChoiceInfo, CB) {
 
 
     //HTTP 서버 생성
-    oServer = http.createServer(function(req, res) {
+    oServer = http.createServer(function (req, res) {
 
         debugger;
 
@@ -165,15 +165,7 @@ exports.send = function(sParams, oChoiceInfo, CB) {
         let sData = querystring.parse(req.url, "/?");
 
         if (typeof sData.code === "undefined") {
-
-            //서버 종료
-            Lfn_serverClose();
-
             //오류 메시지 처리
-
-            //Callback 
-            CB(sParams);
-
             return;
         }
 
@@ -185,10 +177,10 @@ exports.send = function(sParams, oChoiceInfo, CB) {
             //인증키 누락시..
             if (typeof tokens === "undefined") {
 
+                //오류 메시지 처리
+
                 //서버 종료
                 Lfn_serverClose();
-
-                //오류 메시지 처리
 
                 //Callback 
                 CB(sParams);
@@ -202,10 +194,11 @@ exports.send = function(sParams, oChoiceInfo, CB) {
                 //서버 종료
                 Lfn_serverClose();
 
-                //처리 오류 메시지 처리
-
                 //Callback 
                 CB(sParams);
+                console.log("유투브 3");
+
+                //처리 오류 메시지 처리
 
                 return;
 
@@ -247,16 +240,17 @@ exports.send = function(sParams, oChoiceInfo, CB) {
 
                     debugger;
 
-                    //서버 종료
-                    Lfn_serverClose();
-
                     if (err) {
                         res.end('The API returned an error: ' + err);
 
                         //오류 메시지 처리
 
+                        //서버 종료
+                        Lfn_serverClose();
+
                         //callback 
                         CB(sParams);
+                        
 
                         return;
                     }
@@ -266,6 +260,9 @@ exports.send = function(sParams, oChoiceInfo, CB) {
 
                     //정상일 경우 I/F 파라메터 변경
                     sParams.VIDEO.URL = "https://youtube.com/shorts/" + data.data.id;
+
+                    //서버 종료
+                    Lfn_serverClose();
 
                     //callback 
                     CB(sParams);

@@ -1280,6 +1280,8 @@ let oAPP = parent.oAPP;
 
         console.log("Youtube 시작");
 
+        debugger;
+
         oAPP.youtube.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
             oAPP.setBusyMsg("Facebook 전송중...");
@@ -1304,8 +1306,6 @@ let oAPP = parent.oAPP;
 
                     console.log("카카오 시작");
 
-                    debugger;
-
                     oAPP.kakao.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
                         console.log("카카오 종료");
@@ -1313,9 +1313,9 @@ let oAPP = parent.oAPP;
                         oAPP.setBusyMsg("telegram 전송중...");
 
                         console.log("텔레그램 시작");
-                        debugger;
+
                         oAPP.telegram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
-                            debugger;
+
                             console.log("텔레그램 종료");
 
                             cb();

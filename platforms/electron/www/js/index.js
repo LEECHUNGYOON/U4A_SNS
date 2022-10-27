@@ -1,6 +1,8 @@
+debugger;
+
 window.oAPP = {};
 
-((oAPP) => {
+(async (oAPP) => {
     "use strict";
 
     oAPP.fn = {};
@@ -20,18 +22,34 @@ window.oAPP = {};
     oAPP.ip = require('ip');
 
     /************************************************************************
-     * Authentication Info
+     * Mongdb & Telegram Info
      ************************************************************************/
-    let sAuthPath = oAPP.path.join(oAPP.apppath, "auth");
+    oAPP.MongClinet = oAPP.remote.require('mongodb').MongoClient;
+    oAPP.telegramBotAPI = oAPP.remote.require("node-telegram-bot-api");
 
-    oAPP.auth.facebook = require(oAPP.path.join(sAuthPath, "facebook-auth.json"));
-    oAPP.auth.youtube = require(oAPP.path.join(sAuthPath, "youtube-auth.json"));
+    let Lpw = "%U4aIde&";
+    Lpw = encodeURIComponent(Lpw);
+
+    oAPP.MongDB_HOST = "mongodb://u4arnd:" + Lpw + "@118.34.215.175:9102/admin";
+
+    let sJsPath = oAPP.path.join(oAPP.apppath, "js");
+
+    // 몽고 디비 연결 및 SNS별 Token Key 정보 구하기
+    oAPP.mongdb = require(oAPP.path.join(sJsPath, "mongdb.js"));
+
+    let oResult = await oAPP.mongdb.onGET();
+    if (oResult.RETCD == "E") {
+        console.error(oResult.RTMSG);
+        return;
+    }
+
+    oAPP.telegramBOT = new oAPP.telegramBotAPI(oAPP.auth.telegram, {
+        polling: false
+    });
 
     /************************************************************************
      * SNS
      ************************************************************************/
-    let sJsPath = oAPP.path.join(oAPP.apppath, "js");
-
     oAPP.facebook = require(oAPP.path.join(sJsPath, "facebook.js"));
     oAPP.youtube = require(oAPP.path.join(sJsPath, "youtube.js"));
     oAPP.instagram = require(oAPP.path.join(sJsPath, "instagram.js"));
@@ -41,8 +59,8 @@ window.oAPP = {};
     /************************************************************************
      * Library Url
      ************************************************************************/
-     oAPP.fbUrl = "https://connect.facebook.net/en_US/sdk.js";
-
+    oAPP.fbUrl = "https://connect.facebook.net/en_US/sdk.js";
+    oAPP.fbApi = "https://graph.facebook.com";
 
 
     /************************************************************************
@@ -83,13 +101,13 @@ window.oAPP = {};
 
     }; // end of oAPP.onStart
 
+    document.addEventListener('deviceready', onDeviceReady, false);
+
+    function onDeviceReady() {
+
+        // APP 구동 시작
+        oAPP.fn.onStart();
+
+    }
+
 })(oAPP);
-
-document.addEventListener('deviceready', onDeviceReady, false);
-
-function onDeviceReady() {
-
-    // APP 구동 시작
-    oAPP.fn.onStart();
-
-}

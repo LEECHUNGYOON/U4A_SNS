@@ -24,8 +24,36 @@
       "cordova-plugin-whitelist": {}
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LEECHUNGYOON/U4A_SNS.git"
+  },
+  "build": {
+    "artifactName": "${productName}-Setup-${version}.${ext}",
+    "win": {},
+    "publish": {
+      "provider": "github"
+    },
+    "files": [
+      "**/*",
+      "./node_modules/**/*",
+      "./package.json"
+    ],
+    "extraResources": [
+      "./node_modules/**/*",
+      "./node_modules/@electron/remote/**",
+      {
+        "from": "node_modules/regedit/vbs",
+        "to": "regedit/vbs",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@electron/remote": "^2.0.8",
+    "electron-updater": "^5.3.0",
     "http": "^0.0.1-security",
     "ip": "^2.0.0",
     "mime-types": "^2.1.35",

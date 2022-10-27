@@ -1,5 +1,3 @@
-debugger;
-
 window.oAPP = {};
 
 (async (oAPP) => {

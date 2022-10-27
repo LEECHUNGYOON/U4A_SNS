@@ -13,6 +13,8 @@ let oAPP = parent.oAPP;
             oAPP.server.onReq,
             () => {
 
+
+
             },
             () => {
 
@@ -1415,15 +1417,25 @@ let oAPP = parent.oAPP;
 
 document.addEventListener("DOMContentLoaded", () => {
 
+    // 업그레이드 유무 체크..
+
+
+    
+
+    // 화면 그리기
+    oAPP.fn.attachInit();
+
+    
+
 
     // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기
 
-
-
-
-
+    // 백그라운드 일 경우
+    // 서버 가동!!
     oAPP.server.serverOn();
 
-    oAPP.fn.attachInit();
+    // Tray 아이콘 만들고
+
+    // 백그라운드 모드일 경우에만 브라우저 창 Hide 처리
 
 });

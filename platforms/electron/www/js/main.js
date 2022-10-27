@@ -77,7 +77,7 @@ let oAPP = parent.oAPP;
             }
 
             var oSnsInfo = oSnsData.APPINFO;
-
+              
             await oAPP.fn.sendSNS(oSnsInfo, oChoiceInfo);
 
         }
@@ -465,7 +465,7 @@ let oAPP = parent.oAPP;
                                                 text: "{TEXT}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -553,7 +553,7 @@ let oAPP = parent.oAPP;
                                     new sap.m.Input({
                                         value: "{/SNS/VIDEO/URL}",
                                     })
-                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                         if (iIndex !== 0) {
 
@@ -586,7 +586,7 @@ let oAPP = parent.oAPP;
                                             oAPP.fn.videoFileSelect();
                                         }
                                     })
-                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                         if (iIndex !== 1) {
 
@@ -664,7 +664,7 @@ let oAPP = parent.oAPP;
                                     new sap.m.Input({
                                         value: "{/SNS/IMAGE/URL}",
                                     })
-                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                         if (iIndex !== 0) {
 
@@ -700,7 +700,7 @@ let oAPP = parent.oAPP;
                                             oAPP.fn.imageFileSelect();
                                         }
                                     })
-                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                         if (iIndex !== 1) {
 
@@ -1035,7 +1035,7 @@ let oAPP = parent.oAPP;
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function () {
+        reader.onloadend = function() {
 
             var base64data = reader.result;
 
@@ -1228,101 +1228,96 @@ let oAPP = parent.oAPP;
 
         oAPP.setBusy(true);
 
-
-        // debugger;
-
-        // for(var i = 0; i < 3; i++){
-
-        //     (async function(){
-
-        //         await oAPP.fn.sendSNS(TY_IFDATA, oChoice);
-
-        //     })();
-
-        // }
-
-        // oAPP.setBusy(true);
-        // return;
-
         // SNS 일괄 전송!!
-        oAPP.fn.sendSNS(TY_IFDATA, oChoice, (oResult) => {
 
-            oAPP.setBusyMsg("완료!");
+        oAPP.fn.sendSNS(TY_IFDATA, oChoice)
+            .then(() => {
 
-            oAPP.setBusy(false);
+                oAPP.setBusyMsg("완료!");
 
-            sap.m.MessageBox.success("전송 완료!!!!!!!!", {
-                title: "Success", // default
-                onClose: null, // default
-                styleClass: "", // default
-                actions: sap.m.MessageBox.Action.OK, // default
-                emphasizedAction: sap.m.MessageBox.Action.OK, // default
-                initialFocus: null, // default
-                textDirection: sap.ui.core.TextDirection.Inherit // default
+                oAPP.setBusy(false);
+
+                // background 모드에서 실행했을 경우는 메시지 박스 처리를 하지 않음.
+                if(bIsBackgroundMode){
+                    return;
+                }
+
+                sap.m.MessageBox.success("전송 완료!!!!!!!!", {
+                    title: "Success", // default
+                    onClose: null, // default
+                    styleClass: "", // default
+                    actions: sap.m.MessageBox.Action.OK, // default
+                    emphasizedAction: sap.m.MessageBox.Action.OK, // default
+                    initialFocus: null, // default
+                    textDirection: sap.ui.core.TextDirection.Inherit // default
+                });
+
             });
-
-        });
 
     }; // end of oAPP.fn.sendPost
 
     /************************************************************************
      * SNS 일괄 전송
      ************************************************************************/
-    oAPP.fn.sendSNS = (TY_IFDATA, oChoiceInfo, cb) => {
+    oAPP.fn.sendSNS = (TY_IFDATA, oChoiceInfo) => {
 
-        // 순서
-        // 1. telegram
-        // 2. youtube
-        // 3. facebook
-        // 4. instagram
-        // 5. kakao story
-        // 6. telegram
+        return new Promise((resolve) => {
 
-        oAPP.setBusyMsg("Youtube 전송중...");
+            // 순서
+            // 1. telegram
+            // 2. youtube
+            // 3. facebook
+            // 4. instagram
+            // 5. kakao story
+            // 6. telegram
 
-        console.log("Youtube 시작");
+            oAPP.setBusyMsg("Youtube 전송중...");
 
-        debugger;
+            console.log("Youtube 시작");
 
-        oAPP.youtube.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+            debugger;
 
-            oAPP.setBusyMsg("Facebook 전송중...");
+            oAPP.youtube.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-            console.log("Youtube 종료");
+                oAPP.setBusyMsg("Facebook 전송중...");
 
-            console.log("페이스북 시작");
+                console.log("Youtube 종료");
 
-            oAPP.facebook.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                console.log("페이스북 시작");
 
-                console.log("페이스북 종료");
+                oAPP.facebook.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                oAPP.setBusyMsg("Instagram 전송중...");
+                    console.log("페이스북 종료");
 
-                console.log("인스타그램 시작");
+                    oAPP.setBusyMsg("Instagram 전송중...");
 
-                oAPP.instagram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                    console.log("인스타그램 시작");
 
-                    console.log("인스타그램 종료");
+                    oAPP.instagram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                    oAPP.setBusyMsg("Kakao Story 전송중...");
+                        console.log("인스타그램 종료");
 
-                    console.log("카카오 시작");
+                        oAPP.setBusyMsg("Kakao Story 전송중...");
 
-                    oAPP.kakao.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                        console.log("카카오 시작");
 
-                        console.log("카카오 종료");
+                        oAPP.kakao.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                        oAPP.setBusyMsg("telegram 전송중...");
+                            console.log("카카오 종료");
 
-                        console.log("텔레그램 시작");
+                            oAPP.setBusyMsg("telegram 전송중...");
 
-                        oAPP.telegram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                            console.log("텔레그램 시작");
 
-                            console.log("텔레그램 종료");
+                            oAPP.telegram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                            cb();
+                                console.log("텔레그램 종료");
 
-                            return;
+                                resolve();
+
+                                return;
+
+                            });
 
                         });
 
@@ -1420,12 +1415,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // 업그레이드 유무 체크..
 
 
-    
+
 
     // 화면 그리기
     oAPP.fn.attachInit();
 
-    
+
 
 
     // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기

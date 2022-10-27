@@ -1,8 +1,7 @@
 {
   "name": "com.u4a_sns.app",
   "displayName": "u4a_sns",
-  "version": "1.0.0",
-  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "description": "A U4A IDE Platform R&D Team application that responds to the deviceready event.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +9,7 @@
   "keywords": [
     "ecosystem:cordova"
   ],
-  "author": "Apache Cordova Team",
+  "author": "U4A R&D Team",
   "license": "Apache-2.0",
   "devDependencies": {
     "cordova-electron": "^3.0.0",

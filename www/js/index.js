@@ -1,5 +1,7 @@
 window.oAPP = {};
 
+debugger;
+
 (async (oAPP) => {
     "use strict";
 
@@ -18,22 +20,26 @@ window.oAPP = {};
     oAPP.mimetype = require('mime-types');
     oAPP.randomkey = require("random-key");
     oAPP.ip = require('ip');
+    oAPP.autoUpdater = oAPP.remote.require("electron-updater").autoUpdater;
+    oAPP.octokit = oAPP.remote.require("@octokit/core").Octokit;
+    oAPP.MongClinet = oAPP.remote.require('mongodb').MongoClient;
+    oAPP.telegramBotAPI = oAPP.remote.require("node-telegram-bot-api");
+
+    /************************************************************************
+     * Util Local Js Path
+     ************************************************************************/
+    oAPP.JsPath = oAPP.path.join(oAPP.apppath, "js");
+
+    oAPP.mongdb = require(oAPP.path.join(oAPP.JsPath, "mongdb.js")); // 몽고 디비 연결 및 SNS별 Token Key 정보 구하기
+    oAPP.autoUpdate = require(oAPP.path.join(oAPP.JsPath, "autoUpdate.js"));
 
     /************************************************************************
      * Mongdb & Telegram Info
      ************************************************************************/
-    oAPP.MongClinet = oAPP.remote.require('mongodb').MongoClient;
-    oAPP.telegramBotAPI = oAPP.remote.require("node-telegram-bot-api");
-
     let Lpw = "%U4aIde&";
     Lpw = encodeURIComponent(Lpw);
 
     oAPP.MongDB_HOST = "mongodb://u4arnd:" + Lpw + "@118.34.215.175:9102/admin";
-
-    let sJsPath = oAPP.path.join(oAPP.apppath, "js");
-
-    // 몽고 디비 연결 및 SNS별 Token Key 정보 구하기
-    oAPP.mongdb = require(oAPP.path.join(sJsPath, "mongdb.js"));
 
     let oResult = await oAPP.mongdb.onGET();
     if (oResult.RETCD == "E") {
@@ -46,20 +52,28 @@ window.oAPP = {};
     });
 
     /************************************************************************
+     * Auto Update Check
+     ************************************************************************/
+
+    // no build 일 경우는 자동 업데이트를 확인하지 않는다.
+    if (!oAPP.app.isPackaged) {
+        await oAPP.autoUpdate.checkUpdate();
+    }
+
+    /************************************************************************
      * SNS
      ************************************************************************/
-    oAPP.facebook = require(oAPP.path.join(sJsPath, "facebook.js"));
-    oAPP.youtube = require(oAPP.path.join(sJsPath, "youtube.js"));
-    oAPP.instagram = require(oAPP.path.join(sJsPath, "instagram.js"));
-    oAPP.kakao = require(oAPP.path.join(sJsPath, "kakao.js"));
-    oAPP.telegram = require(oAPP.path.join(sJsPath, "telegram.js"));
+    oAPP.facebook = require(oAPP.path.join(oAPP.JsPath, "facebook.js"));
+    oAPP.youtube = require(oAPP.path.join(oAPP.JsPath, "youtube.js"));
+    oAPP.instagram = require(oAPP.path.join(oAPP.JsPath, "instagram.js"));
+    oAPP.kakao = require(oAPP.path.join(oAPP.JsPath, "kakao.js"));
+    oAPP.telegram = require(oAPP.path.join(oAPP.JsPath, "telegram.js"));
 
     /************************************************************************
      * Library Url
      ************************************************************************/
     oAPP.fbUrl = "https://connect.facebook.net/en_US/sdk.js";
     oAPP.fbApi = "https://graph.facebook.com";
-
 
     /************************************************************************
      * Description
@@ -82,7 +96,8 @@ window.oAPP = {};
     /************************************************************************
      * HttpServer 
      ************************************************************************/
-    oAPP.server = require(oAPP.path.join(sJsPath, "CreateServer.js"));
+    oAPP.server = require(oAPP.path.join(oAPP.JsPath, "CreateServer.js"));
+
 
     /************************************************************************
      * APP 구동 시작

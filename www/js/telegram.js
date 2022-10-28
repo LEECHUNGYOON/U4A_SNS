@@ -46,8 +46,6 @@ const
 //텔레그램 고객 전체에 메시지 전송
 async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
 
-    debugger;
-
     if (USER_INFO.length == 0) {
         return;
     }
@@ -67,10 +65,11 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
 
         // continue;
 
-        if (sParams.DESC === "") {
-            continue;
-        }
-        await BOT.sendMessage(sUserInfo.chat_id, sParams.DESC);
+        // if (sParams.DESC === "") {
+        //     continue;
+        // }
+
+        await sendMessage(sUserInfo.chat_id, sParams);
 
     }
 
@@ -80,6 +79,56 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
     CB(sParams);
 
 }
+
+/************************************************************************
+ * 게시글 본문 구성하기
+ ************************************************************************/
+async function sendMessage(chat_id, sParams) {
+
+        var Lbody   = "★ 제목"        + " \n " 
+                    + sParams.TITLE   + " \n\n " 
+                    + "★ 모듈(업무)"  + " \n " 
+                    + sParams.TYPE    + " \n\n " 
+                    + "★ 상세설명"    + " \n " 
+                    + sParams.DESC    + " \n\n ";
+
+    //샘플 URL 정보가 존재한다면 
+    if(sParams.SAMPLE_URL !== ""){
+
+    Lbody = Lbody + "★ 샘플 HOME 이동"   + " \n "
+            + sParams.SAMPLE_URL   + " \n\n ";
+
+    }
+
+    if(sParams.IMAGE !== ""){
+
+    //서브 이미지 URL 존재시
+    if(sParams.IMAGE.T_URL.length != 0){
+
+        Lbody   = Lbody 
+                + "★ 추가 참조 이미지"   + " \n ";
+
+            for (var i = 0; i < sParams.IMAGE.T_URL.length; i++) {
+                    var sUrl = sParams.IMAGE.T_URL[i];
+
+                    Lbody   = Lbody 
+                            + sUrl.URL   + " \n\n ";
+
+            }
+
+    }
+
+    //미리보기 사진 형식 본문 포멧 전송
+    await BOT.sendPhoto(chat_id, sParams.IMAGE.URL , { caption: Lbody } );
+
+    return;
+
+    }
+//일반 본문 포멧 전송 
+await BOT.sendMessage(chat_id, Lbody);
+ 
+
+}; // end of getMessage
 
 /* ================================================================= */
 /* Export Module Function 

@@ -15,7 +15,7 @@ const
 oInstagram.send = (oParams, oChoiceInfo, cb) => {
 
     window.jQuery = WINDOW.jQuery;
-    
+
     debugger;
 
     if (!oChoiceInfo || !oChoiceInfo.INSTAGRAM) {
@@ -85,7 +85,7 @@ oInstagram.send = (oParams, oChoiceInfo, cb) => {
  * 인스타 계정 정보 구하기
  ************************************************************************/
 function getAccount(cbSuccess, cbErr) {
-    debugger;
+
     let sPath = `${PAGEID}?fields=instagram_business_account&access_token=${PAGETOKEN}`,
         sMethod = "GET",
         sUrl = oAPP.fbApi + "/" + sPath;
@@ -94,7 +94,7 @@ function getAccount(cbSuccess, cbErr) {
         url: sUrl,
         type: sMethod,
         success: function (res) {
-            debugger;
+
             let sInstaAccId = res.instagram_business_account.id,
                 oAccInfo = {
                     InstaAccId: sInstaAccId
@@ -104,7 +104,7 @@ function getAccount(cbSuccess, cbErr) {
 
         },
         error: function (e) {
-            debugger;
+
             cbErr(e);
         }
 
@@ -353,23 +353,42 @@ function onError(oParams, oErr, cb) {
 /************************************************************************
  * 게시글 본문 구성하기
  ************************************************************************/
-function getMessage(oParams) {
+ function getMessage(oParams) {
 
     let oSubJect = oAPP.subject;
 
-    let sMsg = `.. \n\n [ ${oSubJect.TITLE} ] \n\n`;
-    sMsg += oParams.TITLE + "\n\n\n";
+    let sMsg = `[ ${oSubJect.TITLE} ] \n\n`;
+    sMsg += oParams.TITLE + " \n\n\n ";
 
     sMsg += `[ ${oSubJect.TYPE} ] \n\n`;
-    sMsg += oParams.TYPE + "\n\n\n";
+    sMsg += oParams.TYPE + " \n\n\n ";
 
     sMsg += `[ ${oSubJect.DESC} ] \n\n`;
-    sMsg += oParams.DESC + "\n\n\n";
+    sMsg += oParams.DESC + " \n\n\n ";
 
     if (oParams.SAMPLE_URL) {
         sMsg += `[ ${oSubJect.SAMPLE_URL} ] \n\n`;
-        sMsg += oParams.SAMPLE_URL + "\n\n\n\n\n\n";
+        sMsg += oParams.SAMPLE_URL + " \n\n\n\n\n\n ";
     }
+
+    if (oParams.IMAGE.T_URL &&
+        oParams.IMAGE.T_URL.length !== 0) {
+
+        sMsg += `[ ${oSubJect.REF_IMG} ] \n\n `;
+
+        let iSubImageLength = oParams.IMAGE.T_URL.length;
+
+        for (var i = 0; i < iSubImageLength; i++) {
+
+            let oSubImgUrl = oParams.IMAGE.T_URL[i];
+
+            sMsg += oSubImgUrl.URL + " \n\n ";
+
+        }
+
+    }
+
+    sMsg += " \n\n\n ";
 
     let iHashLength = oParams.HASHTAG.length;
     if (iHashLength !== 0) {
@@ -381,7 +400,7 @@ function getMessage(oParams) {
                 continue;
             }
 
-            sMsg += oHashItem.TAG + "\n";
+            sMsg += oHashItem.TAG + " \n ";
 
         }
 

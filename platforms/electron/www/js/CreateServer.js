@@ -64,7 +64,8 @@ exports.createServer = function(remote, cb_req, cb_success, cb_error) {
     try {
 
         //서버 생성 
-        http.createServer(async function(req, res) {
+        http.createServer(async function(req, res) {          
+         
 
             //서비스 점검
             if (!onChkService(req, res)) {

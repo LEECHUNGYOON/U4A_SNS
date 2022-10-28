@@ -1,10 +1,10 @@
 let oAutoUpdate = {};
 
-oAutoUpdate.checkUpdate = (autoUpdater) => {
+const autoUpdater = oAPP.autoUpdater;
 
-    debugger;
+oAutoUpdate.checkUpdate = () => {
 
-    return new Promise((resolve, reject) => {       
+    return new Promise((resolve, reject) => {
 
         autoUpdater.on('checking-for-update', () => {
 
@@ -36,15 +36,9 @@ oAutoUpdate.checkUpdate = (autoUpdater) => {
 
         autoUpdater.on('download-progress', (progressObj) => {
 
-
             var iPer = parseFloat(progressObj.percent).toFixed(2);
 
             console.log("Downloading..." + iPer);
-
-
-            // oModel.setProperty("/BUSYPOP/TITLE", "Downloading...", true);
-
-            // oModel.setProperty("/BUSYPOP/PERVALUE", iPer, true);
 
         });
 

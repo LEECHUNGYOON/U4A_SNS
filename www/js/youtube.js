@@ -97,12 +97,15 @@ function Lfn_serverClose() {
 
 }
 
+let oErrLog = oAPP.errorlog;
 
 /* ================================================================= */
 /* Export Module Function 
 /* ================================================================= */
 exports.send = function (sParams, oChoiceInfo, CB) {
 
+    debugger;
+    
     if (!oChoiceInfo || !oChoiceInfo.YOUTUBE) {
 
         //Callback 
@@ -141,10 +144,15 @@ exports.send = function (sParams, oChoiceInfo, CB) {
 
     //동영상 경로 존재 여부  
     if (!FS.existsSync(FPATH)) {
+
         //존재하지않다면!!!
         //오류 메시지 - 처리 현재 프로세스에서 종료 해야하므로 CallBack 처리는 않함!!
 
-
+        //오류 메시지 수집
+        oErrLog.addLog({
+            RETCD: "E",
+            RTMSG: "[ YOUTUBE #3 ] 인증키 누락!"
+        });
 
         return;
 
@@ -153,8 +161,6 @@ exports.send = function (sParams, oChoiceInfo, CB) {
 
     //HTTP 서버 생성
     oServer = http.createServer(function (req, res) {
-
-        debugger;
 
         res.writeHead(200, {
             'Content-Type': 'text/html'
@@ -178,6 +184,10 @@ exports.send = function (sParams, oChoiceInfo, CB) {
             if (typeof tokens === "undefined") {
 
                 //오류 메시지 처리
+                oErrLog.addLog({
+                    RETCD: "E",
+                    RTMSG: "[ YOUTUBE #2 ] 인증키 누락!"
+                });
 
                 //서버 종료
                 Lfn_serverClose();
@@ -191,14 +201,19 @@ exports.send = function (sParams, oChoiceInfo, CB) {
             //인증키 누락시
             if (tokens === "") {
 
+                //오류 메시지 수집
+                oErrLog.addLog({
+                    RETCD: "E",
+                    RTMSG: "[ YOUTUBE #3 ] 인증키 누락!"
+                });
+
                 //서버 종료
                 Lfn_serverClose();
 
                 //Callback 
                 CB(sParams);
-                console.log("유투브 3");
 
-                //처리 오류 메시지 처리
+                console.log("유투브 3");
 
                 return;
 
@@ -244,13 +259,17 @@ exports.send = function (sParams, oChoiceInfo, CB) {
                         res.end('The API returned an error: ' + err);
 
                         //오류 메시지 처리
+                        oErrLog.addLog({
+                            RETCD: "E",
+                            RTMSG: "[ YOUTUBE #4 ] 인증키 누락!"
+                        });
 
                         //서버 종료
                         Lfn_serverClose();
 
                         //callback 
                         CB(sParams);
-                        
+
 
                         return;
                     }
@@ -304,7 +323,6 @@ exports.send = function (sParams, oChoiceInfo, CB) {
         client_secret: CREDENTIALS.web.client_secret,
         redirect_url: CREDENTIALS.web.redirect_uris[0],
     });
-
 
     var Lurl = oauth.generateAuthUrl({
         access_type: "offline",

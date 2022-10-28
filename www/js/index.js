@@ -1,7 +1,5 @@
 window.oAPP = {};
 
-debugger;
-
 (async (oAPP) => {
     "use strict";
 
@@ -9,12 +7,18 @@ debugger;
     oAPP.auth = {};
     oAPP.conf = {};
 
+    oAPP.bIsBackgroundMode = false; // 현재 실행 환경이 백그라운드 모드인지 아닌지 Flag   
+
     /************************************************************************
      * Electron & NPM Library
      ************************************************************************/
     oAPP.remote = require('@electron/remote');
     oAPP.app = oAPP.remote.app;
+    oAPP.tray = oAPP.remote.Tray;
+    oAPP.dialog = oAPP.remote.dialog;
+    oAPP.trayMenu = oAPP.remote.Menu;
     oAPP.apppath = oAPP.app.getAppPath();
+    oAPP.userdata = oAPP.app.getPath("userData");
     oAPP.path = oAPP.remote.require('path');
     oAPP.fs = oAPP.remote.require('fs');
     oAPP.mimetype = require('mime-types');
@@ -26,12 +30,35 @@ debugger;
     oAPP.telegramBotAPI = oAPP.remote.require("node-telegram-bot-api");
 
     /************************************************************************
-     * Util Local Js Path
+     * Prefix
+     ************************************************************************/
+    process.env.SERVER_COMPUTERNAME = "u4arndx";
+    process.env.SERVER_LOG_PATH = "D:\\log\\u4a_sns_log";
+    process.env.LOCAL_LOG_PATH = oAPP.path.join(oAPP.userdata, "log", "u4a_sns_log");
+
+
+    // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
+    if (process.env.COMPUTERNAME == process.env.SERVER_COMPUTERNAME) {
+        oAPP.bIsBackgroundMode = true;
+    }
+
+    /************************************************************************
+     * [Util] Local Js Path
      ************************************************************************/
     oAPP.JsPath = oAPP.path.join(oAPP.apppath, "js");
 
+    oAPP.errorlog = require(oAPP.path.join(oAPP.JsPath, "errlog.js")); // 에러 로그 관련 util
     oAPP.mongdb = require(oAPP.path.join(oAPP.JsPath, "mongdb.js")); // 몽고 디비 연결 및 SNS별 Token Key 정보 구하기
     oAPP.autoUpdate = require(oAPP.path.join(oAPP.JsPath, "autoUpdate.js"));
+
+    /************************************************************************
+     * Auto Update Check
+     ************************************************************************/
+
+    // no build 일 경우는 자동 업데이트를 확인하지 않는다.
+    if (oAPP.app.isPackaged) {
+        await oAPP.autoUpdate.checkUpdate();
+    }
 
     /************************************************************************
      * Mongdb & Telegram Info
@@ -43,22 +70,13 @@ debugger;
 
     let oResult = await oAPP.mongdb.onGET();
     if (oResult.RETCD == "E") {
-        console.error(oResult.RTMSG);
+        oErrLog.writeLog(oResult);
         return;
     }
 
     oAPP.telegramBOT = new oAPP.telegramBotAPI(oAPP.auth.telegram, {
         polling: false
     });
-
-    /************************************************************************
-     * Auto Update Check
-     ************************************************************************/
-
-    // no build 일 경우는 자동 업데이트를 확인하지 않는다.
-    if (!oAPP.app.isPackaged) {
-        await oAPP.autoUpdate.checkUpdate();
-    }
 
     /************************************************************************
      * SNS
@@ -82,7 +100,8 @@ debugger;
         TITLE: "제목",
         TYPE: "모듈(업무)",
         DESC: "상세설명",
-        SAMPLE_URL: "Sample URL"
+        SAMPLE_URL: "Sample URL",
+        REF_IMG: "참고이미지"
     };
 
     /************************************************************************
@@ -91,13 +110,38 @@ debugger;
     oAPP.conf.localServerIP = oAPP.ip.address();
     oAPP.conf.localServerPort = 1333;
 
-    oAPP.conf.youtube_server_port = 1977; // node server port
+    oAPP.conf.youtube_server_port = 1977; // node server port    
 
     /************************************************************************
      * HttpServer 
      ************************************************************************/
     oAPP.server = require(oAPP.path.join(oAPP.JsPath, "CreateServer.js"));
 
+    /************************************************************************
+     * APP 에러 감지
+     ************************************************************************/
+    oAPP.fn.onError = (message, url, line, col, errorObj) => {
+
+        let sMsg = `[window onError] ${message} \n ${url}, ${line}:${col}`;
+
+        // 포그라운드 모드 이면 오류 내용을 화면에 뿌려준다.
+        if (!oAPP.bIsBackgroundMode) {
+            oAPP.showErrorBox(null, sMsg);
+            return;
+        }
+
+
+        // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
+
+
+
+    }; // end of oAPP.fn.onError
+
+    oAPP.showErrorBox = (sTitle = "오류", sMsg) => {
+
+        oAPP.dialog.showErrorBox(sTitle, sMsg);
+
+    };
 
     /************************************************************************
      * APP 구동 시작
@@ -122,5 +166,9 @@ debugger;
         oAPP.fn.onStart();
 
     }
+
+    // 오류 감지
+    document.addEventListener("error", oAPP.fn.onError);
+    window.addEventListener("error", oAPP.fn.onError);
 
 })(oAPP);

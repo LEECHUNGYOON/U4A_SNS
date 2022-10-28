@@ -11,14 +11,16 @@ let oAPP = parent.oAPP;
         oAPP.server.createServer(
             oAPP.remote,
             oAPP.server.onReq,
-            () => {
+            () => { // success
 
-
+                // 서버가 정상적으로 붙으면 Hide 처리
 
             },
-            () => {
+            () => { // error
 
+                // error log 남기기
 
+                // 메시지 팝업 띄우기               
 
             });
 
@@ -29,21 +31,24 @@ let oAPP = parent.oAPP;
      ************************************************************************/
     oAPP.server.onReq = async (oData, oReq, oRes) => {
 
-        debugger;
+        // path 분기
+
+
+
 
         let aSnsData;
 
         // 파라미터가 JSON 구조인지 확인
         try {
 
-            aSnsData = JSON.parse(oData.param[0].value);
+            aSnsData = JSON.parse(oData.PARAM[0].VALUE);
 
         } catch (error) {
 
-            oRes.send({
+            oRes.end(JSON.stringify({
                 RETCD: "E",
                 RTMSG: "JSON Parse Error!"
-            });
+            }));
 
             return;
         }
@@ -51,10 +56,10 @@ let oAPP = parent.oAPP;
         // 파라미터 타입이 Array인지 확인
         if (aSnsData instanceof Array == false) {
 
-            oRes.send({
+            oRes.end(JSON.stringify({
                 RETCD: "E",
                 RTMSG: "Array 형식이 아닙니다!"
-            });
+            }));
 
             return;
         }
@@ -65,27 +70,26 @@ let oAPP = parent.oAPP;
 
             var oChoiceInfo = {};
 
-            // 전송할 SNS 선택 정보를 글로벌 변수에 매핑한다.
             var oSnsData = aSnsData[i],
                 aSnsType = oSnsData.T_SNSTYP,
                 iSnsTypeLength = aSnsType.length;
 
             for (var j = 0; j < iSnsTypeLength; j++) {
 
-                oChoiceInfo[aSnsType[i]] = true;
+                oChoiceInfo[aSnsType[j]] = true;
 
             }
 
             var oSnsInfo = oSnsData.APPINFO;
-              
+
             await oAPP.fn.sendSNS(oSnsInfo, oChoiceInfo);
 
         }
 
-        oRes.send({
+        oRes.end(JSON.stringify({
             RETCD: "S",
             RTMSG: "전송 완료!"
-        });
+        }));
 
     }; // end of oAPP.server.onReq
 
@@ -465,7 +469,7 @@ let oAPP = parent.oAPP;
                                                 text: "{TEXT}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -553,21 +557,23 @@ let oAPP = parent.oAPP;
                                     new sap.m.Input({
                                         value: "{/SNS/VIDEO/URL}",
                                     })
-                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function(iIndex) {
-
-                                        if (iIndex !== 0) {
-
-                                            // 입력된 값 초기화
-                                            this.setValue("");
-
-                                            return false;
-                                        }
-
-                                        return true;
-
-                                    })
 
                                 ]
+
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+
+                                if (iIndex !== 0) {
+
+                                    // // 입력된 값 초기화
+                                    // this.setValue("");
+
+                                    oAPP.setProperty("/SNS/VIDEO/URL", "");
+
+                                    return false;
+                                }
+
+                                return true;
+
                             }),
 
                             new sap.ui.layout.form.FormElement({
@@ -586,21 +592,22 @@ let oAPP = parent.oAPP;
                                             oAPP.fn.videoFileSelect();
                                         }
                                     })
-                                    .bindProperty("enabled", "/PRC/VIDEO/RDBIDX", function(iIndex) {
-
-                                        if (iIndex !== 1) {
-
-                                            // 입력된 값 초기화
-                                            this.setValue("");
-
-                                            return false;
-                                        }
-
-                                        return true;
-
-                                    })
 
                                 ]
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+
+                                if (iIndex !== 1) {
+
+                                    // // 입력된 값 초기화
+                                    // this.setValue("");
+
+                                    oAPP.setProperty("/SNS/VIDEO/LURL", "");
+
+                                    return false;
+                                }
+
+                                return true;
+
                             }),
                         ]
                     })
@@ -664,24 +671,25 @@ let oAPP = parent.oAPP;
                                     new sap.m.Input({
                                         value: "{/SNS/IMAGE/URL}",
                                     })
-                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function(iIndex) {
-
-                                        if (iIndex !== 0) {
-
-                                            // 입력된 값 초기화
-                                            this.setValue("");
-
-                                            // 미리보기쪽 이미지를 지운다.
-                                            sap.ui.getCore().getModel().setProperty("/PREV/IMAGE/URL", "");
-
-                                            return false;
-                                        }
-
-                                        return true;
-
-                                    })
 
                                 ]
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+
+                                if (iIndex !== 0) {
+
+                                    // // 입력된 값 초기화
+                                    // this.setValue("");
+
+                                    oAPP.setProperty("/SNS/IMAGE/URL", "");
+
+                                    // 미리보기쪽 이미지를 지운다.
+                                    sap.ui.getCore().getModel().setProperty("/PREV/IMAGE/URL", "");
+
+                                    return false;
+                                }
+
+                                return true;
+
                             }),
 
                             new sap.ui.layout.form.FormElement({
@@ -700,27 +708,29 @@ let oAPP = parent.oAPP;
                                             oAPP.fn.imageFileSelect();
                                         }
                                     })
-                                    .bindProperty("enabled", "/PRC/IMAGE/RDBIDX", function(iIndex) {
-
-                                        if (iIndex !== 1) {
-
-                                            // 입력된 값 초기화
-                                            this.setValue("");
-
-                                            // Blob 파일 정보를 지운다.
-                                            sap.ui.getCore().getModel().setProperty("/SNS/IMAGE/DATA", "");
-
-                                            // 미리보기쪽 이미지를 지운다.
-                                            sap.ui.getCore().getModel().setProperty("/PREV/IMAGE/URL", "");
-
-                                            return false;
-                                        }
-
-                                        return true;
-
-                                    })
 
                                 ]
+
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+
+                                if (iIndex !== 1) {
+
+                                    // // 입력된 값 초기화
+                                    // this.setValue("");
+
+                                    oAPP.setProperty("/SNS/IMAGE/LURL", "");
+
+                                    // Blob 파일 정보를 지운다.
+                                    sap.ui.getCore().getModel().setProperty("/SNS/IMAGE/DATA", "");
+
+                                    // 미리보기쪽 이미지를 지운다.
+                                    sap.ui.getCore().getModel().setProperty("/PREV/IMAGE/URL", "");
+
+                                    return false;
+                                }
+
+                                return true;
+
                             }),
                         ]
                     })
@@ -1035,7 +1045,7 @@ let oAPP = parent.oAPP;
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function() {
+        reader.onloadend = function () {
 
             var base64data = reader.result;
 
@@ -1187,11 +1197,6 @@ let oAPP = parent.oAPP;
 
         // 체크박스가 하나도 선택 되어 있지 않다면 오류 메시지 출력
 
-
-
-
-
-
         var TY_IFDATA = {
 
             "TITLE": "", //제목 
@@ -1237,11 +1242,6 @@ let oAPP = parent.oAPP;
 
                 oAPP.setBusy(false);
 
-                // background 모드에서 실행했을 경우는 메시지 박스 처리를 하지 않음.
-                if(bIsBackgroundMode){
-                    return;
-                }
-
                 sap.m.MessageBox.success("전송 완료!!!!!!!!", {
                     title: "Success", // default
                     onClose: null, // default
@@ -1284,9 +1284,9 @@ let oAPP = parent.oAPP;
                 console.log("Youtube 종료");
 
                 console.log("페이스북 시작");
-
+               
                 oAPP.facebook.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
-
+        
                     console.log("페이스북 종료");
 
                     oAPP.setBusyMsg("Instagram 전송중...");
@@ -1330,7 +1330,6 @@ let oAPP = parent.oAPP;
         });
 
     }; // end of oAPP.fn.sendSNS
-
 
     oAPP.setBusyMsg = (sMsg) => {
 
@@ -1408,29 +1407,65 @@ let oAPP = parent.oAPP;
 
     }; // end of oAPP.fn.openMsgPopover
 
+    /************************************************************************
+     * Tray Icon 생성
+     ************************************************************************/
+    oAPP.fn.createTrayIcon = () => {
+
+        let sTrayIconPath = oAPP.path.join(oAPP.apppath, "img", "logo.png"),
+            oTray = oAPP.remote.Tray(sTrayIconPath);
+
+        let aMenu = [{
+                key: "exit",
+                label: "종료",
+                click: oAPP.fn.TrayMenu01
+            }
+
+        ];
+
+        let oTrayMenu = oAPP.trayMenu.buildFromTemplate(aMenu);
+        oTray.setToolTip("U4A SNS");
+        oTray.setContextMenu(oTrayMenu);
+
+    }; // end of oAPP.fn.createTrayIcon
+
+    /************************************************************************
+     * Tray Icon의 종료 이벤트
+     ************************************************************************/
+    oAPP.fn.TrayMenu01 = () => {
+
+        oAPP.remote.app.exit();
+
+    }; // end of oAPP.fn.TrayMenu01
+
 })(oAPP);
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // 업그레이드 유무 체크..
-
-
-
+    debugger;
 
     // 화면 그리기
     oAPP.fn.attachInit();
 
-
-
-
     // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기
+
+    // if (parent.process.env.COMPUTERNAME !== "") {
+    //     return;
+    // }
 
     // 백그라운드 일 경우
     // 서버 가동!!
     oAPP.server.serverOn();
 
     // Tray 아이콘 만들고
+    oAPP.fn.createTrayIcon();
 
-    // 백그라운드 모드일 경우에만 브라우저 창 Hide 처리
+    // // 백그라운드 모드일 경우에만 브라우저 창 Hide 처리
+    // let oCurrWin = oAPP.remote.getCurrentWindow();
+    // oCurrWin.hide();
 
 });
+
+// 오류 감지
+document.addEventListener("error", oAPP.fn.onError);
+window.addEventListener("error", oAPP.fn.onError);

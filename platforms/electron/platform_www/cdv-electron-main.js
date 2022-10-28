@@ -79,6 +79,7 @@ function createWindow () {
     const browserWindowOpts = Object.assign({}, cdvElectronSettings.browserWindow, { icon: appIcon });
     // browserWindowOpts.webPreferences.preload = path.join(app.getAppPath(), 'cdv-electron-preload.js');
     browserWindowOpts.webPreferences.contextIsolation = false;
+    browserWindowOpts.backgroundColor = "#030303";
 
     mainWindow = new BrowserWindow(browserWindowOpts);
     remote.enable(mainWindow.webContents);

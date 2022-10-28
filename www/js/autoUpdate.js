@@ -4,8 +4,6 @@ const autoUpdater = oAPP.autoUpdater;
 
 oAutoUpdate.checkUpdate = () => {
 
-    debugger;
-
     return new Promise((resolve, reject) => {
 
         autoUpdater.on('checking-for-update', () => {

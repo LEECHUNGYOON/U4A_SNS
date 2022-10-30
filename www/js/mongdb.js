@@ -3,27 +3,38 @@ let oMongdb = {};
 //DATA 추출 
 oMongdb.onGET = async () => {
 
-    return new Promise(function (res, rej) {
+    return new Promise(function(res, rej) {
 
-        oAPP.MongClinet.connect(oAPP.MongDB_HOST, function (err, db) {
-            if (err) throw err;
+        oAPP.MongClinet.connect(oAPP.MongDB_HOST, function(err, db) {
+
+            // if (err) throw err;
+            if (err) {
+
+                res({
+                    "RETCD": "E",
+                    "RTMSG": "[Mongodb] Connection Error : " + err.toString()
+                });
+
+                return;
+
+            }
 
             var dbo = db.db("U4A_ADMIN");
 
-            dbo.collection("SNS_AUTHORITY").find({}).limit(0).toArray(function (err, T_AUTH) {
+            dbo.collection("SNS_AUTHORITY").find({}).limit(0).toArray(function(err, T_AUTH) {
                 db.close(); //db 종료
 
                 if (err) {
                     res({
                         "RETCD": "E",
-                        "RTMSG": "몽고 DB 연결 실패"
+                        "RTMSG": "[Mongodb] 몽고 DB 연결 실패"
                     });
                     return;
                 } //오류
                 if (T_AUTH.length === 0) {
                     res({
                         "RETCD": "E",
-                        "RTMSG": "API 권한 Key정보 누락"
+                        "RTMSG": "[Mongodb] API 권한 Key정보 누락"
                     });
                     return;
                 }
@@ -33,7 +44,7 @@ oMongdb.onGET = async () => {
                 if (T_DATA.length === 0) {
                     res({
                         "RETCD": "E",
-                        "RTMSG": "유투브 Key정보 누락"
+                        "RTMSG": "[Mongodb] 유투브 Key정보 누락"
                     });
                     return;
                 }
@@ -57,7 +68,7 @@ oMongdb.onGET = async () => {
                 if (T_DATA.length === 0) {
                     res({
                         "RETCD": "E",
-                        "RTMSG": "인스타그램 Key정보 누락"
+                        "RTMSG": "[Mongodb] 인스타그램 Key정보 누락"
                     });
                     return;
                 }
@@ -69,7 +80,7 @@ oMongdb.onGET = async () => {
                 if (T_DATA.length === 0) {
                     res({
                         "RETCD": "E",
-                        "RTMSG": "텔레그램 Key정보 누락"
+                        "RTMSG": "[Mongodb] 텔레그램 Key정보 누락"
                     });
                     return;
                 }

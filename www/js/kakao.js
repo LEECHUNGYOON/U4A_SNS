@@ -12,6 +12,7 @@ oKakao.send = (oParams, oChoiceInfo, cb) => {
 
     //Callback 
     cb(oParams);
+    
     return;
 
 };

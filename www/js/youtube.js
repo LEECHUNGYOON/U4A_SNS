@@ -151,7 +151,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
         //오류 메시지 수집
         oErrLog.addLog({
             RETCD: "E",
-            RTMSG: "[ YOUTUBE #3 ] 인증키 누락!"
+            RTMSG: `[ YOUTUBE #1 ] 동영상 파일이 존재하지 않음 ==> ${FPATH} `
         });
 
         return;
@@ -170,8 +170,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
         let querystring = remote.require('querystring');
         let sData = querystring.parse(req.url, "/?");
 
-        if (typeof sData.code === "undefined") {
-            //오류 메시지 처리
+        if (typeof sData.code === "undefined") {            
             return;
         }
 
@@ -261,7 +260,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
                         //오류 메시지 처리
                         oErrLog.addLog({
                             RETCD: "E",
-                            RTMSG: "[ YOUTUBE #4 ] 인증키 누락!"
+                            RTMSG: `[ YOUTUBE #4 ] The API returned an error! ==> ${err}`
                         });
 
                         //서버 종료

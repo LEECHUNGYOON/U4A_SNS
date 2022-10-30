@@ -10,8 +10,13 @@ let oErrLog = {};
 
 let aLog = [];
 
+
 /************************************************************************
  * Error 내용 수집
+ ************************************************************************
+ * @param {Object(JSON)} oError 
+ * - ERROR 구조 
+ *  예) --> { RETCD:  "E", RTMSG: "" }
  ************************************************************************/
 oErrLog.addLog = (oError) => {
 
@@ -25,6 +30,8 @@ oErrLog.addLog = (oError) => {
 
 /************************************************************************
  * 수집된 Error 내용 리턴
+ ************************************************************************
+ * @return Array
  ************************************************************************/
 oErrLog.getLog = () => {
 
@@ -43,16 +50,23 @@ oErrLog.clearAll = () => {
 
 /************************************************************************
  * Directory에 Log 파일을 만든다.
+ ************************************************************************
+ * @param {String} sFileName
+ * 
+ * @param {String, Array} oLogData
  ************************************************************************/
 oErrLog.writeLog = (sFileName, oLogData) => {
+
+    if (oLogData === null || typeof oLogData === "undefined") {
+        return;
+    }
 
     let sPrefixFileName = "";
 
     // 파일 이름 파라미터에 값이 없으면 Default 이름으로 지정한다.
-    if (sFileName == null || typeof sFileName !== "string") {
+    if (sFileName === null || typeof sFileName !== "string") {
         sPrefixFileName = "error_log";
-    }
-    else {
+    } else {
         sPrefixFileName = sFileName;
     }
 
@@ -88,7 +102,13 @@ oErrLog.writeLog = (sFileName, oLogData) => {
 
     let sLogFile = PATH.join(sTodayFolderPath, sLogFileName);
 
-    FS.writeFileSync(sLogFile, JSON.stringify([oLogData]));
+    if (typeof oLogData == "object") {
+        FS.writeFileSync(sLogFile, JSON.stringify([oLogData]));
+    }
+
+    if (oLogData instanceof Array == true) {
+        FS.writeFileSync(sLogFile, JSON.stringify(oLogData));
+    }
 
 }; // end of oErrLog.writeLog
 

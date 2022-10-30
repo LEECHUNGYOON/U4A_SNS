@@ -124,8 +124,9 @@ async function sendMessage(chat_id, sParams) {
     return;
 
     }
-//일반 본문 포멧 전송 
-await BOT.sendMessage(chat_id, Lbody);
+
+    //일반 본문 포멧 전송 
+    await BOT.sendMessage(chat_id, Lbody);
  
 
 }; // end of getMessage
@@ -148,10 +149,19 @@ exports.send = function (sParams, oChoiceInfo, CB) {
         MongClinet = oAPP.MongClinet,
         MongDB_HOST = oAPP.MongDB_HOST;
 
+    let oErrLog = oAPP.errorlog;
+
     //몽고 DB에 전체 사용자 정보 얻기 
     MongClinet.connect(MongDB_HOST, function (err, db) {
 
         if (err) {
+
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM #1 ] 몽고 DB 접속 실패: " + err.toString()
+            });
+
             CB(sParams);
             return;
         }
@@ -163,6 +173,13 @@ exports.send = function (sParams, oChoiceInfo, CB) {
             debugger;
             db.close();
             if (err) {
+
+                //오류 메시지 수집
+                oErrLog.addLog({
+                    RETCD: "E",
+                    RTMSG: "[ TELEGRAM #2 ] dbo.collection('USER_INFO'): " + err.toString()
+                });
+
                 CB(sParams);
                 return;
             }

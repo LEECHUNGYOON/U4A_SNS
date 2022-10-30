@@ -12,8 +12,18 @@ const
 const
     WINDOW = global.document.ws_frame;
 
+/************************************************************************
+ * Facebook 전송
+ ************************************************************************
+ * @param {Object} oParams
+ * - SNS 본문 공통 구조
+ * 
+ * @param {Object} oChoiceInfo
+ * - 전송할 SNS 종류
+ * 
+ ************************************************************************/
 oFaceBook.send = (oParams, oChoiceInfo, cb) => {
-       
+
     window.jQuery = WINDOW.jQuery;
 
     console.log("페이스북 진입");
@@ -50,7 +60,6 @@ oFaceBook.send = (oParams, oChoiceInfo, cb) => {
     // 나머지는 본문만 전송
     sendFeed(oParams, cb);
 
-
 }; // end of oFaceBook.send
 
 /************************************************************************
@@ -79,22 +88,22 @@ function sendFeed(oParams, cb) {
         contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
         data: oFormData, // 위에서 선언한 fromdata
         type: sMethod,
-        success: function (result) {
+        success: function(result) {
 
             cb(oParams);
 
         },
-        error: function (e) {
+        error: function(e) {
 
-            //오류 메시지 수집
-            oErrLog.addLog({
+            let oErr = {
                 RETCD: "E",
-                RTMSG: "[ FACEBOOK - sendFeed ] 게시글 올리기 오류!! \n\n" + e.response
-            });       
+                RTMSG: "[ FACEBOOK #1 - sendFeed ] 게시글 올리기 오류 : \n\n" + e.response
+            };
 
             console.error(e);
 
-            cb(oParams);
+            // 오류 수집 
+            onError(oParams, oErr, cb);
 
         }
 
@@ -128,16 +137,22 @@ function sendPhoto(oParams, cb) {
             contentType: false,
             data: oFormData,
             type: sMethod,
-            success: function (result) {
+            success: function(result) {
 
                 cb(oParams);
 
             },
-            error: function (e) {
+            error: function(e) {
+
+                let oErr = {
+                    RETCD: "E",
+                    RTMSG: "[ FACEBOOK #2 - sendPhoto(URL) ] 게시글 올리기 오류 :  \n\n" + e.response
+                };
 
                 console.error(e);
 
-                cb(oParams);
+                // 오류 수집 
+                onError(oParams, oErr, cb);
 
             }
 
@@ -158,16 +173,22 @@ function sendPhoto(oParams, cb) {
             contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
             data: oFormData, // 위에서 선언한 fromdata
             type: sMethod,
-            success: function (result) {
+            success: function(result) {
 
                 cb(oParams);
 
             },
-            error: function (e) {
+            error: function(e) {
+
+                let oErr = {
+                    RETCD: "E",
+                    RTMSG: "[ FACEBOOK #3 - sendPhoto(blob) ] 게시글 올리기 오류 : \n\n" + e.response
+                };
 
                 console.error(e);
 
-                cb(oParams);
+                // 오류 수집 
+                onError(oParams, oErr, cb);
 
             }
 
@@ -238,5 +259,19 @@ function getMessage(oParams) {
     return sMsg;
 
 }; // end of getMessage
+
+/************************************************************************
+ * 공통 에러
+ ************************************************************************/
+function onError(oParams, oErr, cb) {
+
+    let oErrLog = oAPP.errorlog;
+
+    // 공통 에러 수집..
+    oErrLog.addLog(oErr);
+
+    cb(oParams);
+
+} // end of onError
 
 module.exports = oFaceBook;

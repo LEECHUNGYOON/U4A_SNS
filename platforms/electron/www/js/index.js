@@ -122,14 +122,13 @@ window.oAPP = {};
      ************************************************************************/
     oAPP.fn.onError = (message, url, line, col, errorObj) => {
 
-        let sMsg = `[window onError] ${message} \n ${url}, ${line}:${col}`;
+        let sErrMsg = `[window onError] : ${message} \n ${url}, ${line}:${col}`;
 
         // 포그라운드 모드 이면 오류 내용을 화면에 뿌려준다.
         if (!oAPP.bIsBackgroundMode) {
-            oAPP.showErrorBox(null, sMsg);
+            oAPP.showErrorBox("script Error", sErrMsg);
             return;
         }
-
 
         // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
 
@@ -168,7 +167,7 @@ window.oAPP = {};
     }
 
     // 오류 감지
-    document.addEventListener("error", oAPP.fn.onError);
-    window.addEventListener("error", oAPP.fn.onError);
+    window.onerror = oAPP.fn.onError;
+    document.onerror = oAPP.fn.onError;
 
 })(oAPP);

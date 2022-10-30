@@ -14,6 +14,9 @@ let oAPP = parent.oAPP;
             () => { // success
 
                 // 서버가 정상적으로 붙으면 Hide 처리
+                // // 백그라운드 모드일 경우에만 브라우저 창 Hide 처리
+                // let oCurrWin = oAPP.remote.getCurrentWindow();
+                // oCurrWin.hide();
 
             },
             () => { // error
@@ -86,6 +89,11 @@ let oAPP = parent.oAPP;
 
         }
 
+        let oErrLog = oAPP.errorlog;
+
+        // SNS 전송시 오류가 있었다면 Log 파일 저장
+        oErrLog.writeLog(oErrLog.getLog());
+
         oRes.end(JSON.stringify({
             RETCD: "S",
             RTMSG: "전송 완료!"
@@ -128,9 +136,8 @@ let oAPP = parent.oAPP;
             PRC: {
                 MSGPOP: { // Message Popover 구조
                     BTNICO: "sap-icon://message-popup",
-                    MSGCNT: "0",
+                    MSGCNT: 0,
                     MSGLIST: [{
-                        TYPE: "", // SNS 유형
                         RETCD: "", // return code
                         RTMSG: "" // msg
                     }]
@@ -469,7 +476,7 @@ let oAPP = parent.oAPP;
                                                 text: "{TEXT}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -560,7 +567,7 @@ let oAPP = parent.oAPP;
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -594,7 +601,7 @@ let oAPP = parent.oAPP;
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -673,7 +680,7 @@ let oAPP = parent.oAPP;
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -711,7 +718,7 @@ let oAPP = parent.oAPP;
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -1045,7 +1052,7 @@ let oAPP = parent.oAPP;
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function () {
+        reader.onloadend = function() {
 
             var base64data = reader.result;
 
@@ -1234,9 +1241,11 @@ let oAPP = parent.oAPP;
         oAPP.setBusy(true);
 
         // SNS 일괄 전송!!
-
         oAPP.fn.sendSNS(TY_IFDATA, oChoice)
             .then(() => {
+
+                // 오류가 있을 경우 오류에 대한 정보 기록하기
+                oAPP.fn.setErrorLog();
 
                 oAPP.setBusyMsg("완료!");
 
@@ -1255,6 +1264,34 @@ let oAPP = parent.oAPP;
             });
 
     }; // end of oAPP.fn.sendPost
+
+    /************************************************************************
+     * 오류가 있을 경우 오류에 대한 정보 기록하기
+     ************************************************************************/
+    oAPP.fn.setErrorLog = () => {
+
+        let oDefMsgPopData = jQuery.extend(true, {}, oAPP.setProperty("/PRC/MSGPOP"));
+
+        let oErrLog = oAPP.errorlog,
+            aLog = oErrLog.getLog(),
+            iLoglength = aLog.length;
+
+        oDefMsgPopData.MSGCNT = iLoglength;
+        oDefMsgPopData.MSGLIST = [];
+
+        if (iLoglength == 0) {
+            oAPP.setProperty("/PRC/MSGPOP", oDefMsgPopData);
+            return;
+        }
+
+        // SNS 전송시 오류가 있었다면 Log 파일 저장
+        oErrLog.writeLog(aLog);
+
+        oDefMsgPopData.MSGLIST = aLog;
+
+        oAPP.setProperty("/PRC/MSGPOP", oDefMsgPopData);
+
+    }; // end of oAPP.fn.setErrorLog
 
     /************************************************************************
      * SNS 일괄 전송
@@ -1284,9 +1321,9 @@ let oAPP = parent.oAPP;
                 console.log("Youtube 종료");
 
                 console.log("페이스북 시작");
-               
+
                 oAPP.facebook.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
-        
+
                     console.log("페이스북 종료");
 
                     oAPP.setBusyMsg("Instagram 전송중...");
@@ -1401,9 +1438,51 @@ let oAPP = parent.oAPP;
      ************************************************************************/
     oAPP.fn.openMsgPopover = () => {
 
+        let sMsgPopId = "msgpop";
 
+        // 메시지 모델 세팅
+        var oMsgPop = sap.ui.getCore().byId(sMsgPopId);
+        if (oMsgPop) {
 
+            oMsgPop.open();
+            return;
 
+        }
+
+        let aLog = oAPP.errorlog.getLog();
+
+        oAPP.setProperty("/PRC/MSGPOP/MSGLIST", aLog);
+
+        new sap.m.MessagePopover(sMsgPopId, {
+
+            items: {
+                path: "/PRC/MSGPOP/MSGLIST",
+                template: new sap.m.MessageItem({
+                    title: "RTMSG"
+                }).bindProperty("type", "RETCD", function(RETCD) {
+
+                    switch (RETCD) {
+                        case "S":
+                            return sap.ui.core.MessageType.Success;
+
+                        case "E":
+                            return sap.ui.core.MessageType.Error;
+
+                        case "W":
+                            return sap.ui.core.MessageType.Warning;
+
+                        case "I":
+                            return sap.ui.core.MessageType.Information;
+
+                        default:
+                            return sap.ui.core.MessageType.None;
+
+                    }
+
+                })
+            } // end of item
+
+        }).open();
 
     }; // end of oAPP.fn.openMsgPopover
 
@@ -1442,14 +1521,13 @@ let oAPP = parent.oAPP;
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    debugger;
-
     // 화면 그리기
     oAPP.fn.attachInit();
 
     // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기
 
-    // if (parent.process.env.COMPUTERNAME !== "") {
+    // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
+    // if (process.env.COMPUTERNAME != process.env.SERVER_COMPUTERNAME) {
     //     return;
     // }
 
@@ -1460,12 +1538,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Tray 아이콘 만들고
     oAPP.fn.createTrayIcon();
 
-    // // 백그라운드 모드일 경우에만 브라우저 창 Hide 처리
-    // let oCurrWin = oAPP.remote.getCurrentWindow();
-    // oCurrWin.hide();
-
 });
 
-// 오류 감지
-document.addEventListener("error", oAPP.fn.onError);
-window.addEventListener("error", oAPP.fn.onError);
+
+window.onerror = oAPP.fn.onError;
+document.onerror = oAPP.fn.onError;

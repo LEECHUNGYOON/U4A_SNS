@@ -12,6 +12,8 @@ const
 const
     WINDOW = global.document.ws_frame;
 
+let oErrLog = oAPP.errorlog;
+
 oInstagram.send = (oParams, oChoiceInfo, cb) => {
 
     window.jQuery = WINDOW.jQuery;
@@ -93,7 +95,7 @@ function getAccount(cbSuccess, cbErr) {
     jQuery.ajax({
         url: sUrl,
         type: sMethod,
-        success: function (res) {
+        success: function(res) {
 
             let sInstaAccId = res.instagram_business_account.id,
                 oAccInfo = {
@@ -103,9 +105,17 @@ function getAccount(cbSuccess, cbErr) {
             cbSuccess(oAccInfo);
 
         },
-        error: function (e) {
+        error: function(e) {
 
-            cbErr(e);
+            let oErr = {
+                RETCD: "E",
+                RTMSG: "[ INSTAGRAM #1 - getAccount ] 인스타 계정 정보 오류 : \n\n" + e.response
+            };
+
+            console.error(e);
+
+            cbErr(oErr);
+
         }
 
     });
@@ -146,7 +156,7 @@ function sendVideo(oParams, oAccInfo, cb) {
         contentType: false,
         data: oFormData,
         type: sMethod,
-        success: function (res) {
+        success: function(res) {
 
             setTimeout(() => {
 
@@ -155,11 +165,16 @@ function sendVideo(oParams, oAccInfo, cb) {
             }, 3000);
 
         },
-        error: function (e) {
+        error: function(e) {
+
+            let oErr = {
+                RETCD: "E",
+                RTMSG: "[ INSTAGRAM #2 - sendVideo ] 비디오 전송 오류 : \n\n" + e.response
+            };
 
             console.error(e);
 
-            onError(oParams, e, cb);
+            onError(oParams, oErr, cb);
 
         }
 
@@ -199,7 +214,7 @@ function sendPost(oParams, oAccInfo, cb) {
         contentType: false,
         data: oFormData,
         type: sMethod,
-        success: function (res) {
+        success: function(res) {
 
             setTimeout(() => {
 
@@ -208,12 +223,17 @@ function sendPost(oParams, oAccInfo, cb) {
             }, 5000);
 
         },
-        error: function (e) {
+        error: function(e) {
+
+            let oErr = {
+                RETCD: "E",
+                RTMSG: "[ INSTAGRAM #3 - sendPost ] 일반 게시물 전송 오류 : \n\n" + e.response
+            };
 
             // 오류 수집
             console.error(e);
 
-            onError(oParams, e, cb);
+            onError(oParams, oErr, cb);
 
         }
 
@@ -235,7 +255,7 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
     jQuery.ajax({
         url: sUrl,
         type: sMethod,
-        success: function (res) {
+        success: function(res) {
 
             let oErr = {
                 RETCD: "",
@@ -286,12 +306,17 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
             // cb(oParams);
 
         },
-        error: function (e) {
+        error: function(e) {
+
+            let oErr = {
+                RETCD: "E",
+                RTMSG: "[ INSTAGRAM #4 - sendStatus ] 게시물 전송 상태 확인 오류 : \n\n" + e.response
+            };
 
             console.error(e);
 
             // 오류 수집
-            onError(oParams, e, cb);
+            onError(oParams, oErr, cb);
 
         }
 
@@ -320,17 +345,22 @@ function sendPublish(oParams, oAccInfo, oRes, cb) {
         contentType: false,
         data: oFormData,
         type: sMethod,
-        success: function (res) {
+        success: function(res) {
 
             cb(oParams);
 
         },
-        error: function (e) {
+        error: function(e) {
+
+            let oErr = {
+                RETCD: "E",
+                RTMSG: "[ INSTAGRAM #5 - sendPublish ] : \n\n" + e.response
+            };
 
             console.error(e);
 
             // 오류 수집
-            onError(oParams, e, cb);
+            onError(oParams, oErr, cb);
         }
 
     });
@@ -338,22 +368,9 @@ function sendPublish(oParams, oAccInfo, oRes, cb) {
 } // end of sendPublish
 
 /************************************************************************
- * Promise 공통 에러
- ************************************************************************/
-function onError(oParams, oErr, cb) {
-
-    // 공통 에러 수집..
-
-
-
-    cb(oParams);
-
-} // end of onError
-
-/************************************************************************
  * 게시글 본문 구성하기
  ************************************************************************/
- function getMessage(oParams) {
+function getMessage(oParams) {
 
     let oSubJect = oAPP.subject;
 
@@ -409,5 +426,17 @@ function onError(oParams, oErr, cb) {
     return sMsg;
 
 }; // end of getMessage
+
+/************************************************************************
+ * 공통 에러
+ ************************************************************************/
+function onError(oParams, oErr, cb) {
+
+    // 공통 에러 수집..
+    oErrLog.addLog(oErr);
+
+    cb(oParams);
+
+} // end of onError
 
 module.exports = oInstagram;

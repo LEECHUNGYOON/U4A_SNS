@@ -45,7 +45,9 @@
 
 				case "ss": return d.getSeconds().zf(2); // 초 (2자리)
 
-				case "a/p": return d.getHours() < 12 ? "AM" : "PM"; // 오전/오후 구분
+				case "A/P": return d.getHours() < 12 ? "AM" : "PM"; // 오전/오후 구분
+
+				case "a/p": return d.getHours() < 12 ? "am" : "pm"; // 오전/오후 구분
 
 				default: return $1;
 

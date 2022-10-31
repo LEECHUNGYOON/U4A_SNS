@@ -66,7 +66,7 @@ oErrLog.clearAll = () => {
  * - 로그를 저장할 오류 정보가 있는 데이터
  * - 예) { RETCD : "E", RTMSG: "OOO 오류" }
  ************************************************************************/
-oErrLog.writeLog = (sErrType, oLogData, bIsShowErrorMsg) => {
+oErrLog.writeLog = (sErrType, oLogData) => {
 
     let sPrefixFileName = "";
 
@@ -93,7 +93,7 @@ oErrLog.writeLog = (sErrType, oLogData, bIsShowErrorMsg) => {
     }
 
     let sDirPath = "",
-        sLogFileName = `${sPrefixFileName}_${new Date().format("yyyyMMdd_HHmmss")}_${RANDOMKEY.generateBase30(10)}.json`;
+        sLogFileName = `${sPrefixFileName}_${new Date().format("yyyyMMdd_A/P_hhmmss")}_${RANDOMKEY.generateBase30(10)}.json`;
 
     // 백그라운드 모드 일 경우
     if (oAPP.bIsBackgroundMode) {

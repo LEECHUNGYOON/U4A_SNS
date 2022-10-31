@@ -20,39 +20,6 @@
     <div id="content" class="sapUiBody"></div>
     <script>
 
-        function fnError1(message, url, line, col, errorObj) {
-
-            let remote = parent.require('@electron/remote'),
-                dialog = remote.dialog,
-                sErrMsg = `[window onError] : ${message} \n ${url}, ${line}:${col}`;
-
-            dialog.showErrorBox("script Error", sErrMsg);
-
-        }
-
-        function onunhandledrejection1(oEvent) {
-
-            alert("onunhandledrejection1");
-
-        }
-
-        // window.onunhandledrejection = onunhandledrejection1;
-
-        window.addEventListener("unhandledrejection", onunhandledrejection1);
-
-        window.onerror = fnError1;
-        document.onerror = fnError1;
-
-
-
-
-
-
-
-
-
-
-
         // window.fbAsyncInit = function () {
 
         //     FB.init({

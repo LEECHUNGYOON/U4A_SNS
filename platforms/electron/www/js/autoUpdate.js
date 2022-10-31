@@ -28,15 +28,24 @@ oAutoUpdate.checkUpdate = () => {
 
         autoUpdater.on('error', (err) => {
 
+            let oCurrWin = oAPP.remote.getCurrentWindow(),
+                bIsVisible = oCurrWin.isVisible(),
+                sErrMsg = `[update Error] : ${err.toString()}`;
+
+            // 포그라운드 모드 이면 오류 내용을 화면에 뿌려준다.
+            if (bIsVisible) {
+                oAPP.dialog.showErrorBox("update Error", sErrMsg);
+            }
+
             // 오류 로그 남기기            
-            oAPP.errorlog.writeLog("01",{
+            oAPP.errorlog.writeLog("01", {
                 RETCD: "E",
                 RTMSG: err.toString()
             });
 
             console.log('에러가 발생하였습니다. 에러내용 : ' + err);
 
-            resolve();            
+            resolve();
 
         });
 

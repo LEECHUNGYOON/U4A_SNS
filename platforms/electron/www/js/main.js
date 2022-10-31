@@ -1,7 +1,11 @@
-let oAPP = parent.oAPP;
-
 ((oAPP) => {
     "use strict";
+
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onunhandledrejection);
+
+    document.addEventListener("error", onError);
+    document.addEventListener("DOMContentLoaded", onDOMContentLoaded);
 
     /************************************************************************
      * Server Background 실행 모드
@@ -11,19 +15,28 @@ let oAPP = parent.oAPP;
         oAPP.server.createServer(
             oAPP.remote,
             oAPP.server.onReq,
-            () => { // success
+            () => { // success             
 
                 // 서버가 정상적으로 붙으면 Hide 처리
-                // // 백그라운드 모드일 경우에만 브라우저 창 Hide 처리
                 // let oCurrWin = oAPP.remote.getCurrentWindow();
-                // oCurrWin.hide();
+                // oCurrWin.hide();               
 
             },
-            () => { // error
+            (error) => { // error
 
-                // error log 남기기
+                // 오류 메시지 띄우기
+                let sErrMsg = `[http server error] : ${error.stack.toString()}`;
 
-                // 메시지 팝업 띄우기               
+                // 메시지 팝업 띄우기  
+                oAPP.dialog.showErrorBox("window onerror", sErrMsg);
+
+                let oErrMsg = {
+                    RETCD: "E",
+                    RTMSG: sErrMsg
+                };
+
+                // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
+                oAPP.errorlog.writeLog("01", oErrMsg);
 
             });
 
@@ -108,8 +121,6 @@ let oAPP = parent.oAPP;
 
         sap.ui.getCore().attachInit(() => {
 
-
-
             oAPP.jQuery = jQuery;
 
             jQuery.sap.require("sap.m.MessageBox");
@@ -121,13 +132,6 @@ let oAPP = parent.oAPP;
         });
 
     }; // end of oAPP.fn.attachInit    
-
-    oAPP.fn.setMsg = (oMsg) => {
-
-
-
-
-    };
 
     /************************************************************************
      * Model 초기 세팅
@@ -478,7 +482,7 @@ let oAPP = parent.oAPP;
                                                 text: "{TEXT}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -569,7 +573,7 @@ let oAPP = parent.oAPP;
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -603,7 +607,7 @@ let oAPP = parent.oAPP;
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -682,7 +686,7 @@ let oAPP = parent.oAPP;
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -720,7 +724,7 @@ let oAPP = parent.oAPP;
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -1054,7 +1058,7 @@ let oAPP = parent.oAPP;
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function () {
+        reader.onloadend = function() {
 
             var base64data = reader.result;
 
@@ -1480,7 +1484,7 @@ let oAPP = parent.oAPP;
                 path: "/PRC/MSGPOP/MSGLIST",
                 template: new sap.m.MessageItem({
                     title: "RTMSG"
-                }).bindProperty("type", "RETCD", function (RETCD) {
+                }).bindProperty("type", "RETCD", function(RETCD) {
 
                     switch (RETCD) {
                         case "S":
@@ -1538,29 +1542,97 @@ let oAPP = parent.oAPP;
 
     }; // end of oAPP.fn.TrayMenu01
 
-})(oAPP);
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    // 화면 그리기
-    oAPP.fn.attachInit();
-
-    // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기
-
-    // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
-    // if (process.env.COMPUTERNAME != process.env.SERVER_COMPUTERNAME) {
-    //     return;
-    // }
-
-    // 백그라운드 일 경우
-    // 서버 가동!!
-    oAPP.server.serverOn();
-
-    // Tray 아이콘 만들고
-    oAPP.fn.createTrayIcon();
-
-});
 
 
-// window.onerror = oAPP.fn.onError;
-// document.onerror = oAPP.fn.onError;
+    /************************************************************************
+     * html dom이 로드가 완료된 후 타는 이벤트
+     ************************************************************************/
+    function onDOMContentLoaded() {
+
+        // 화면 그리기
+        oAPP.fn.attachInit();
+
+        // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기
+
+        // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
+        // if (process.env.COMPUTERNAME !== process.env.SERVER_COMPUTERNAME) {
+        //     return;
+        // }       
+
+        // 백그라운드 일 경우
+        // 서버 가동!!
+        oAPP.server.serverOn();
+
+        // Tray 아이콘 만들고
+        // oAPP.fn.createTrayIcon();
+
+    } // end of onDOMContentLoaded
+
+    /************************************************************************
+     * 스크립트 오류 감지
+     ************************************************************************/
+    function onError(oEvent) {
+
+        let oCurrWin = oAPP.remote.getCurrentWindow(),
+            bIsVisible = oCurrWin.isVisible(),
+            sErrMsg = `[window onerror] : ${oEvent.error.stack.toString()}`;
+
+        // 아직 화면이 떠있다면 오류 메시지 출력
+        if (bIsVisible) {
+            oAPP.dialog.showErrorBox("window onerror", sErrMsg);
+        }
+
+        // if (!oAPP.bIsBackgroundMode) {
+        //     oAPP.dialog.showErrorBox("window onerror", sErrMsg);
+        // }
+
+        let oErrMsg = {
+            RETCD: "E",
+            RTMSG: sErrMsg
+        };
+
+        // oAPP.errorlog가 있다면 
+        if (oAPP.errorlog) {
+
+            // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
+            oAPP.errorlog.writeLog("01", oErrMsg);
+
+        }
+
+    } // end of onError
+
+    /************************************************************************
+     * 비동기 오류 (Promise 등..) 감지
+     ************************************************************************/
+    function onunhandledrejection(event) {
+
+        let oCurrWin = oAPP.remote.getCurrentWindow(),
+            bIsVisible = oCurrWin.isVisible(),
+            sErrMsg = event.reason.stack.toString();
+
+        // 아직 화면이 떠있다면 오류 메시지 출력
+        if (bIsVisible) {
+            oAPP.dialog.showErrorBox("unhandledrejection Error:", sErrMsg);
+        }
+
+        // // 포그라운드 모드 이면 오류 내용을 화면에 뿌려준다.
+        // if (!oAPP.bIsBackgroundMode) {
+        //     oAPP.dialog.showErrorBox("unhandledrejection Error: ", sErrMsg);
+        // }
+
+        let oErrMsg = {
+            RETCD: "E",
+            RTMSG: sErrMsg
+        };
+
+        // oAPP.errorlog가 있다면 
+        if (oAPP.errorlog) {
+
+            // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
+            oAPP.errorlog.writeLog("01", oErrMsg);
+
+        }
+
+    } // end of onunhandledrejection
+
+})(parent.oAPP);

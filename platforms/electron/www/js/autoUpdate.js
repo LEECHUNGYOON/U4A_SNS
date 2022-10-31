@@ -28,9 +28,15 @@ oAutoUpdate.checkUpdate = () => {
 
         autoUpdater.on('error', (err) => {
 
-            resolve();
+            // 오류 로그 남기기            
+            oAPP.errorlog.writeLog("01",{
+                RETCD: "E",
+                RTMSG: err.toString()
+            });
 
             console.log('에러가 발생하였습니다. 에러내용 : ' + err);
+
+            resolve();            
 
         });
 

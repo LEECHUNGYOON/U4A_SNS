@@ -9,7 +9,8 @@
     <meta charset="utf-8">
     <script id="sap-ui-bootstrap" src="https://sapui5.hana.ondemand.com/1.106.0/resources/sap-ui-core.js"
         data-sap-ui-language="EN" data-sap-ui-preload="async" data-sap-ui-compatversion="edge"
-        data-sap-ui-theme="sap_fiori_3_dark" data-sap-ui-libs="sap.m, sap.ui.layout, sap.ui.table" data-sap-ui-noduplicateids="true">
+        data-sap-ui-theme="sap_fiori_3_dark" data-sap-ui-libs="sap.m, sap.ui.layout, sap.ui.table"
+        data-sap-ui-noduplicateids="true">
     </script>
 
     <link rel="stylesheet" href="css/index.css">
@@ -17,11 +18,41 @@
 
 <body>
     <div id="content" class="sapUiBody"></div>
-
-    <script src="js/main.js"></script>
-
     <script>
-     
+
+        function fnError1(message, url, line, col, errorObj) {
+
+            let remote = parent.require('@electron/remote'),
+                dialog = remote.dialog,
+                sErrMsg = `[window onError] : ${message} \n ${url}, ${line}:${col}`;
+
+            dialog.showErrorBox("script Error", sErrMsg);
+
+        }
+
+        function onunhandledrejection1(oEvent) {
+
+            alert("onunhandledrejection1");
+
+        }
+
+        // window.onunhandledrejection = onunhandledrejection1;
+
+        window.addEventListener("unhandledrejection", onunhandledrejection1);
+
+        window.onerror = fnError1;
+        document.onerror = fnError1;
+
+
+
+
+
+
+
+
+
+
+
         // window.fbAsyncInit = function () {
 
         //     FB.init({
@@ -33,10 +64,11 @@
         //     });      
 
         //     oAPP.FB = FB;
-            
+
         // };
     </script>
 
+    <script src="js/main.js"></script>
     <!-- <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script> -->
 
 </body>

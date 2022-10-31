@@ -92,7 +92,7 @@ let oAPP = parent.oAPP;
         let oErrLog = oAPP.errorlog;
 
         // SNS 전송시 오류가 있었다면 Log 파일 저장
-        oErrLog.writeLog(oErrLog.getLog());
+        oErrLog.writeLog("02", oErrLog.getLog());
 
         oRes.end(JSON.stringify({
             RETCD: "S",
@@ -107,6 +107,8 @@ let oAPP = parent.oAPP;
     oAPP.fn.attachInit = () => {
 
         sap.ui.getCore().attachInit(() => {
+
+
 
             oAPP.jQuery = jQuery;
 
@@ -319,7 +321,7 @@ let oAPP = parent.oAPP;
                                     footer: new sap.m.Bar({
 
                                         contentLeft: [
-                                            new sap.m.Button({
+                                            new sap.m.Button("msgpop_btn", {
                                                 icon: "{/PRC/MSGPOP/BTNICO}",
                                                 text: "{/PRC/MSGPOP/MSGCNT}",
                                                 press: () => {
@@ -476,7 +478,7 @@ let oAPP = parent.oAPP;
                                                 text: "{TEXT}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -567,7 +569,7 @@ let oAPP = parent.oAPP;
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -601,7 +603,7 @@ let oAPP = parent.oAPP;
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -680,7 +682,7 @@ let oAPP = parent.oAPP;
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -718,7 +720,7 @@ let oAPP = parent.oAPP;
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -1052,7 +1054,7 @@ let oAPP = parent.oAPP;
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function() {
+        reader.onloadend = function () {
 
             var base64data = reader.result;
 
@@ -1285,7 +1287,7 @@ let oAPP = parent.oAPP;
         }
 
         // SNS 전송시 오류가 있었다면 Log 파일 저장
-        oErrLog.writeLog(aLog);
+        oErrLog.writeLog("02", aLog);
 
         oDefMsgPopData.MSGLIST = aLog;
 
@@ -1438,13 +1440,32 @@ let oAPP = parent.oAPP;
      ************************************************************************/
     oAPP.fn.openMsgPopover = () => {
 
+        function ffff() {
+
+            return new Promise(() => {
+
+
+                var aa = new sap.m.TTT();
+
+            });
+
+
+        }
+
+        ffff();
+
+
+
+        return;
+
+
         let sMsgPopId = "msgpop";
 
         // 메시지 모델 세팅
         var oMsgPop = sap.ui.getCore().byId(sMsgPopId);
         if (oMsgPop) {
 
-            oMsgPop.open();
+            oMsgPop.openBy("msgpop_btn");
             return;
 
         }
@@ -1459,7 +1480,7 @@ let oAPP = parent.oAPP;
                 path: "/PRC/MSGPOP/MSGLIST",
                 template: new sap.m.MessageItem({
                     title: "RTMSG"
-                }).bindProperty("type", "RETCD", function(RETCD) {
+                }).bindProperty("type", "RETCD", function (RETCD) {
 
                     switch (RETCD) {
                         case "S":
@@ -1482,7 +1503,7 @@ let oAPP = parent.oAPP;
                 })
             } // end of item
 
-        }).open();
+        }).open("msgpop_btn");
 
     }; // end of oAPP.fn.openMsgPopover
 
@@ -1541,5 +1562,5 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-window.onerror = oAPP.fn.onError;
-document.onerror = oAPP.fn.onError;
+// window.onerror = oAPP.fn.onError;
+// document.onerror = oAPP.fn.onError;

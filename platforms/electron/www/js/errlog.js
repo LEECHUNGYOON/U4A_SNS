@@ -11,6 +11,14 @@ let oErrLog = {};
 let aLog = [];
 
 
+
+oErrLog.onError = () => {
+
+
+
+};
+
+
 /************************************************************************
  * Error 내용 수집
  ************************************************************************
@@ -51,23 +59,37 @@ oErrLog.clearAll = () => {
 /************************************************************************
  * Directory에 Log 파일을 만든다.
  ************************************************************************
- * @param {String} sFileName
- * 
+ * @param {String} sErrType
+ * - 01 : 일반적인 오류 또는 스크립트(window onerror) 오류
+ * - 02 : SNS 전송 과정에 발생한 오류
  * @param {String, Array} oLogData
+ * - 로그를 저장할 오류 정보가 있는 데이터
+ * - 예) { RETCD : "E", RTMSG: "OOO 오류" }
  ************************************************************************/
-oErrLog.writeLog = (sFileName, oLogData) => {
-
-    if (oLogData === null || typeof oLogData === "undefined") {
-        return;
-    }
+oErrLog.writeLog = (sErrType, oLogData, bIsShowErrorMsg) => {
 
     let sPrefixFileName = "";
 
-    // 파일 이름 파라미터에 값이 없으면 Default 이름으로 지정한다.
-    if (sFileName === null || typeof sFileName !== "string") {
-        sPrefixFileName = "error_log";
-    } else {
-        sPrefixFileName = sFileName;
+    // 오류 타입에 따른 파일명 분기
+    switch (sErrType) {
+        case "01":
+            sPrefixFileName = "error_log";
+            break;
+
+        case "02":
+            sPrefixFileName = "sns_log";
+            break;
+
+    }
+
+    // Error Type 지정 누락일 경우 (잘못된 파라미터)
+    if (sPrefixFileName === "") {
+        return;
+    }
+
+    // 로그를 남길 오류 정보가 없을 경우 (잘못된 파라미터)
+    if (oLogData === null || typeof oLogData === "undefined") {
+        return;
     }
 
     let sDirPath = "",
@@ -111,5 +133,7 @@ oErrLog.writeLog = (sFileName, oLogData) => {
     }
 
 }; // end of oErrLog.writeLog
+
+
 
 module.exports = oErrLog;

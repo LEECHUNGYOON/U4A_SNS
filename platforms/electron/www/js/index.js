@@ -1,8 +1,11 @@
 window.oAPP = {};
 
+
+
+
 (async (oAPP) => {
     "use strict";
-
+    
     oAPP.fn = {};
     oAPP.auth = {};
     oAPP.conf = {};
@@ -29,12 +32,18 @@ window.oAPP = {};
     oAPP.MongClinet = oAPP.remote.require('mongodb').MongoClient;
     oAPP.telegramBotAPI = oAPP.remote.require("node-telegram-bot-api");
 
+
+    var aa = new sap.m.Dialog();
+
     /************************************************************************
      * Prefix
      ************************************************************************/
     process.env.SERVER_COMPUTERNAME = "u4arndx";
     process.env.SERVER_LOG_PATH = "D:\\log\\u4a_sns_log";
     process.env.LOCAL_LOG_PATH = oAPP.path.join(oAPP.userdata, "log", "u4a_sns_log");
+
+    // var win = oAPP.remote.getCurrentWindow();
+    // win.hide();
 
 
     // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
@@ -70,7 +79,7 @@ window.oAPP = {};
 
     let oResult = await oAPP.mongdb.onGET();
     if (oResult.RETCD == "E") {
-        oErrLog.writeLog(oResult);
+        oAPP.errorlog.writeLog("01", oResult);
         return;
     }
 
@@ -124,19 +133,25 @@ window.oAPP = {};
 
         let sErrMsg = `[window onError] : ${message} \n ${url}, ${line}:${col}`;
 
+        console.error(sErrMsg);
+
         // 포그라운드 모드 이면 오류 내용을 화면에 뿌려준다.
         if (!oAPP.bIsBackgroundMode) {
             oAPP.showErrorBox("script Error", sErrMsg);
             return;
         }
 
+        let oErrMsg = {
+            RETCD: "E",
+            RTMSG: sErrMsg
+        };
+
         // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
-
-
+        oAPP.errorlog.writeLog("01", oErrMsg);
 
     }; // end of oAPP.fn.onError
 
-    oAPP.showErrorBox = (sTitle = "오류", sMsg) => {
+    oAPP.showErrorBox = (sTitle, sMsg) => {
 
         oAPP.dialog.showErrorBox(sTitle, sMsg);
 
@@ -166,8 +181,63 @@ window.oAPP = {};
 
     }
 
-    // 오류 감지
-    window.onerror = oAPP.fn.onError;
-    document.onerror = oAPP.fn.onError;
 
 })(oAPP);
+
+
+/************************************************************************
+ * 스크립트 오류 감지
+ ************************************************************************/
+function onError(message, url, line, col, errorObj) {
+
+    let sErrMsg = `[window onError] : ${message} \n ${url}, ${line}:${col}`;
+
+    console.error(sErrMsg);
+
+    // 포그라운드 모드 이면 오류 내용을 화면에 뿌려준다.
+    if (!oAPP.bIsBackgroundMode) {
+        oAPP.dialog.showErrorBox("script Error", sErrMsg);
+        return;
+    }
+
+    let oErrMsg = {
+        RETCD: "E",
+        RTMSG: sErrMsg
+    };
+
+    // oAPP.errorlog가 있다면 
+    if (oAPP.errorlog) {
+
+        // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
+        oAPP.errorlog.writeLog("01", oErrMsg);
+
+    }
+
+} // end of onError
+
+
+/************************************************************************
+ * 비동기 오류 (Promise 등..) 감지
+ ************************************************************************/
+function onunhandledrejection(event) {
+
+    let sErrMsg = event.reason.stack.toString();
+
+    oAPP.dialog.showErrorBox("script Error", sErrMsg);
+
+}
+
+window.onerror = onError;
+document.onerror = onError;
+
+window.addEventListener("unhandledrejection", onunhandledrejection);
+
+
+// .catch((error) => {
+
+//     let remote = require('@electron/remote'),
+//         dialog = remote.dialog;        
+
+//     dialog.showErrorBox("script Error", error.toString());
+
+// });

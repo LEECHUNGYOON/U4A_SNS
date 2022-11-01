@@ -468,7 +468,7 @@
                                                 text: "{MODNM}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -575,7 +575,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -609,7 +609,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -688,7 +688,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -726,7 +726,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -1060,7 +1060,7 @@
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function () {
+        reader.onloadend = function() {
 
             var base64data = reader.result;
 
@@ -1487,7 +1487,7 @@
                 template: new sap.m.MessageItem({
                     title: "{RTMSG}",
                     description: "{RTMSG}",
-                }).bindProperty("type", "RETCD", function (RETCD) {
+                }).bindProperty("type", "RETCD", function(RETCD) {
 
                     switch (RETCD) {
                         case "S":
@@ -1546,8 +1546,9 @@
      ************************************************************************/
     oAPP.fn.createTrayIcon = () => {
 
-        // let sTrayIconPath = oAPP.path.join(oAPP.apppath, "img", "logo.png"),
-        //     oTray = new oAPP.remote.Tray(sTrayIconPath);
+        let sTrayIconPath = oAPP.path.join(oAPP.apppath, "img", "logo.png");
+
+        oAPP.oTray = new oAPP.remote.Tray(sTrayIconPath);
 
         let aMenu = [{
             key: "exit",
@@ -1555,29 +1556,22 @@
             click: oAPP.fn.TrayMenu01
         }];
 
-        // let oTrayMenu = oAPP.trayMenu.buildFromTemplate(aMenu);
-        // oTray.setToolTip("U4A SNS");
-        // oTray.setContextMenu(oTrayMenu);
+        oAPP.oTrayMenu = oAPP.trayMenu.buildFromTemplate(aMenu);
+        oAPP.oTray.setToolTip("U4A SNS");
+        oAPP.oTray.setContextMenu(oAPP.oTrayMenu);
 
+        oAPP.oTray.on("double-click", () => {
 
-        /**
-         * 
-         * 
-         * 
-         *          
-         */
+            let oCurrWin = oAPP.remote.getCurrentWindow(),
+                bIsVisible = oCurrWin.isVisible();
 
+            if (bIsVisible) {
+                return;
+            }
 
-        const {
-            app,
-            Menu,
-            Tray
-        } = oAPP.remote.require("electron");
+            oCurrWin.show();
 
-        var tray = new Tray(oAPP.path.join(oAPP.apppath, "img", "logo.png"));
-        const contextMenu = Menu.buildFromTemplate(aMenu);
-        tray.setToolTip('This is my application.');
-        tray.setContextMenu(contextMenu);
+        });
 
     }; // end of oAPP.fn.createTrayIcon
 
@@ -1598,7 +1592,7 @@
         // 화면 그리기
         oAPP.fn.attachInit();
 
-        // Tray 아이콘 만들고
+        // [배포시 주석] Tray 아이콘 만들고
         oAPP.fn.createTrayIcon();
 
         // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기        
@@ -1612,7 +1606,7 @@
         oAPP.server.serverOn();
 
         // Tray 아이콘 만들고
-        // oAPP.fn.createTrayIcon();
+        oAPP.fn.createTrayIcon();
 
     } // end of onDOMContentLoaded
 
@@ -1672,6 +1666,17 @@
 
         }
 
-    } // end of onunhandledrejection
+    } // end of onunhandledrejection 
+
+
+    window.onbeforeunload = () => {
+
+        let oCurrWin = oAPP.remote.getCurrentWindow();
+
+        oCurrWin.hide();
+
+        return "";
+
+    };
 
 })(parent.oAPP);

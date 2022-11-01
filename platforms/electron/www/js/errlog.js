@@ -128,4 +128,36 @@ oErrLog.writeLog = (sErrType, oLogData) => {
 
 }; // end of oErrLog.writeLog
 
+/************************************************************************
+ * error log 정보를 저장할 폴더를 만든다.
+ ************************************************************************/
+oErrLog.createLogFolder = () => {
+
+    return new Promise((resolve) => {
+
+        let sFolderPath = process.env.SERVER_LOG_PATH;
+
+        // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
+        if (process.env.COMPUTERNAME !== process.env.SERVER_COMPUTERNAME) {
+            sFolderPath = process.env.LOCAL_LOG_PATH;
+        }
+
+        let bIsExistsFolder = FS.existsSync(sFolderPath);
+
+        if (bIsExistsFolder) {
+            resolve();
+            return;
+        }
+
+        // 없으면 생성
+        FS.mkdirSync(sFolderPath, {
+            recursive: true
+        });
+
+        resolve();
+
+    });
+
+}; // end of oErrLog.createLogFolder
+
 module.exports = oErrLog;

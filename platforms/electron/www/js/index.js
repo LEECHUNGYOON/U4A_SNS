@@ -1,6 +1,5 @@
 (async () => {
     "use strict";
-    debugger;
 
     window.oAPP = {};
 
@@ -39,9 +38,17 @@
     oAPP.telegramBotAPI = oAPP.remote.require("node-telegram-bot-api");
 
     /************************************************************************
+     * Auto Update Check
+     ************************************************************************/
+    // no build 일 경우는 자동 업데이트를 확인하지 않는다.
+    if (oAPP.app.isPackaged) {
+        await oAPP.autoUpdate.checkUpdate();
+    }
+
+    /************************************************************************
      * Prefix
      ************************************************************************/
-    process.env.SERVER_COMPUTERNAME = "u4arndx";
+    process.env.SERVER_COMPUTERNAME = "U4ARNDX";
     process.env.SERVER_LOG_PATH = "D:\\log\\u4a_sns_log";
     // process.env.LOCAL_LOG_PATH = oAPP.path.join(oAPP.userdata, "log", "u4a_sns_log");
     process.env.LOCAL_LOG_PATH = "C:\\Tmp\\log\\u4a_sns_log";
@@ -61,6 +68,9 @@
     oAPP.autoUpdate = require(oAPP.path.join(oAPP.JsPath, "autoUpdate.js"));
 
     oAPP.aEmogiIcons = require(oAPP.path.join(oAPP.apppath, "json", "emogi.json"));
+
+    // error log를 저장할 폴더를 만든다.
+    await oAPP.errorlog.createLogFolder();
 
     /************************************************************************
      * Description
@@ -96,6 +106,7 @@
      * 게시글 유형 코드 가져오기
      ************************************************************************/
     oAPP.getModuleCode = require(oAPP.path.join(oAPP.JsPath, "getModuleCode.js"));
+
     let oModuleCode = await oAPP.getModuleCode.getDataALL(oAPP.remote);
     if (oModuleCode.RETCD == "E") {
 
@@ -111,15 +122,7 @@
     oAPP.aModuleCode = oModuleCode.T_DATA;
 
     /************************************************************************
-     * Auto Update Check
-     ************************************************************************/
-    // no build 일 경우는 자동 업데이트를 확인하지 않는다.
-    if (oAPP.app.isPackaged) {
-        await oAPP.autoUpdate.checkUpdate();
-    }
-
-    /************************************************************************
-     * Mongdb & Telegram Info
+     * Mongdb 연결해서 sns 별 인증 토큰 키 가져오기 & Telegram Info
      ************************************************************************/
     let Lpw = "%U4aIde&";
     Lpw = encodeURIComponent(Lpw);
@@ -149,6 +152,9 @@
     oAPP.instagram = require(oAPP.path.join(oAPP.JsPath, "instagram.js"));
     oAPP.kakao = require(oAPP.path.join(oAPP.JsPath, "kakao.js"));
     oAPP.telegram = require(oAPP.path.join(oAPP.JsPath, "telegram.js"));
+
+
+
 
     /************************************************************************
      * APP 구동 시작
@@ -238,6 +244,21 @@
         }
 
     } // end of onunhandledrejection    
+
+    function 잠시만요() {
+
+        return new Promise((resolve) => {
+
+            setTimeout(() => {
+
+                resolve();
+
+            }, 3000);
+
+
+        });
+
+    }
 
 })().then(() => {
 

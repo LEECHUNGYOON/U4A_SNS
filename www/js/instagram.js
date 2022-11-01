@@ -16,9 +16,9 @@ let oErrLog = oAPP.errorlog;
 
 oInstagram.send = (oParams, oChoiceInfo, cb) => {
 
-    window.jQuery = WINDOW.jQuery;
-
     debugger;
+
+    window.jQuery = WINDOW.jQuery;
 
     if (!oChoiceInfo || !oChoiceInfo.INSTAGRAM) {
 
@@ -86,7 +86,7 @@ oInstagram.send = (oParams, oChoiceInfo, cb) => {
 /************************************************************************
  * 인스타 계정 정보 구하기
  ************************************************************************/
-function getAccount(cbSuccess, cbErr) {
+function getAccount(cbSuccess, cbError) {
 
     let sPath = `${PAGEID}?fields=instagram_business_account&access_token=${PAGETOKEN}`,
         sMethod = "GET",
@@ -95,7 +95,7 @@ function getAccount(cbSuccess, cbErr) {
     jQuery.ajax({
         url: sUrl,
         type: sMethod,
-        success: function(res) {
+        success: function (res) {
 
             let sInstaAccId = res.instagram_business_account.id,
                 oAccInfo = {
@@ -105,16 +105,20 @@ function getAccount(cbSuccess, cbErr) {
             cbSuccess(oAccInfo);
 
         },
-        error: function(e) {
+        error: function (e) {
 
-            let oErr = {
+            let oRes = e.responseJSON,
+                oErr = oRes.error;
+
+            let oErrMsg = {
                 RETCD: "E",
-                RTMSG: "[ INSTAGRAM #1 - getAccount ] 인스타 계정 정보 오류 : \n\n" + e.response
+                RTMSG: "[ INSTAGRAM #1 - getAccount ] 인스타 계정 정보 오류 :  \n\n" + oErr.message
             };
 
-            console.error(e);
+            console.error(oErr.message);
 
-            cbErr(oErr);
+            // 오류 수집 
+            cbError(oParams, oErrMsg, cb);
 
         }
 
@@ -156,7 +160,7 @@ function sendVideo(oParams, oAccInfo, cb) {
         contentType: false,
         data: oFormData,
         type: sMethod,
-        success: function(res) {
+        success: function (res) {
 
             setTimeout(() => {
 
@@ -165,16 +169,20 @@ function sendVideo(oParams, oAccInfo, cb) {
             }, 3000);
 
         },
-        error: function(e) {
+        error: function (e) {
 
-            let oErr = {
+            let oRes = e.responseJSON,
+                oErr = oRes.error;
+
+            let oErrMsg = {
                 RETCD: "E",
-                RTMSG: "[ INSTAGRAM #2 - sendVideo ] 비디오 전송 오류 : \n\n" + e.response
+                RTMSG: "[ INSTAGRAM #2 - sendVideo ] 비디오 전송 오류 :  \n\n" + oErr.message
             };
 
-            console.error(e);
+            console.error(oErr.message);
 
-            onError(oParams, oErr, cb);
+            // 오류 수집 
+            onError(oParams, oErrMsg, cb);
 
         }
 
@@ -214,7 +222,7 @@ function sendPost(oParams, oAccInfo, cb) {
         contentType: false,
         data: oFormData,
         type: sMethod,
-        success: function(res) {
+        success: function (res) {
 
             setTimeout(() => {
 
@@ -223,17 +231,20 @@ function sendPost(oParams, oAccInfo, cb) {
             }, 5000);
 
         },
-        error: function(e) {
+        error: function (e) {
 
-            let oErr = {
+            let oRes = e.responseJSON,
+                oErr = oRes.error;
+
+            let oErrMsg = {
                 RETCD: "E",
-                RTMSG: "[ INSTAGRAM #3 - sendPost ] 일반 게시물 전송 오류 : \n\n" + e.response
+                RTMSG: "[ INSTAGRAM #3 - sendPost ] 일반 게시물 전송 오류 :  \n\n" + oErr.message
             };
 
-            // 오류 수집
-            console.error(e);
+            console.error(oErr.message);
 
-            onError(oParams, oErr, cb);
+            // 오류 수집 
+            onError(oParams, oErrMsg, cb);
 
         }
 
@@ -255,7 +266,7 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
     jQuery.ajax({
         url: sUrl,
         type: sMethod,
-        success: function(res) {
+        success: function (res) {
 
             let oErr = {
                 RETCD: "",
@@ -306,17 +317,20 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
             // cb(oParams);
 
         },
-        error: function(e) {
+        error: function (e) {
 
-            let oErr = {
+            let oRes = e.responseJSON,
+                oErr = oRes.error;
+
+            let oErrMsg = {
                 RETCD: "E",
-                RTMSG: "[ INSTAGRAM #4 - sendStatus ] 게시물 전송 상태 확인 오류 : \n\n" + e.response
+                RTMSG: "[ INSTAGRAM #4 - sendStatus ] 게시물 전송 상태 확인 오류 : \n\n" + oErr.message
             };
 
-            console.error(e);
+            console.error(oErr.message);
 
-            // 오류 수집
-            onError(oParams, oErr, cb);
+            // 오류 수집 
+            onError(oParams, oErrMsg, cb);
 
         }
 
@@ -345,22 +359,26 @@ function sendPublish(oParams, oAccInfo, oRes, cb) {
         contentType: false,
         data: oFormData,
         type: sMethod,
-        success: function(res) {
+        success: function (res) {
 
             cb(oParams);
 
         },
-        error: function(e) {
+        error: function (e) {
 
-            let oErr = {
+            let oRes = e.responseJSON,
+                oErr = oRes.error;
+
+            let oErrMsg = {
                 RETCD: "E",
-                RTMSG: "[ INSTAGRAM #5 - sendPublish ] : \n\n" + e.response
+                RTMSG: "[ INSTAGRAM #5 - sendPublish ] : \n\n" + oErr.message
             };
 
-            console.error(e);
+            console.error(oErr.message);
 
-            // 오류 수집
-            onError(oParams, oErr, cb);
+            // 오류 수집 
+            onError(oParams, oErrMsg, cb);
+
         }
 
     });

@@ -1,5 +1,6 @@
-(() => {
+(async () => {
     "use strict";
+    debugger;
 
     window.oAPP = {};
 
@@ -16,7 +17,6 @@
     window.addEventListener("unhandledrejection", onunhandledrejection);
 
     document.addEventListener("error", onError);
-    document.addEventListener("DOMContentLoaded", onDOMContentLoaded);
 
     /************************************************************************
      * Electron & NPM Library
@@ -43,7 +43,8 @@
      ************************************************************************/
     process.env.SERVER_COMPUTERNAME = "u4arndx";
     process.env.SERVER_LOG_PATH = "D:\\log\\u4a_sns_log";
-    process.env.LOCAL_LOG_PATH = oAPP.path.join(oAPP.userdata, "log", "u4a_sns_log");
+    // process.env.LOCAL_LOG_PATH = oAPP.path.join(oAPP.userdata, "log", "u4a_sns_log");
+    process.env.LOCAL_LOG_PATH = "C:\\Tmp\\log\\u4a_sns_log";
 
     // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
     if (process.env.COMPUTERNAME === process.env.SERVER_COMPUTERNAME) {
@@ -58,6 +59,8 @@
     oAPP.errorlog = require(oAPP.path.join(oAPP.JsPath, "errlog.js")); // 에러 로그 관련 util
     oAPP.mongdb = require(oAPP.path.join(oAPP.JsPath, "mongdb.js")); // 몽고 디비 연결 및 SNS별 Token Key 정보 구하기
     oAPP.autoUpdate = require(oAPP.path.join(oAPP.JsPath, "autoUpdate.js"));
+
+    oAPP.aEmogiIcons = require(oAPP.path.join(oAPP.apppath, "json", "emogi.json"));
 
     /************************************************************************
      * Description
@@ -89,51 +92,63 @@
      ************************************************************************/
     oAPP.server = require(oAPP.path.join(oAPP.JsPath, "CreateServer.js"));
 
-    (async (oAPP) => {
-        "use strict";
+    /************************************************************************
+     * 게시글 유형 코드 가져오기
+     ************************************************************************/
+    oAPP.getModuleCode = require(oAPP.path.join(oAPP.JsPath, "getModuleCode.js"));
+    let oModuleCode = await oAPP.getModuleCode.getDataALL(oAPP.remote);
+    if (oModuleCode.RETCD == "E") {
 
-        /************************************************************************
-         * Auto Update Check
-         ************************************************************************/
+        // 화면에 오류 내용을 출력한다.
+        oAPP.dialog.showErrorBox("[mongodb.onGet error]", oModuleCode.RTMSG);
 
-        // no build 일 경우는 자동 업데이트를 확인하지 않는다.
-        if (oAPP.app.isPackaged) {
-            await oAPP.autoUpdate.checkUpdate();
-        }
+        oAPP.errorlog.writeLog("01", oModuleCode);
 
-        /************************************************************************
-         * Mongdb & Telegram Info
-         ************************************************************************/
-        let Lpw = "%U4aIde&";
-        Lpw = encodeURIComponent(Lpw);
+        return;
+    }
 
-        oAPP.MongDB_HOST = "mongodb://u4arnd:" + Lpw + "@118.34.215.175:9102/admin";
+    // 게시글 유형 정보를 글로벌 변수에 넣어둔다.
+    oAPP.aModuleCode = oModuleCode.T_DATA;
 
-        let oResult = await oAPP.mongdb.onGET();
-        if (oResult.RETCD == "E") {
+    /************************************************************************
+     * Auto Update Check
+     ************************************************************************/
+    // no build 일 경우는 자동 업데이트를 확인하지 않는다.
+    if (oAPP.app.isPackaged) {
+        await oAPP.autoUpdate.checkUpdate();
+    }
 
-            // 화면에 오류 내용을 출력한다.
-            oAPP.dialog.showErrorBox("[mongodb.onGet error]", oResult.RTMSG);
+    /************************************************************************
+     * Mongdb & Telegram Info
+     ************************************************************************/
+    let Lpw = "%U4aIde&";
+    Lpw = encodeURIComponent(Lpw);
 
-            oAPP.errorlog.writeLog("01", oResult);
+    oAPP.MongDB_HOST = "mongodb://u4arnd:" + Lpw + "@118.34.215.175:9102/admin";
 
-            return;
-        }
+    let oResult = await oAPP.mongdb.onGET();
+    if (oResult.RETCD == "E") {
 
-        oAPP.telegramBOT = new oAPP.telegramBotAPI(oAPP.auth.telegram, {
-            polling: false
-        });
+        // 화면에 오류 내용을 출력한다.
+        oAPP.dialog.showErrorBox("[mongodb.onGet error]", oResult.RTMSG);
 
-        /************************************************************************
-         * SNS (몽고DB 연결 성공 후 SNS 인증 키를 받아야하므로 반드시 여기에 있어야 함!)
-         ************************************************************************/
-        oAPP.facebook = require(oAPP.path.join(oAPP.JsPath, "facebook.js"));
-        oAPP.youtube = require(oAPP.path.join(oAPP.JsPath, "youtube.js"));
-        oAPP.instagram = require(oAPP.path.join(oAPP.JsPath, "instagram.js"));
-        oAPP.kakao = require(oAPP.path.join(oAPP.JsPath, "kakao.js"));
-        oAPP.telegram = require(oAPP.path.join(oAPP.JsPath, "telegram.js"));
+        oAPP.errorlog.writeLog("01", oResult);
 
-    })(oAPP);
+        return;
+    }
+
+    oAPP.telegramBOT = new oAPP.telegramBotAPI(oAPP.auth.telegram, {
+        polling: false
+    });
+
+    /************************************************************************
+     * SNS (몽고DB 연결 성공 후 SNS 인증 키를 받아야하므로 반드시 여기에 있어야 함!)
+     ************************************************************************/
+    oAPP.facebook = require(oAPP.path.join(oAPP.JsPath, "facebook.js"));
+    oAPP.youtube = require(oAPP.path.join(oAPP.JsPath, "youtube.js"));
+    oAPP.instagram = require(oAPP.path.join(oAPP.JsPath, "instagram.js"));
+    oAPP.kakao = require(oAPP.path.join(oAPP.JsPath, "kakao.js"));
+    oAPP.telegram = require(oAPP.path.join(oAPP.JsPath, "telegram.js"));
 
     /************************************************************************
      * APP 구동 시작
@@ -148,17 +163,23 @@
         let sUrl = oAPP.path.join(oAPP.apppath, "main.html");
         oFrame.src = sUrl;
 
-    }; // end of oAPP.onStart    
+    }; // end of oAPP.onStart
 
     /************************************************************************
-     * html dom이 로드가 완료된 후 타는 이벤트
+     * 백그라운드 모드인지 아닌지 확인
      ************************************************************************/
-    function onDOMContentLoaded() {
+    oAPP.isBackgroundMode = () => {
 
-        // APP 구동 시작
-        oAPP.fn.onStart();
+        let bIsBackgroundMode = false;
 
-    } // end of onDOMContentLoaded
+        // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
+        if (process.env.COMPUTERNAME === process.env.SERVER_COMPUTERNAME) {
+            bIsBackgroundMode = true; // 백그라운드 모드 Flag 
+        }
+
+        return bIsBackgroundMode;
+
+    }; // end of oAPP.isBackgroundMode
 
     /************************************************************************
      * 스크립트 오류 감지
@@ -167,17 +188,12 @@
 
         let oCurrWin = oAPP.remote.getCurrentWindow(),
             bIsVisible = oCurrWin.isVisible(),
-            sErrMsg = `[window onerror] : ${oEvent.error.stack.toString()}`;
+            sErrMsg = `[window onerror] : ${oEvent.error.toString()}`;
 
         // 포그라운드 모드 이면 오류 내용을 화면에 뿌려준다.
         if (bIsVisible) {
             oAPP.dialog.showErrorBox("window onerror", sErrMsg);
         }
-
-        // // 포그라운드 모드 이면 오류 내용을 화면에 뿌려준다.
-        // if (!oAPP.bIsBackgroundMode) {
-        //     oAPP.dialog.showErrorBox("window onerror", sErrMsg);
-        // }
 
         let oErrMsg = {
             RETCD: "E",
@@ -201,17 +217,12 @@
 
         let oCurrWin = oAPP.remote.getCurrentWindow(),
             bIsVisible = oCurrWin.isVisible(),
-            sErrMsg = event.reason.stack.toString();
+            sErrMsg = event.reason.toString();
 
-        // 포그라운드 모드 이면 오류 내용을 화면에 뿌려준다.
+        // 포그라운드 모드일 경우 오류 내용을 화면에 뿌려준다.
         if (bIsVisible) {
             oAPP.dialog.showErrorBox("unhandledrejection Error:", sErrMsg);
         }
-
-        // // 포그라운드 모드 이면 오류 내용을 화면에 뿌려준다.
-        // if (!oAPP.bIsBackgroundMode) {
-        //     oAPP.dialog.showErrorBox("unhandledrejection Error: ", sErrMsg);
-        // }
 
         let oErrMsg = {
             RETCD: "E",
@@ -226,6 +237,11 @@
 
         }
 
-    } // end of onunhandledrejection
+    } // end of onunhandledrejection    
 
-})();
+})().then(() => {
+
+    // APP 구동 시작
+    oAPP.fn.onStart();
+
+});

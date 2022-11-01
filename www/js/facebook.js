@@ -24,6 +24,8 @@ const
  ************************************************************************/
 oFaceBook.send = (oParams, oChoiceInfo, cb) => {
 
+    debugger;
+
     window.jQuery = WINDOW.jQuery;
 
     console.log("페이스북 진입");
@@ -88,22 +90,25 @@ function sendFeed(oParams, cb) {
         contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
         data: oFormData, // 위에서 선언한 fromdata
         type: sMethod,
-        success: function(result) {
+        success: function (result) {
 
             cb(oParams);
 
         },
-        error: function(e) {
+        error: function (e) {
 
-            let oErr = {
+            let oRes = e.responseJSON,
+                oErr = oRes.error;
+
+            let oErrMsg = {
                 RETCD: "E",
-                RTMSG: "[ FACEBOOK #1 - sendFeed ] 게시글 올리기 오류 : \n\n" + e.response
+                RTMSG: "[ FACEBOOK #1 - sendFeed ] 게시글 올리기 오류 : \n\n" + oErr.message
             };
 
-            console.error(e);
+            console.error(oErr.message);
 
             // 오류 수집 
-            onError(oParams, oErr, cb);
+            onError(oParams, oErrMsg, cb);
 
         }
 
@@ -137,22 +142,25 @@ function sendPhoto(oParams, cb) {
             contentType: false,
             data: oFormData,
             type: sMethod,
-            success: function(result) {
+            success: function (result) {
 
                 cb(oParams);
 
             },
-            error: function(e) {
+            error: function (e) {
 
-                let oErr = {
+                let oRes = e.responseJSON,
+                    oErr = oRes.error;
+
+                let oErrMsg = {
                     RETCD: "E",
-                    RTMSG: "[ FACEBOOK #2 - sendPhoto(URL) ] 게시글 올리기 오류 :  \n\n" + e.response
+                    RTMSG: "[ FACEBOOK #2 - sendPhoto(URL) ] 게시글 올리기 오류 :  \n\n" + oErr.message
                 };
 
-                console.error(e);
+                console.error(oErr.message);
 
                 // 오류 수집 
-                onError(oParams, oErr, cb);
+                onError(oParams, oErrMsg, cb);
 
             }
 
@@ -173,22 +181,25 @@ function sendPhoto(oParams, cb) {
             contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
             data: oFormData, // 위에서 선언한 fromdata
             type: sMethod,
-            success: function(result) {
+            success: function (result) {
 
                 cb(oParams);
 
             },
-            error: function(e) {
+            error: function (e) {
 
-                let oErr = {
+                let oRes = e.responseJSON,
+                    oErr = oRes.error;
+
+                let oErrMsg = {
                     RETCD: "E",
-                    RTMSG: "[ FACEBOOK #3 - sendPhoto(blob) ] 게시글 올리기 오류 : \n\n" + e.response
+                    RTMSG: "[ FACEBOOK #3 - sendPhoto(blob) ] 게시글 올리기 오류 :  \n\n" + oErr.message
                 };
 
-                console.error(e);
+                console.error(oErr.message);
 
                 // 오류 수집 
-                onError(oParams, oErr, cb);
+                onError(oParams, oErrMsg, cb);
 
             }
 

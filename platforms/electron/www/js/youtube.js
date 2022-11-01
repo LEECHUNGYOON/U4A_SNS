@@ -158,9 +158,10 @@ exports.send = function (sParams, oChoiceInfo, CB) {
 
     }
 
-
     //HTTP 서버 생성
     oServer = http.createServer(function (req, res) {
+
+        debugger;
 
         res.writeHead(200, {
             'Content-Type': 'text/html'
@@ -177,10 +178,14 @@ exports.send = function (sParams, oChoiceInfo, CB) {
         //요청받은 받은 인증key 로 아래에 넣어주면 토큰 callback 펑션이 호출됨 
         oauth.getToken(sData.code, (err, tokens) => {
 
+            if(err){
+                res.end(err.toString());
+            }
+
             debugger;
 
             //인증키 누락시..
-            if (typeof tokens === "undefined") {
+            if (typeof tokens === "undefined" || tokens == null) {
 
                 //오류 메시지 처리
                 oErrLog.addLog({

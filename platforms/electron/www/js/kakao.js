@@ -1,7 +1,7 @@
 let oKakao = {};
 
 oKakao.send = (oParams, oChoiceInfo, cb) => {
-
+    
     if (!oChoiceInfo || !oChoiceInfo.KAKAO_STORY) {
 
         //Callback 

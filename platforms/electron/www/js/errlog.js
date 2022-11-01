@@ -5,19 +5,9 @@ const
     RANDOMKEY = require("random-key"),
     FS = require("fs");
 
-
 let oErrLog = {};
 
 let aLog = [];
-
-
-
-oErrLog.onError = () => {
-
-
-
-};
-
 
 /************************************************************************
  * Error 내용 수집
@@ -124,16 +114,18 @@ oErrLog.writeLog = (sErrType, oLogData) => {
 
     let sLogFile = PATH.join(sTodayFolderPath, sLogFileName);
 
-    if (typeof oLogData == "object") {
-        FS.writeFileSync(sLogFile, JSON.stringify([oLogData]));
-    }
-
+    // 에러 구조가 Array 일 경우
     if (oLogData instanceof Array == true) {
         FS.writeFileSync(sLogFile, JSON.stringify(oLogData));
+        return;
+    }
+
+    // 에러 구조가 object일 경우
+    if (typeof oLogData == "object") {
+        FS.writeFileSync(sLogFile, JSON.stringify([oLogData]));
+        return;
     }
 
 }; // end of oErrLog.writeLog
-
-
 
 module.exports = oErrLog;

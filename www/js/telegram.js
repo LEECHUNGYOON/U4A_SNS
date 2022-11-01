@@ -136,6 +136,8 @@ async function sendMessage(chat_id, sParams) {
 /* ================================================================= */
 exports.send = function (sParams, oChoiceInfo, CB) {
 
+    debugger;
+
     if (!oChoiceInfo || !oChoiceInfo.TELEGRAM) {
 
         //Callback 
@@ -144,7 +146,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
 
     }
 
-    const
+    var
         remote = oAPP.remote,
         MongClinet = oAPP.MongClinet,
         MongDB_HOST = oAPP.MongDB_HOST;
@@ -163,15 +165,19 @@ exports.send = function (sParams, oChoiceInfo, CB) {
             });
 
             CB(sParams);
+
             return;
         }
-
-        var dbo = db.db("TELEGRAM");
+        
+        var dbo = db.db("TELEGRAM"),
+            dbname = "USER_INFO";
         var query = {};
 
-        dbo.collection("USER_INFO").find(query).toArray(function (err, result) {
+        dbo.collection(dbname).find(query).toArray(function (err, result) {
             debugger;
+
             db.close();
+
             if (err) {
 
                 //오류 메시지 수집

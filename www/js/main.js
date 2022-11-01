@@ -17,18 +17,17 @@
             oAPP.server.onReq,
             () => { // success             
 
+                // 
+
                 // 서버가 정상적으로 붙으면 Hide 처리
-                // let oCurrWin = oAPP.remote.getCurrentWindow();
-                // oCurrWin.hide();               
+                let oCurrWin = oAPP.remote.getCurrentWindow();
+                oCurrWin.hide();
 
             },
             (error) => { // error
 
                 // 오류 메시지 띄우기
-                let sErrMsg = `[http server error] : ${error.stack.toString()}`;
-
-                // 메시지 팝업 띄우기  
-                oAPP.dialog.showErrorBox("window onerror", sErrMsg);
+                let sErrMsg = `[http server error] : ${error.toString()}`;
 
                 let oErrMsg = {
                     RETCD: "E",
@@ -37,6 +36,9 @@
 
                 // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
                 oAPP.errorlog.writeLog("01", oErrMsg);
+
+                // 메시지 팝업 띄우기  
+                oAPP.dialog.showErrorBox("window onerror", sErrMsg);
 
             });
 
@@ -142,11 +144,9 @@
             PRC: {
                 MSGPOP: { // Message Popover 구조
                     BTNICO: "sap-icon://message-popup",
+                    BTNTYP: sap.m.ButtonType.Default,
                     MSGCNT: 0,
-                    MSGLIST: [{
-                        RETCD: "", // return code
-                        RTMSG: "" // msg
-                    }]
+                    MSGLIST: []
                 },
                 SUBJECT: oAPP.subject,
                 VIDEO: {
@@ -164,47 +164,8 @@
                 },
                 BUSYTXD: "잠시만 기다려 주십시오...", // Busy default Text
                 BUSYTXT: "",
-                TYPEKEY: "ETC", // 선택한 모듈의 키값  // 모듈 종류
-                TYPELIST: [{
-                        KEY: "ETC",
-                        TEXT: "기타(공통)"
-                    }, {
-                        KEY: "FI",
-                        TEXT: "FI"
-                    },
-                    {
-                        KEY: "CO",
-                        TEXT: "CO"
-                    },
-                    {
-                        KEY: "SD",
-                        TEXT: "SD"
-                    },
-                    {
-                        KEY: "MM",
-                        TEXT: "MM"
-                    },
-                    {
-                        KEY: "PP",
-                        TEXT: "PP"
-                    },
-                    {
-                        KEY: "PM",
-                        TEXT: "PM"
-                    },
-                    {
-                        KEY: "QM",
-                        TEXT: "QM"
-                    },
-                    {
-                        KEY: "PS",
-                        TEXT: "PS"
-                    },
-                    {
-                        KEY: "HR",
-                        TEXT: "HR"
-                    },
-                ],
+                TYPEKEY: "999", // 선택한 모듈의 키값  // 모듈 종류
+                TYPELIST: oAPP.aModuleCode
             },
             SNS: {
                 TITLE: "",
@@ -241,6 +202,7 @@
         }
 
         oAPP.mDefaultModel.SNS.HASHTAG = aHashTempData;
+        oAPP.mDefaultModel.EMO = oAPP.fn.getEmogiIcons(); // 유니코드 이모티콘
 
         let oModelData = jQuery.extend(true, {}, oAPP.mDefaultModel);
 
@@ -260,6 +222,8 @@
         oCoreModel.setModel(oJsonModel);
 
     }; // end of oAPP.fn.initModeling
+
+
 
     /************************************************************************
      * 초기 화면 그리기
@@ -328,9 +292,29 @@
                                             new sap.m.Button("msgpop_btn", {
                                                 icon: "{/PRC/MSGPOP/BTNICO}",
                                                 text: "{/PRC/MSGPOP/MSGCNT}",
-                                                press: () => {
+                                                press: (oEvent) => {
 
-                                                    oAPP.fn.openMsgPopover();
+                                                    oAPP.fn.openMsgPopover(oEvent);
+
+                                                }
+                                            }).bindProperty("type", {
+                                                parts: [
+                                                    "/PRC/MSGPOP/MSGCNT",
+                                                ],
+                                                formatter: (MSGCNT) => {
+
+                                                    let sDefType = sap.m.ButtonType.Default;
+
+                                                    if (MSGCNT == null) {
+                                                        return sDefType;
+                                                    }
+
+                                                    // sap.m.ButtonType.Negative
+                                                    if (MSGCNT == 0) {
+                                                        return sDefType;
+                                                    }
+
+                                                    return sap.m.ButtonType.Negative;
 
                                                 }
                                             })
@@ -478,18 +462,20 @@
                                         items: {
                                             path: "/PRC/TYPELIST",
                                             template: new sap.ui.core.ListItem({
-                                                key: "{KEY}",
-                                                text: "{TEXT}"
+                                                // key: "{KEY}",
+                                                // text: "{TEXT}",
+                                                key: "{MODCD}",
+                                                text: "{MODNM}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
 
-                                        let oFind = aTypeList.find(elem => elem.KEY == TYPEKEY);
+                                        let oFind = aTypeList.find(elem => elem.MODCD == TYPEKEY);
                                         if (oFind) {
-                                            oModel.setProperty("/SNS/TYPE", oFind.TEXT);
+                                            oModel.setProperty("/SNS/TYPE", oFind.MODNM);
                                             oModel.refresh();
                                         }
 
@@ -506,11 +492,27 @@
                                     text: "{/PRC/SUBJECT/DESC}" // "상세설명"
                                 }),
                                 fields: [
-                                    new sap.m.TextArea({
-                                        width: "100%",
-                                        rows: 20,
-                                        value: "{/SNS/DESC}"
+                                    new sap.m.VBox({
+                                        renderType: sap.m.FlexRendertype.Bare,
+                                        items: [
+                                            new sap.m.TextArea({
+                                                width: "100%",
+                                                rows: 20,
+                                                value: "{/SNS/DESC}"
+                                            }),
+                                            new sap.m.Bar({
+                                                contentRight: [
+                                                    new sap.m.Button({
+                                                        icon: "sap-icon://feedback",
+                                                        press: (oEvent) => {
+                                                            oAPP.fn.openEmogiPopup(oEvent);
+                                                        }
+                                                    })
+                                                ]
+                                            })
+                                        ]
                                     })
+
                                 ]
                             }),
 
@@ -573,14 +575,14 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
                                     // // 입력된 값 초기화
                                     // this.setValue("");
 
-                                    oAPP.setProperty("/SNS/VIDEO/URL", "");
+                                    oAPP.setModelProperty("/SNS/VIDEO/URL", "");
 
                                     return false;
                                 }
@@ -607,14 +609,14 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
                                     // // 입력된 값 초기화
                                     // this.setValue("");
 
-                                    oAPP.setProperty("/SNS/VIDEO/LURL", "");
+                                    oAPP.setModelProperty("/SNS/VIDEO/LURL", "");
 
                                     return false;
                                 }
@@ -686,14 +688,14 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
                                     // // 입력된 값 초기화
                                     // this.setValue("");
 
-                                    oAPP.setProperty("/SNS/IMAGE/URL", "");
+                                    oAPP.setModelProperty("/SNS/IMAGE/URL", "");
 
                                     // 미리보기쪽 이미지를 지운다.
                                     sap.ui.getCore().getModel().setProperty("/PREV/IMAGE/URL", "");
@@ -724,14 +726,14 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
                                     // // 입력된 값 초기화
                                     // this.setValue("");
 
-                                    oAPP.setProperty("/SNS/IMAGE/LURL", "");
+                                    oAPP.setModelProperty("/SNS/IMAGE/LURL", "");
 
                                     // Blob 파일 정보를 지운다.
                                     sap.ui.getCore().getModel().setProperty("/SNS/IMAGE/DATA", "");
@@ -1008,7 +1010,7 @@
 
                         //             oAPP.fn.readImageLocalDir(DATA, (oImgData) => {
 
-                        //                 debugger;
+                        //                 
 
                         //                 return oImgData;
 
@@ -1058,7 +1060,7 @@
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function() {
+        reader.onloadend = function () {
 
             var base64data = reader.result;
 
@@ -1074,7 +1076,7 @@
     }; // end of oAPP.fn.readImageLocalDir
 
     /************************************************************************
-     * Video Local File Select Dialog
+     * 로컬 경로에 있는 비디오 파일 선택 Dialog
      ************************************************************************/
     oAPP.fn.videoFileSelect = () => {
 
@@ -1121,7 +1123,7 @@
     }; // end of oAPP.fn.videoFileSelect
 
     /************************************************************************
-     * Image Local File Select Dialog
+     * 로컬 경로에 있는 이미지 파일 선택 Dialog
      ************************************************************************/
     oAPP.fn.imageFileSelect = () => {
 
@@ -1213,23 +1215,23 @@
         var TY_IFDATA = {
 
             "TITLE": "", //제목 
-            "TYPE": "", //문서 유형
-            "DESC": "", //내역 
-            "SAMPLE_URL": "", //샘플 URL
+            "TYPE": "", // 문서 유형
+            "DESC": "", // 내역 
+            "SAMPLE_URL": "", // 샘플 URL
             "IMAGE": {
-                "URL": "", //대표 이미지 URL
-                "T_URL": [], //서브 이미지 URL 
-                "DATA": "" //대표 이미지 Data (Base64)
+                "URL": "", // 대표 이미지 URL
+                "T_URL": [], // 서브 이미지 URL 
+                "DATA": "" // 대표 이미지 Data (Base64)
             },
             "VIDEO": {
-                "URL": "", //동영상 URL 
-                "FPATH": "" //동영상 path(PC 디렉토리 경로)
+                "URL": "", // 동영상 URL 
+                "FPATH": "" // 동영상 path(PC 디렉토리 경로)
             },
-            "HASHTAG": [] //해시태그
+            "HASHTAG": [] // 해시태그
 
         };
 
-        debugger;
+
 
         // SNS 전송할 구조
         let oSns = sap.ui.getCore().getModel().getProperty("/SNS");
@@ -1246,12 +1248,15 @@
 
         oAPP.setBusy(true);
 
+        // 기존 오류 로그 다 지운다.
+        oAPP.errorlog.clearAll();
+
         // SNS 일괄 전송!!
         oAPP.fn.sendSNS(TY_IFDATA, oChoice)
             .then(() => {
 
-                // 오류가 있을 경우 오류에 대한 정보 기록하기
-                oAPP.fn.setErrorLog();
+                // SNS 전송시 오류가 있을 경우 오류에 대한 정보 기록하기
+                oAPP.fn.setErrorLogSNS();
 
                 oAPP.setBusyMsg("완료!");
 
@@ -1274,30 +1279,27 @@
     /************************************************************************
      * 오류가 있을 경우 오류에 대한 정보 기록하기
      ************************************************************************/
-    oAPP.fn.setErrorLog = () => {
+    oAPP.fn.setErrorLogSNS = () => {
 
-        let oDefMsgPopData = jQuery.extend(true, {}, oAPP.setProperty("/PRC/MSGPOP"));
+        let oDefMsgPopData = jQuery.extend(true, {}, oAPP.getModelProperty("/PRC/MSGPOP"));
 
         let oErrLog = oAPP.errorlog,
             aLog = oErrLog.getLog(),
             iLoglength = aLog.length;
 
-        oDefMsgPopData.MSGCNT = iLoglength;
-        oDefMsgPopData.MSGLIST = [];
+        oDefMsgPopData.MSGCNT = iLoglength; // 오류 갯수
+        oDefMsgPopData.MSGLIST = aLog; // 오류 리스트
+
+        oAPP.setModelProperty("/PRC/MSGPOP", oDefMsgPopData);
 
         if (iLoglength == 0) {
-            oAPP.setProperty("/PRC/MSGPOP", oDefMsgPopData);
             return;
         }
 
         // SNS 전송시 오류가 있었다면 Log 파일 저장
         oErrLog.writeLog("02", aLog);
 
-        oDefMsgPopData.MSGLIST = aLog;
-
-        oAPP.setProperty("/PRC/MSGPOP", oDefMsgPopData);
-
-    }; // end of oAPP.fn.setErrorLog
+    }; // end of oAPP.fn.setErrorLogSNS
 
     /************************************************************************
      * SNS 일괄 전송
@@ -1317,8 +1319,6 @@
             oAPP.setBusyMsg("Youtube 전송중...");
 
             console.log("Youtube 시작");
-
-            debugger;
 
             oAPP.youtube.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
@@ -1343,6 +1343,10 @@
                         oAPP.setBusyMsg("Kakao Story 전송중...");
 
                         console.log("카카오 시작");
+
+                        resolve();
+
+                        return;
 
                         oAPP.kakao.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
@@ -1374,13 +1378,19 @@
 
     }; // end of oAPP.fn.sendSNS
 
+    /************************************************************************
+     * Busy Dialog의 텍스트 내용 변경
+     ************************************************************************/
     oAPP.setBusyMsg = (sMsg) => {
 
-        oAPP.setProperty("/PRC/BUSYTXT", sMsg);
+        oAPP.setModelProperty("/PRC/BUSYTXT", sMsg);
 
     }; // end of oAPP.setBusyMsg
 
-    oAPP.setProperty = (sBindPath, oData, bIsRefresh = true) => {
+    /************************************************************************
+     * Model 정보 갱신
+     ************************************************************************/
+    oAPP.setModelProperty = (sBindPath, oData, bIsRefresh = true) => {
 
         let oCoreModel = sap.ui.getCore().getModel();
         if (!oCoreModel) {
@@ -1389,8 +1399,25 @@
 
         oCoreModel.setProperty(sBindPath, oData, bIsRefresh);
 
-    }; // end of  oAPP.setProperty
+    }; // end of  oAPP.setModelProperty
 
+    /************************************************************************
+     * Model 정보 가져오기
+     ************************************************************************/
+    oAPP.getModelProperty = (sBindPath) => {
+
+        let oCoreModel = sap.ui.getCore().getModel();
+        if (!oCoreModel) {
+            return;
+        }
+
+        return oCoreModel.getProperty(sBindPath);
+
+    }; // end of oAPP.getModelProperty
+
+    /************************************************************************
+     * Busy Dialog 실행
+     ************************************************************************/
     oAPP.setBusy = (bIsBusy) => {
 
         let oBusyDialog = sap.ui.getCore().byId("busyDlg"),
@@ -1442,49 +1469,25 @@
     /************************************************************************
      * 메시지 Popover 실행
      ************************************************************************/
-    oAPP.fn.openMsgPopover = () => {
+    oAPP.fn.openMsgPopover = (oEvent) => {
 
-        function ffff() {
+        let sMsgPopId = "msgpop",
+            oMsgPopBtn = oEvent.getSource();
 
-            return new Promise(() => {
-
-
-                var aa = new sap.m.TTT();
-
-            });
-
-
-        }
-
-        ffff();
-
-
-
-        return;
-
-
-        let sMsgPopId = "msgpop";
-
-        // 메시지 모델 세팅
         var oMsgPop = sap.ui.getCore().byId(sMsgPopId);
         if (oMsgPop) {
-
-            oMsgPop.openBy("msgpop_btn");
+            oMsgPop.toggle(oMsgPopBtn);
             return;
-
         }
 
-        let aLog = oAPP.errorlog.getLog();
-
-        oAPP.setProperty("/PRC/MSGPOP/MSGLIST", aLog);
-
-        new sap.m.MessagePopover(sMsgPopId, {
+        var oMessagePopover = new sap.m.MessagePopover(sMsgPopId, {
 
             items: {
                 path: "/PRC/MSGPOP/MSGLIST",
                 template: new sap.m.MessageItem({
-                    title: "RTMSG"
-                }).bindProperty("type", "RETCD", function(RETCD) {
+                    title: "{RTMSG}",
+                    description: "{RTMSG}",
+                }).bindProperty("type", "RETCD", function (RETCD) {
 
                     switch (RETCD) {
                         case "S":
@@ -1507,29 +1510,74 @@
                 })
             } // end of item
 
-        }).open("msgpop_btn");
+        });
+
+        oMsgPopBtn.addDependent(oMessagePopover);
+
+        oMessagePopover.toggle(oMsgPopBtn);
 
     }; // end of oAPP.fn.openMsgPopover
+
+    /************************************************************************
+     *  이모티콘 팝업
+     ************************************************************************/
+    oAPP.fn.openEmogiPopup = () => {
+
+
+
+
+
+    }; // end of oAPP.fn.openEmogiPopup
+
+    /************************************************************************
+     *  이모티콘 정보 리턴
+     ************************************************************************/
+    oAPP.fn.getEmogiIcons = () => {
+
+
+
+
+        return [];
+
+    } // end of oAPP.fn.getEmogiIcons
 
     /************************************************************************
      * Tray Icon 생성
      ************************************************************************/
     oAPP.fn.createTrayIcon = () => {
 
-        let sTrayIconPath = oAPP.path.join(oAPP.apppath, "img", "logo.png"),
-            oTray = oAPP.remote.Tray(sTrayIconPath);
+        // let sTrayIconPath = oAPP.path.join(oAPP.apppath, "img", "logo.png"),
+        //     oTray = new oAPP.remote.Tray(sTrayIconPath);
 
         let aMenu = [{
-                key: "exit",
-                label: "종료",
-                click: oAPP.fn.TrayMenu01
-            }
+            key: "exit",
+            label: "종료",
+            click: oAPP.fn.TrayMenu01
+        }];
 
-        ];
+        // let oTrayMenu = oAPP.trayMenu.buildFromTemplate(aMenu);
+        // oTray.setToolTip("U4A SNS");
+        // oTray.setContextMenu(oTrayMenu);
 
-        let oTrayMenu = oAPP.trayMenu.buildFromTemplate(aMenu);
-        oTray.setToolTip("U4A SNS");
-        oTray.setContextMenu(oTrayMenu);
+
+        /**
+         * 
+         * 
+         * 
+         *          
+         */
+
+
+        const {
+            app,
+            Menu,
+            Tray
+        } = oAPP.remote.require("electron");
+
+        var tray = new Tray(oAPP.path.join(oAPP.apppath, "img", "logo.png"));
+        const contextMenu = Menu.buildFromTemplate(aMenu);
+        tray.setToolTip('This is my application.');
+        tray.setContextMenu(contextMenu);
 
     }; // end of oAPP.fn.createTrayIcon
 
@@ -1542,8 +1590,6 @@
 
     }; // end of oAPP.fn.TrayMenu01
 
-
-
     /************************************************************************
      * html dom이 로드가 완료된 후 타는 이벤트
      ************************************************************************/
@@ -1552,12 +1598,14 @@
         // 화면 그리기
         oAPP.fn.attachInit();
 
-        // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기
+        // Tray 아이콘 만들고
+        oAPP.fn.createTrayIcon();
 
-        // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
-        // if (process.env.COMPUTERNAME !== process.env.SERVER_COMPUTERNAME) {
-        //     return;
-        // }       
+        // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기        
+        let bIsBackgroundMode = oAPP.isBackgroundMode();
+        if (!bIsBackgroundMode) {
+            return;
+        }
 
         // 백그라운드 일 경우
         // 서버 가동!!
@@ -1575,16 +1623,12 @@
 
         let oCurrWin = oAPP.remote.getCurrentWindow(),
             bIsVisible = oCurrWin.isVisible(),
-            sErrMsg = `[window onerror] : ${oEvent.error.stack.toString()}`;
+            sErrMsg = `[window onerror] : ${oEvent.error.toString()}`;
 
         // 아직 화면이 떠있다면 오류 메시지 출력
         if (bIsVisible) {
             oAPP.dialog.showErrorBox("window onerror", sErrMsg);
         }
-
-        // if (!oAPP.bIsBackgroundMode) {
-        //     oAPP.dialog.showErrorBox("window onerror", sErrMsg);
-        // }
 
         let oErrMsg = {
             RETCD: "E",
@@ -1608,17 +1652,12 @@
 
         let oCurrWin = oAPP.remote.getCurrentWindow(),
             bIsVisible = oCurrWin.isVisible(),
-            sErrMsg = event.reason.stack.toString();
+            sErrMsg = event.reason.toString();
 
         // 아직 화면이 떠있다면 오류 메시지 출력
         if (bIsVisible) {
             oAPP.dialog.showErrorBox("unhandledrejection Error:", sErrMsg);
         }
-
-        // // 포그라운드 모드 이면 오류 내용을 화면에 뿌려준다.
-        // if (!oAPP.bIsBackgroundMode) {
-        //     oAPP.dialog.showErrorBox("unhandledrejection Error: ", sErrMsg);
-        // }
 
         let oErrMsg = {
             RETCD: "E",

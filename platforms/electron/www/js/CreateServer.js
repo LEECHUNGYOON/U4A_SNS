@@ -55,7 +55,7 @@ var IP = oAPP.conf.localServerIP,
 //           cb_req       : 요청 이벤트 발생시 callBack 함수 
 //           cb_success   : 서버 정상 생성시 callBack 함수 
 //           cb_error     : 오류 발생시 callBack 함수
-exports.createServer = function(remote, cb_req, cb_success, cb_error) {
+exports.createServer = function (remote, cb_req, cb_success, cb_error) {
 
     http = remote.require('http');
     qs = remote.require('querystring');
@@ -64,8 +64,7 @@ exports.createServer = function(remote, cb_req, cb_success, cb_error) {
     try {
 
         //서버 생성 
-        http.createServer(async function(req, res) {          
-         
+        const server = http.createServer(async function (req, res) {
 
             //서비스 점검
             if (!onChkService(req, res)) {
@@ -90,10 +89,24 @@ exports.createServer = function(remote, cb_req, cb_success, cb_error) {
 
             //res.end('aaa');
 
-        }).listen(PORT, IP, cb_success);
+        });
 
+        server.on("error", (err) => {
+
+            cb_error(err);
+
+        });
+
+        server.on("clientError", (err) => {
+
+            cb_error(err);
+
+        });
+
+        server.listen(PORT, IP, cb_success);
 
     } catch (error) {
+
         cb_error(error);
 
     }
@@ -204,7 +217,7 @@ function onServiceInfo(req, res) {
                 }
             }
 
-            return new Promise(function(resolve, reject) {
+            return new Promise(function (resolve, reject) {
 
                 var oForm = new Multiparty.Form();
                 oForm.parse(req, (err, fields, files) => {

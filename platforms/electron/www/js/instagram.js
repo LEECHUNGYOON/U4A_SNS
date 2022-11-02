@@ -3,12 +3,17 @@ let oInstagram = {};
 /************************************************************************
  * Facebook APP 정보 및 인증 토큰
  ************************************************************************/
+// const
+//     APPID = oAPP.auth.facebook.app_id,
+//     PAGEID = oAPP.auth.facebook.page_id,
+//     USERTOKEN = oAPP.auth.facebook.user_token,
+//     PAGETOKEN = oAPP.auth.facebook.page_token;
 const
     APPID = oAPP.auth.facebook.app_id,
-    PAGEID = oAPP.auth.facebook.page_id,
+    PAGEID = "101385506102675",
     USERTOKEN = oAPP.auth.facebook.user_token,
-    PAGETOKEN = oAPP.auth.facebook.page_token;
-
+    PAGETOKEN = "EAAFjhb2eVusBAC7rBo1Ewa7fTO2VMWCbeTvAx94HxLbK8kHbASR7L8H7qp0Ym1GYiOVIZBSZBFZBUCC2R59yVcUCEXUzWP5cPQNuuVothn3U0ZBXO7y1W9q1VaNt8t1xgpC9896LWrUMIVSSXsVKLBJnwQvhZByv4FVqNcBW1zFDkyHFqzzXq";
+    
 const
     WINDOW = global.document.ws_frame;
 
@@ -96,6 +101,19 @@ function getAccount(cbSuccess, cbError) {
         url: sUrl,
         type: sMethod,
         success: function (res) {
+
+            if (!res.instagram_business_account) {
+
+                let oErrMsg = {
+                    RETCD: "E",
+                    RTMSG: "[ INSTAGRAM #1 - getAccount ] 인스타 계정 오류"
+                };
+
+                // 오류 수집 
+                cbError(oErrMsg);
+
+                return;
+            }
 
             let sInstaAccId = res.instagram_business_account.id,
                 oAccInfo = {

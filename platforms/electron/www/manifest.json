@@ -7,5 +7,12 @@
   "short_name": "u4a_sns",
   "version": "com.u4a_sns.app",
   "description": "A U4A IDE Platform RnD Team application that responds to the deviceready event.",
-  "author": "U4A IDE Platform RnD Team"
+  "author": "U4A IDE Platform RnD Team",
+  "icons": [
+    {
+      "src": "www/img/logo.png",
+      "type": "image/png",
+      "sizes": "undefinedxundefined"
+    }
+  ]
 }

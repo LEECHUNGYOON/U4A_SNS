@@ -1,11 +1,17 @@
 let oMongdb = {};
 
+
+const
+    REMOTE = require('@electron/remote'),
+    APP = REMOTE.app;
+
+
 //DATA 추출 
 oMongdb.onGET = async () => {
 
-    return new Promise(function(res, rej) {
+    return new Promise(function (res, rej) {
 
-        oAPP.MongClinet.connect(oAPP.MongDB_HOST, function(err, db) {
+        oAPP.MongClinet.connect(oAPP.MongDB_HOST, function (err, db) {
 
             // if (err) throw err;
             if (err) {
@@ -21,7 +27,15 @@ oMongdb.onGET = async () => {
 
             var dbo = db.db("U4A_ADMIN");
 
-            dbo.collection("SNS_AUTHORITY").find({}).limit(0).toArray(function(err, T_AUTH) {
+            // 테스트 모드 일 경우의 mongoDB의 Document 명
+            let sDocName = "SNS_AUTHORITY_TEST";
+
+             // build 된 환경에서 바라볼 mongoDB의 Document 명
+            if (APP.isPackaged) {
+                sDocName = "SNS_AUTHORITY";
+            }
+
+            dbo.collection(sDocName).find({}).limit(0).toArray(function (err, T_AUTH) {
                 db.close(); //db 종료
 
                 if (err) {

@@ -18,6 +18,14 @@
     document.addEventListener("error", onError);
 
     /************************************************************************
+     * Prefix
+     ************************************************************************/
+    process.env.SERVER_COMPUTERNAME = "U4ARNDX";
+    process.env.SERVER_LOG_PATH = "D:\\log\\u4a_sns_log";
+    // process.env.LOCAL_LOG_PATH = oAPP.path.join(oAPP.userdata, "log", "u4a_sns_log");
+    process.env.LOCAL_LOG_PATH = "C:\\Tmp\\log\\u4a_sns_log";
+
+    /************************************************************************
      * Electron & NPM Library
      ************************************************************************/
     oAPP.remote = require('@electron/remote');
@@ -38,27 +46,6 @@
     oAPP.telegramBotAPI = oAPP.remote.require("node-telegram-bot-api");
 
     /************************************************************************
-     * Auto Update Check
-     ************************************************************************/
-    // no build 일 경우는 자동 업데이트를 확인하지 않는다.
-    if (oAPP.app.isPackaged) {
-        await oAPP.autoUpdate.checkUpdate();
-    }
-
-    /************************************************************************
-     * Prefix
-     ************************************************************************/
-    process.env.SERVER_COMPUTERNAME = "U4ARNDX";
-    process.env.SERVER_LOG_PATH = "D:\\log\\u4a_sns_log";
-    // process.env.LOCAL_LOG_PATH = oAPP.path.join(oAPP.userdata, "log", "u4a_sns_log");
-    process.env.LOCAL_LOG_PATH = "C:\\Tmp\\log\\u4a_sns_log";
-
-    // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
-    if (process.env.COMPUTERNAME === process.env.SERVER_COMPUTERNAME) {
-        oAPP.bIsBackgroundMode = true; // 백그라운드 모드 Flag 
-    }
-
-    /************************************************************************
      * [Util] Local Js Path
      ************************************************************************/
     oAPP.JsPath = oAPP.path.join(oAPP.apppath, "js");
@@ -69,9 +56,22 @@
 
     oAPP.aEmogiIcons = require(oAPP.path.join(oAPP.apppath, "json", "emogi.json"));
 
+    // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
+    if (process.env.COMPUTERNAME === process.env.SERVER_COMPUTERNAME) {
+        oAPP.bIsBackgroundMode = true; // 백그라운드 모드 Flag 
+    }
+
     // error log를 저장할 폴더를 만든다.
     await oAPP.errorlog.createLogFolder();
 
+    /************************************************************************
+     * Auto Update Check
+     ************************************************************************/
+    // build 된 상태에서만 자동 업데이트 체크를 한다.
+    if (oAPP.app.isPackaged) {
+        await oAPP.autoUpdate.checkUpdate();
+    }
+    
     /************************************************************************
      * Description
      ************************************************************************/
@@ -87,7 +87,7 @@
      * Config Info
      ************************************************************************/
     oAPP.conf.localServerIP = oAPP.ip.address();
-    oAPP.conf.localServerPort = 1333;
+    oAPP.conf.localServerPort = 9402;
 
     oAPP.conf.youtube_server_port = 1977; // node server port    
 
@@ -144,6 +144,8 @@
         polling: false
     });
 
+    oAPP.auth.youtube = {"web":{"client_id":"1078653778696-ubaf3gbvkfckcq3hhi10vdkf6k7ohmo0.apps.googleusercontent.com","project_id":"yoon-youtube-1977","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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","redirect_uris":["http://localhost:1977","http://localhost:5000"],"javascript_origins":["http://localhost","http://localhost:1977","http://localhost:5000"]}};
+
     /************************************************************************
      * SNS (몽고DB 연결 성공 후 SNS 인증 키를 받아야하므로 반드시 여기에 있어야 함!)
      ************************************************************************/
@@ -152,9 +154,6 @@
     oAPP.instagram = require(oAPP.path.join(oAPP.JsPath, "instagram.js"));
     oAPP.kakao = require(oAPP.path.join(oAPP.JsPath, "kakao.js"));
     oAPP.telegram = require(oAPP.path.join(oAPP.JsPath, "telegram.js"));
-
-
-
 
     /************************************************************************
      * APP 구동 시작
@@ -207,12 +206,12 @@
         };
 
         // oAPP.errorlog가 있다면 
-        if (oAPP.errorlog) {
-
-            // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
-            oAPP.errorlog.writeLog("01", oErrMsg);
-
+        if (!oAPP.errorlog) {
+            return;
         }
+
+        // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
+        oAPP.errorlog.writeLog("01", oErrMsg);
 
     } // end of onError
 
@@ -236,29 +235,14 @@
         };
 
         // oAPP.errorlog가 있다면 
-        if (oAPP.errorlog) {
-
-            // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
-            oAPP.errorlog.writeLog("01", oErrMsg);
-
+        if (!oAPP.errorlog) {
+            return;
         }
 
-    } // end of onunhandledrejection    
+        // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
+        oAPP.errorlog.writeLog("01", oErrMsg);
 
-    function 잠시만요() {
-
-        return new Promise((resolve) => {
-
-            setTimeout(() => {
-
-                resolve();
-
-            }, 3000);
-
-
-        });
-
-    }
+    } // end of onunhandledrejection       
 
 })().then(() => {
 

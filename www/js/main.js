@@ -17,8 +17,7 @@
             oAPP.server.onReq,
             () => { // success             
 
-                // 
-
+                //                 
                 // 서버가 정상적으로 붙으면 Hide 처리
                 let oCurrWin = oAPP.remote.getCurrentWindow();
                 oCurrWin.hide();
@@ -49,7 +48,14 @@
      ************************************************************************/
     oAPP.server.onReq = async (oData, oReq, oRes) => {
 
+        debugger;
+        
+        // 기존 오류 로그 다 지운다.
+        oAPP.errorlog.clearAll();
+
         // path 분기
+
+
 
 
 
@@ -223,8 +229,6 @@
 
     }; // end of oAPP.fn.initModeling
 
-
-
     /************************************************************************
      * 초기 화면 그리기
      ************************************************************************/
@@ -270,11 +274,8 @@
             aSNSPrevContent = oAPP.fn.getSnsPrevPageContent();
 
         let oPage = new sap.m.Page({
-
             showHeader: false,
-
             content: [
-
                 new sap.ui.layout.ResponsiveSplitter({
 
                     rootPaneContainer: new sap.ui.layout.PaneContainer({
@@ -385,9 +386,7 @@
                             new sap.ui.layout.SplitPane({
 
                                 content: new sap.m.Page({
-
                                     title: "SNS Preview",
-
                                     content: aSNSPrevContent,
                                     footer: new sap.m.Bar()
 
@@ -468,7 +467,7 @@
                                                 text: "{MODNM}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -575,7 +574,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -609,7 +608,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -688,7 +687,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -726,7 +725,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -1060,7 +1059,7 @@
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function() {
+        reader.onloadend = function () {
 
             var base64data = reader.result;
 
@@ -1231,8 +1230,6 @@
 
         };
 
-
-
         // SNS 전송할 구조
         let oSns = sap.ui.getCore().getModel().getProperty("/SNS");
 
@@ -1343,10 +1340,6 @@
                         oAPP.setBusyMsg("Kakao Story 전송중...");
 
                         console.log("카카오 시작");
-
-                        resolve();
-
-                        return;
 
                         oAPP.kakao.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
@@ -1487,7 +1480,7 @@
                 template: new sap.m.MessageItem({
                     title: "{RTMSG}",
                     description: "{RTMSG}",
-                }).bindProperty("type", "RETCD", function(RETCD) {
+                }).bindProperty("type", "RETCD", function (RETCD) {
 
                     switch (RETCD) {
                         case "S":
@@ -1563,13 +1556,16 @@
         oAPP.oTray.on("double-click", () => {
 
             let oCurrWin = oAPP.remote.getCurrentWindow(),
-                bIsVisible = oCurrWin.isVisible();
+                bIsVisible = oCurrWin.isVisible(),
+                bIsFocus = oCurrWin.isFocused();
 
-            if (bIsVisible) {
-                return;
+            if (!bIsVisible) {
+                oCurrWin.show();
             }
 
-            oCurrWin.show();
+            if (!bIsFocus) {
+                oCurrWin.focus();
+            }
 
         });
 
@@ -1605,8 +1601,8 @@
         // 서버 가동!!
         oAPP.server.serverOn();
 
-        // Tray 아이콘 만들고
-        oAPP.fn.createTrayIcon();
+        // // Tray 아이콘 만들고
+        // oAPP.fn.createTrayIcon();
 
     } // end of onDOMContentLoaded
 
@@ -1667,7 +1663,6 @@
         }
 
     } // end of onunhandledrejection 
-
 
     window.onbeforeunload = () => {
 

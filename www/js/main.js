@@ -106,6 +106,8 @@
 
             var oSnsInfo = oSnsData.APPINFO;
 
+            oSnsInfo.TYPE = oAPP.fn.getModuleDesc(oSnsInfo.TYPE);
+
             await oAPP.fn.sendSNS(oSnsInfo, oChoiceInfo);
 
         }
@@ -216,6 +218,7 @@
         oModelData.PRC.BUSYTXT = oModelData.PRC.BUSYTXD;
 
         let oJsonModel = new sap.ui.model.json.JSONModel();
+        oJsonModel.setSizeLimit(100000);
         oJsonModel.setData(oModelData);
 
         let oCoreModel = sap.ui.getCore().getModel();
@@ -225,6 +228,7 @@
             return;
         }
 
+        oCoreModel.setSizeLimit(100000);
         oCoreModel.setModel(oJsonModel);
 
     }; // end of oAPP.fn.initModeling
@@ -467,7 +471,7 @@
                                                 text: "{MODNM}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -574,7 +578,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -608,7 +612,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -687,7 +691,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -725,7 +729,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -1059,7 +1063,7 @@
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function () {
+        reader.onloadend = function() {
 
             var base64data = reader.result;
 
@@ -1305,14 +1309,6 @@
 
         return new Promise((resolve) => {
 
-            // 순서
-            // 1. telegram
-            // 2. youtube
-            // 3. facebook
-            // 4. instagram
-            // 5. kakao story
-            // 6. telegram
-
             oAPP.setBusyMsg("Youtube 전송중...");
 
             console.log("Youtube 시작");
@@ -1480,7 +1476,7 @@
                 template: new sap.m.MessageItem({
                     title: "{RTMSG}",
                     description: "{RTMSG}",
-                }).bindProperty("type", "RETCD", function (RETCD) {
+                }).bindProperty("type", "RETCD", function(RETCD) {
 
                     switch (RETCD) {
                         case "S":
@@ -1514,23 +1510,75 @@
     /************************************************************************
      *  이모티콘 팝업
      ************************************************************************/
-    oAPP.fn.openEmogiPopup = () => {
+    oAPP.fn.openEmogiPopup = (oEvent) => {
 
+        let sPopId = "EmogiPopup",
+            oBtn = oEvent.getSource();
 
+        var oPopup = sap.ui.getCore().byId(sPopId);
+        if (oPopup) {
+            oPopup.openBy(oBtn);
+            return;
+        }
 
+        var oPopup = new sap.m.Popover({
+            title: "이모티콘",
+            contentMinWidth: "500px",
+            horizontalScrolling: true,
+            resizable: true,
+            content: [
 
+                new sap.m.HBox({
+                    renderType: sap.m.FlexRendertype.Bare,
+                    wrap: sap.m.FlexWrap.Wrap,
+                    items: {
+                        path: "/EMO",
+                        template:
+
+                            new sap.m.Button({
+                                text: "{ICON}",
+                                type: sap.m.ButtonType.Ghost,
+                                press: (oEvent) => {
+                                    oAPP.fn.onPressEmoIcon(oEvent);
+                                }
+                            })
+
+                    }
+                })
+
+            ]
+
+        });
+
+        oPopup.openBy(oBtn);
 
     }; // end of oAPP.fn.openEmogiPopup
+
+    oAPP.fn.onPressEmoIcon = (oEvent) => {
+
+
+
+    }; // end of oAPP.fn.onPressEmoIcon
 
     /************************************************************************
      *  이모티콘 정보 리턴
      ************************************************************************/
     oAPP.fn.getEmogiIcons = () => {
 
+        let aEmogi = [];
 
+        if (!oAPP.aEmogiIcons) {
+            return [];
+        }
 
+        let iEmogiLength = oAPP.aEmogiIcons.length;
+        for (let i = 0; i < iEmogiLength; i++) {
+            aEmogi.push({
+                ICON: oAPP.aEmogiIcons[i]
+            });
+        }
 
-        return [];
+        return aEmogi;
 
     } // end of oAPP.fn.getEmogiIcons
 
@@ -1540,16 +1588,16 @@
     oAPP.fn.getModuleDesc = (sCode) => {
 
         if (sCode === null || typeof sCode === "undefined" || typeof sCode !== "string") {
-            return;
+            return "";
         }
 
         if (!oAPP.aModuleCode) {
-            return;
+            return "";
         }
 
         let sModuleName = oAPP.aModuleCode.find(elem => elem.MODCD == sCode);
         if (!sModuleName) {
-            return;
+            return "";
         }
 
 

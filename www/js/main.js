@@ -49,7 +49,7 @@
     oAPP.server.onReq = async (oData, oReq, oRes) => {
 
         debugger;
-        
+
         // 기존 오류 로그 다 지운다.
         oAPP.errorlog.clearAll();
 
@@ -1533,6 +1533,29 @@
         return [];
 
     } // end of oAPP.fn.getEmogiIcons
+
+    /************************************************************************
+     *  모듈 코드에 따른 Description
+     ************************************************************************/
+    oAPP.fn.getModuleDesc = (sCode) => {
+
+        if (sCode === null || typeof sCode === "undefined" || typeof sCode !== "string") {
+            return;
+        }
+
+        if (!oAPP.aModuleCode) {
+            return;
+        }
+
+        let sModuleName = oAPP.aModuleCode.find(elem => elem.MODCD == sCode);
+        if (!sModuleName) {
+            return;
+        }
+
+
+        return sModuleName.MODNM || "";
+
+    }; // end of oAPP.fn.getModuleDesc
 
     /************************************************************************
      * Tray Icon 생성

@@ -3,17 +3,11 @@ let oFaceBook = {};
 /************************************************************************
  * Facebook APP 정보 및 인증 토큰
  ************************************************************************/
-// const
-//     APPID = oAPP.auth.facebook.app_id,
-//     PAGEID = oAPP.auth.facebook.page_id,
-//     USERTOKEN = oAPP.auth.facebook.user_token,
-//     PAGETOKEN = oAPP.auth.facebook.page_token;
-
 const
     APPID = oAPP.auth.facebook.app_id,
-    PAGEID = "101385506102675",
+    PAGEID = oAPP.auth.facebook.page_id,
     USERTOKEN = oAPP.auth.facebook.user_token,
-    PAGETOKEN = "EAAFjhb2eVusBAC7rBo1Ewa7fTO2VMWCbeTvAx94HxLbK8kHbASR7L8H7qp0Ym1GYiOVIZBSZBFZBUCC2R59yVcUCEXUzWP5cPQNuuVothn3U0ZBXO7y1W9q1VaNt8t1xgpC9896LWrUMIVSSXsVKLBJnwQvhZByv4FVqNcBW1zFDkyHFqzzXq";
+    PAGETOKEN = oAPP.auth.facebook.page_token;
 
 const
     WINDOW = global.document.ws_frame;

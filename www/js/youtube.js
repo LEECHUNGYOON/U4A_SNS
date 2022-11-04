@@ -257,6 +257,8 @@ exports.send = function (sParams, oChoiceInfo, CB) {
                 },
                 (err, data) => {
 
+                    oAPP.authWIN.close();
+                    
                     debugger;
 
                     if (err) {
@@ -279,7 +281,8 @@ exports.send = function (sParams, oChoiceInfo, CB) {
                     }
 
                     //인증 절차 브라우져 종료 처리
-                    res.end('<script>window.close();</script>');
+                   
+                    // res.end('<script>window.close();</script>');
 
                     //정상일 경우 I/F 파라메터 변경
                     sParams.VIDEO.URL = "https://youtube.com/shorts/" + data.data.id;
@@ -334,6 +337,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
     });
 
     //로그인 인증 화면 호출
-    opn(Lurl);
+    oAPP.onAuthCall(Lurl);
+    // opn(Lurl);
 
 };

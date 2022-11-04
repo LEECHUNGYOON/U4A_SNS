@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+    </head>
+    <body>
+
+        <webview id="frame1" style="width:100%; height:900px;" src="" ></webview>
+
+        <script>
+
+           
+            let oAPP = null;
+
+            document.addEventListener('DOMContentLoaded', ()=> {    
+
+                oAPP = {
+                    onStart:function(){
+                        this.ipcRenderer = require('electron').ipcRenderer;
+                        //호출처 I/F Data 추출 
+                        this.ipcRenderer.on('IF_U4A_APP', (event, data) => {
+                                //I/F Data 
+                                oAPP.config = data.config;
+
+                                document.getElementById("frame1").src = oAPP.config;
+
+                        });
+
+                    }
+                };
+
+                oAPP.onStart();
+
+            });
+          
+
+        </script>
+
+    </body>
+</html>

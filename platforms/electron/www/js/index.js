@@ -160,13 +160,13 @@
     //     }
     // }
 
-    // 테스트
-    oAPP.auth.facebook = {
-        "app_id": "488920756286607",
-        "page_id": "102433182683642",
-        "user_token": "EAAG8q7wAdI8BAAmeManlHSSq0naqQKfZCFo5Y61GHw84ZChgLYNaYRtJRrbRBIBND7UbFu48LH6cx5WaZCxNdw7491FonUvuiDvFSsiUi0cRVxlhNlcXCBOmpM0ZCaECFb7B3aYV2LD54u3nyK1tjI25u0EVvel8ZBTYZCekwGNx1FT1ZAyCHs3",
-        "page_token": "EAAG8q7wAdI8BAEzufSNg6kGJvSgU9j5igG0dNblr67XOY6P5XQhsdgs3u7FbKJFY1oV04MHCfdAtVqFMAsuynq95kBru9HcWQdtebWWqYcQEkpyaHcjmtuAra8OIFKBZB3ZANvBs5VKKOGl7xljluOHoZAZCPpEEnHMJWsV3iwk4oe3AoS6C",
-    };
+    // // 테스트
+    // oAPP.auth.facebook = {
+    //     "app_id": "488920756286607",
+    //     "page_id": "102433182683642",
+    //     "user_token": "EAAG8q7wAdI8BAAmeManlHSSq0naqQKfZCFo5Y61GHw84ZChgLYNaYRtJRrbRBIBND7UbFu48LH6cx5WaZCxNdw7491FonUvuiDvFSsiUi0cRVxlhNlcXCBOmpM0ZCaECFb7B3aYV2LD54u3nyK1tjI25u0EVvel8ZBTYZCekwGNx1FT1ZAyCHs3",
+    //     "page_token": "EAAG8q7wAdI8BAL6Ugp7px119vrxAX4hZBqzU9QZCSDvTshk6tWI1g673OXIU7JaLuwFIsjwiSa7RALXtLZCcumkUloza8cZBF4P2KgVscAaQFecIcIvGb8FJ44XZBj7LOiGMQhgueJ9IZCcAoi4mAxjr0hrBuZA14WrxjRpxR9kknr3mqLGnK19",
+    // };
 
     /************************************************************************
      * SNS (몽고DB 연결 성공 후 SNS 인증 키를 받아야하므로 반드시 여기에 있어야 함!)

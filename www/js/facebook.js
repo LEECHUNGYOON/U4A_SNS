@@ -24,8 +24,6 @@ const
  ************************************************************************/
 oFaceBook.send = (oParams, oChoiceInfo, cb) => {
 
-    debugger;
-
     window.jQuery = WINDOW.jQuery;
 
     console.log("페이스북 진입");

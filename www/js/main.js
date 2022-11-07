@@ -537,7 +537,8 @@
                                                 contentRight: [
                                                     new sap.m.Button({
                                                         icon: "sap-icon://feedback",
-                                                        press: (oEvent) => {
+                                                        press: (oEvent) => {                                                         
+
                                                             oAPP.fn.openEmogiPopup(oEvent);
                                                         }
                                                     })

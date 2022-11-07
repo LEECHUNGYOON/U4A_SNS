@@ -7,3 +7,9 @@ html, body {
 .u4aBusyIndicator .sapMLabel {
     margin-top: 1rem;
 } 
+
+
+
+.emogiPage .sapMBtnInner {
+    border: none !important;
+}

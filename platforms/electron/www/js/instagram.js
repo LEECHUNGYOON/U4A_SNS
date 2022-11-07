@@ -443,12 +443,9 @@ function getMessage(oParams) {
 
         for (var i = 0; i < iHashLength; i++) {
 
-            let oHashItem = oParams.HASHTAG[i];
-            if (!oHashItem.TAG) {
-                continue;
-            }
+            let sHash = oParams.HASHTAG[i];      
 
-            sMsg += oHashItem.TAG + " \n ";
+            sMsg += sHash + " \n ";
 
         }
 

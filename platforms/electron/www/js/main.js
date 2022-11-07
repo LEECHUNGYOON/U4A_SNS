@@ -156,6 +156,7 @@
 
         oAPP.mDefaultModel = {
             PRC: {
+                BODYTXT: "", // 미리보기 본문 텍스트
                 MSGPOP: { // Message Popover 구조
                     BTNICO: "sap-icon://message-popup",
                     BTNTYP: sap.m.ButtonType.Default,
@@ -216,7 +217,8 @@
         }
 
         oAPP.mDefaultModel.SNS.HASHTAG = aHashTempData;
-        oAPP.mDefaultModel.EMO = oAPP.fn.getEmogiIcons(); // 유니코드 이모티콘
+        // oAPP.mDefaultModel.EMO = oAPP.fn.getEmogiIcons(); // 유니코드 이모티콘
+        oAPP.mDefaultModel.EMOGILIST = oAPP.fn.getEmogiGroupList();
 
         let oModelData = jQuery.extend(true, {}, oAPP.mDefaultModel);
 
@@ -260,7 +262,14 @@
                     ],
                     contentRight: [
                         new sap.m.Button({
-                            icon: "sap-icon://settings"
+                            type: sap.m.ButtonType.Negative,
+                            icon: "sap-icon://restart",
+                            text: "Restart",
+                            press: () => {
+
+                                oAPP.fn.onAppRestart();
+
+                            }
                         })
                     ]
                 }),
@@ -445,7 +454,13 @@
                                 fields: [
                                     new sap.m.Input({
                                         value: "{/SNS/TITLE}",
-                                    })
+                                        change: () => {
+
+                                            // 미리보기 갱신
+                                            oAPP.fn.prevText();
+                                        }
+                                    }),
+
                                 ]
                             }),
 
@@ -466,6 +481,9 @@
                                                 sSelectedText = oSelectedItem.getText();
 
                                             oSelectModel.setProperty("/SNS/TYPE", sSelectedText);
+
+                                            // 미리보기 갱신
+                                            oAPP.fn.prevText();
 
                                         },
                                         items: {
@@ -507,7 +525,13 @@
                                             new sap.m.TextArea({
                                                 width: "100%",
                                                 rows: 20,
-                                                value: "{/SNS/DESC}"
+                                                value: "{/SNS/DESC}",
+                                                change: () => {
+
+                                                    // 미리보기 갱신
+                                                    oAPP.fn.prevText();
+
+                                                }
                                             }),
                                             new sap.m.Bar({
                                                 contentRight: [
@@ -533,6 +557,13 @@
                                 fields: [
                                     new sap.m.Input({
                                         value: "{/SNS/SAMPLE_URL}",
+                                        change: () => {
+
+                                            // 미리보기 갱신
+                                            oAPP.fn.prevText();
+
+                                        }
+
                                     })
                                 ]
                             }),
@@ -810,7 +841,13 @@
                             text: `Hash Tag       ex) #U4A #UI5`
                         }),
                         template: new sap.m.Input({
-                            value: "{TAG}"
+                            value: "{TAG}",
+                            change: () => {
+
+                                // 미리보기 갱신
+                                oAPP.fn.prevText();
+
+                            }
                         })
                     })
                 ],
@@ -950,31 +987,8 @@
             items: [
 
                 new sap.m.Text({
-                    text: "[제목]"
+                    text: "{/PRC/BODYTXT}"
                 }).addStyleClass("sapUiTinyMarginBottom"),
-
-                new sap.m.Text({
-                    // text: "{/PREV/TITLE}"
-                    text: "{/SNS/TITLE}"
-                }).addStyleClass("sapUiSmallMarginBottom"),
-
-                new sap.m.Text({
-                    text: "[모듈(업무)]"
-                }).addStyleClass("sapUiTinyMarginBottom"),
-
-                new sap.m.Text({
-                    // text: "{/PREV/TYPE}"
-                    text: "{/SNS/TYPE}"
-                }).addStyleClass("sapUiSmallMarginBottom"),
-
-                new sap.m.Text({
-                    text: "[상세설명]"
-                }).addStyleClass("sapUiTinyMarginBottom"),
-
-                new sap.m.Text({
-                    // text: "{/PREV/DESC}"
-                    text: "{/SNS/DESC}"
-                }).addStyleClass("sapUiSmallMarginBottom"),
 
                 new sap.m.VBox({
                     renderType: sap.m.FlexRendertype.Bare,
@@ -1541,32 +1555,44 @@
             return;
         }
 
+        var oSplitApp = oAPP.fn.emogiSplitApp();
+
         var oPopup = new sap.m.Popover({
             title: "이모티콘",
             contentMinWidth: "500px",
+            contentHeight: "500px",
+            contentWidth: "800px",
             horizontalScrolling: true,
             resizable: true,
+            placement: sap.m.PlacementType.Auto,
             content: [
 
-                new sap.m.HBox({
-                    renderType: sap.m.FlexRendertype.Bare,
-                    wrap: sap.m.FlexWrap.Wrap,
-                    items: {
-                        path: "/EMO",
-                        template:
+                oSplitApp
 
-                            new sap.m.Button({
-                                text: "{ICON}",
-                                type: sap.m.ButtonType.Ghost,
-                                press: (oEvent) => {
-                                    oAPP.fn.onPressEmoIcon(oEvent);
-                                }
-                            })
+                // new sap.m.HBox({
+                //     renderType: sap.m.FlexRendertype.Bare,
+                //     wrap: sap.m.FlexWrap.Wrap,
+                //     items: {
+                //         path: "/EMO",
+                //         template:
 
-                    }
-                })
+                //             new sap.m.Button({
+                //                 text: "{ICON}",
+                //                 type: sap.m.ButtonType.Ghost,
+                //                 press: (oEvent) => {
+                //                     oAPP.fn.onPressEmoIcon(oEvent);
+                //                 }
+                //             })
 
-            ]
+                //     }
+                // })
+
+            ],
+            afterClose: () => {
+
+                oAPP.setModelProperty("/EMO", []);
+
+            }
 
         });
 
@@ -1574,9 +1600,99 @@
 
     }; // end of oAPP.fn.openEmogiPopup
 
+    oAPP.fn.emogiSplitApp = () => {
+
+        let oSplitApp = new sap.m.SplitApp({
+            // mode: sap.m.SplitAppMode.StretchCompressMode,
+            mode: sap.m.SplitAppMode.ShowHideMode,
+            masterPages: [
+                new sap.m.Page({
+                    showHeader: false,
+                    content: [
+
+                        new sap.m.List({
+                            mode: sap.m.ListMode.SingleSelectMaster,
+                            selectionChange: (oEvent) => {
+                                oAPP.fn.onEmogiListItemPress(oEvent);
+                            },
+                            items: {
+                                path: "/EMOGILIST",
+                                template: new sap.m.StandardListItem({
+                                    title: "{NAME}"
+
+                                })
+                            }
+
+                        })
+
+                    ]
+
+                })
+            ], // end of masterPages
+
+            detailPages: [
+                new sap.m.Page({
+                    showHeader: false,
+
+                    content: [
+
+                        new sap.m.HBox({
+                            renderType: sap.m.FlexRendertype.Bare,
+                            wrap: sap.m.FlexWrap.Wrap,
+                            items: {
+                                path: "/EMO",
+                                template:
+
+                                    new sap.m.Button({
+                                        text: "{emoji}",
+                                        type: sap.m.ButtonType.Ghost,
+                                        press: (oEvent) => {
+                                            oAPP.fn.onPressEmoIcon(oEvent);
+                                        }
+                                    })
+
+                            }
+                        })
+
+                    ]
+
+                }).addStyleClass("sapUiContentPadding emogiPage")
+
+            ] // end of detailPages
+
+        });
+
+
+
+        return oSplitApp;
+
+    };
+
+    oAPP.fn.onEmogiListItemPress = (oEvent) => {
+
+        let oSelectItem = oEvent.getParameter("listItem"),
+            oCtx = oSelectItem.getBindingContext();
+
+        if (!oCtx) {
+            return;
+        }
+
+        let oIconData = oCtx.getObject();
+
+        oAPP.setModelProperty("/EMO", oIconData.ICONS);
+
+    };
+
     oAPP.fn.onPressEmoIcon = (oEvent) => {
 
+        var oSnsData = jQuery.extend(true, {}, oAPP.getModelProperty("/SNS"));
 
+        let oBtn = oEvent.getSource(),
+            icon = oBtn.getText();
+
+        oSnsData.DESC += icon;
+
+        oAPP.setModelProperty("/SNS", oSnsData);
 
     }; // end of oAPP.fn.onPressEmoIcon
 
@@ -1601,6 +1717,121 @@
         return aEmogi;
 
     } // end of oAPP.fn.getEmogiIcons
+
+    oAPP.fn.getEmogiGroupList = () => {
+
+        let aGroups = [];
+
+        for (var i in oAPP.emogiGroupIcons) {
+            aGroups.push({
+                NAME: i,
+                ICONS: oAPP.emogiGroupIcons[i]
+            });
+        }
+
+        return aGroups;
+
+    };
+
+    /************************************************************************
+     *  앱 재부팅
+     ************************************************************************/
+    oAPP.fn.onAppRestart = () => {
+
+        oAPP.remote.app.relaunch();
+        oAPP.remote.app.exit();
+
+    }; // end of oAPP.fn.onAppRestart
+
+    /************************************************************************
+     *  미리보기 본문 설정
+     ************************************************************************/
+    oAPP.fn.prevText = () => {
+
+        var oParams = {
+
+            "TITLE": "", //제목 
+            "TYPE": "", // 문서 유형
+            "DESC": "", // 내역 
+            "SAMPLE_URL": "", // 샘플 URL
+            "IMAGE": {
+                "URL": "", // 대표 이미지 URL
+                "T_URL": [], // 서브 이미지 URL 
+                "DATA": "" // 대표 이미지 Data (Base64)
+            },
+            "VIDEO": {
+                "URL": "", // 동영상 URL 
+                "FPATH": "" // 동영상 path(PC 디렉토리 경로)
+            },
+            "HASHTAG": [] // 해시태그
+
+        };
+
+        // SNS 전송할 구조
+        let oSnsData = sap.ui.getCore().getModel().getProperty("/SNS"),
+            oSns = jQuery.extend(true, {}, oSnsData);
+
+        oParams.TITLE = oSns.TITLE;
+        oParams.TYPE = oSns.TYPE;
+        oParams.DESC = oSns.DESC;
+        oParams.SAMPLE_URL = oSns.SAMPLE_URL;
+        oParams.IMAGE.URL = oSns.IMAGE.URL;
+        oParams.IMAGE.DATA = oSns.IMAGE.DATA;
+        oParams.VIDEO.URL = oSns.VIDEO.URL;
+        oParams.VIDEO.FPATH = oSns.VIDEO.LURL;
+        oParams.HASHTAG = oAPP.fn.getHashTagList() || [];
+
+        let oSubJect = oAPP.subject;
+
+        let sMsg = `[ ${oSubJect.TITLE} ] \n\n`;
+        sMsg += oParams.TITLE + " \n\n\n ";
+
+        sMsg += `[ ${oSubJect.TYPE} ] \n\n`;
+        sMsg += oParams.TYPE + " \n\n\n ";
+
+        sMsg += `[ ${oSubJect.DESC} ] \n\n`;
+        sMsg += oParams.DESC + " \n\n\n ";
+
+        if (oParams.SAMPLE_URL) {
+            sMsg += `[ ${oSubJect.SAMPLE_URL} ] \n\n`;
+            sMsg += oParams.SAMPLE_URL + " \n\n\n\n\n\n ";
+        }
+
+        if (oParams.IMAGE.T_URL &&
+            oParams.IMAGE.T_URL.length !== 0) {
+
+            sMsg += `[ ${oSubJect.REF_IMG} ] \n\n `;
+
+            let iSubImageLength = oParams.IMAGE.T_URL.length;
+
+            for (var i = 0; i < iSubImageLength; i++) {
+
+                let oSubImgUrl = oParams.IMAGE.T_URL[i];
+
+                sMsg += oSubImgUrl.URL + " \n\n ";
+
+            }
+
+        }
+
+        sMsg += " \n\n\n ";
+
+        let iHashLength = oParams.HASHTAG.length;
+        if (iHashLength !== 0) {
+
+            for (var i = 0; i < iHashLength; i++) {
+
+                let sHash = oParams.HASHTAG[i];
+
+                sMsg += sHash + " \n ";
+
+            }
+
+        }
+
+        oAPP.setModelProperty("/PRC/BODYTXT", sMsg);
+
+    }; // end of oAPP.fn.prevText
 
     /************************************************************************
      *  모듈 코드에 따른 Description

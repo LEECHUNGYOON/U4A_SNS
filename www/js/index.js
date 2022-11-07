@@ -55,6 +55,7 @@
     oAPP.autoUpdate = require(oAPP.path.join(oAPP.JsPath, "autoUpdate.js"));
 
     oAPP.aEmogiIcons = require(oAPP.path.join(oAPP.apppath, "json", "emogi.json"));
+    oAPP.emogiGroupIcons = require(oAPP.path.join(oAPP.apppath, "json", "emogi-group.json"));
 
     // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
     if (process.env.COMPUTERNAME === process.env.SERVER_COMPUTERNAME) {

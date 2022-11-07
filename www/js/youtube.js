@@ -45,8 +45,49 @@ let CREDENTIALS_PATH = "F:\\cordova_u4a\\electron\\U4A_HTTP_CLIENT_SERVER\\www\\
 /* 내부 펑션 
 /* ================================================================= */
 
+// 원하는 문자열 길이만큼 자르기
+function cutByMaxStr(str, maxLength) {
+
+    if (str == undefined || str == null) {
+        return '';
+    }
+
+    if (str.length > maxLength) {
+        str = str.substring(0, maxLength);
+        // str을 maxLength 길이만큼 자른다
+    }
+
+    return str;
+
+}
+
+// 원하는 bytes 만큼 텍스트 자르기 
+function cutByLen(str, maxByte) {
+
+    if (str == undefined || str == null) {
+        return '';
+    }
+
+    for (b = i = 0; c = str.charCodeAt(i);) {
+
+        b += c >> 7 ? 2 : 1;
+
+        if (b > maxByte)
+
+            break;
+
+        i++;
+
+    }
+
+    return str.substring(0, i);
+
+}
+
 //전송 내역 정보 구성 
 function Lfn_setSendBody(sParams) {
+
+    debugger;
 
     var Lbody = "";
     var Lsub_img = "";
@@ -56,8 +97,7 @@ function Lfn_setSendBody(sParams) {
     //해시 태그
     for (var i = 0; i < sParams.HASHTAG.length; i++) {
         var Lhash = sParams.HASHTAG[i];
-        LHASHTAG = " \n " + LHASHTAG + Lhash;
-
+        LHASHTAG += " \n " + Lhash;
     }
 
     //추가 이미지가 존재한다면 ..
@@ -69,27 +109,45 @@ function Lfn_setSendBody(sParams) {
 
     //SAMPLE URL 정보가 존재한다면..
     if (sParams.SAMPLE_URL !== "") {
-        Lsample_url = "Sample GO => " + sParams.SAMPLE_URL + " \n ";
+        Lsample_url = "Sample GO => " + sParams.SAMPLE_URL + " \n\n ";
 
     }
+
+    /**
+     * 타이틀 구성
+     * - 특수기호 "<", ">" 제거하기
+     * - maxLength = 100 
+     */
+    sParams.TITLE = sParams.TITLE.replaceAll("<", "");
+    sParams.TITLE = sParams.TITLE.replaceAll(">", "");
+    sParams.TITLE = cutByMaxStr(sParams.TITLE, 100);
 
     //출력 내역 구성
     Lbody = sParams.TITLE + " \n\n " +
         sParams.DESC + " \n\n " +
         "[reference image]" + " \n " +
-        sParams.IMAGE.URL + " \n " +
+        sParams.IMAGE.URL + " \n\n" +
         Lsub_img +
         Lsample_url +
-        "home : https://www.u4ainfo.com" +
+        "home : https://www.u4ainfo.com" + " \n\n " +
         LHASHTAG;
+
+    /**
+     * 본문 구성
+     * - 특수기호 "<", ">" 제거하기
+     * - maximum byte = 5000 bytes
+     */
+    Lbody = Lbody.replaceAll("<", "");
+    Lbody = Lbody.replaceAll(">", "");
+    Lbody = cutByLen(Lbody, 5000);
 
     return Lbody;
 
 }
 
-
 //HTTP 클라이언트 서버 종료 
 function Lfn_serverClose() {
+
     try {
         oServer.close();
         oServer = null;
@@ -105,7 +163,7 @@ let oErrLog = oAPP.errorlog;
 exports.send = function (sParams, oChoiceInfo, CB) {
 
     debugger;
-    
+
     if (!oChoiceInfo || !oChoiceInfo.YOUTUBE) {
 
         //Callback 
@@ -171,18 +229,16 @@ exports.send = function (sParams, oChoiceInfo, CB) {
         let querystring = remote.require('querystring');
         let sData = querystring.parse(req.url, "/?");
 
-        if (typeof sData.code === "undefined") {            
+        if (typeof sData.code === "undefined") {
             return;
         }
 
         //요청받은 받은 인증key 로 아래에 넣어주면 토큰 callback 펑션이 호출됨 
         oauth.getToken(sData.code, (err, tokens) => {
 
-            if(err){
+            if (err) {
                 res.end(err.toString());
             }
-
-            debugger;
 
             //인증키 누락시..
             if (typeof tokens === "undefined" || tokens == null) {
@@ -257,8 +313,6 @@ exports.send = function (sParams, oChoiceInfo, CB) {
                 },
                 (err, data) => {
 
-                    oAPP.authWIN.close();
-                    
                     debugger;
 
                     if (err) {
@@ -273,15 +327,23 @@ exports.send = function (sParams, oChoiceInfo, CB) {
                         //서버 종료
                         Lfn_serverClose();
 
-                        //callback 
-                        CB(sParams);
+                        // //callback 
+                        // CB(sParams);
 
+                        // youtube 인증 팝업이 닫혀있지 않을 경우에만 윈도우 클로즈를 실행
+                        if (oAPP.authWIN) {
+
+                            // 브라우저를 닫는다.
+                            oAPP.authWIN.close();
+
+                        }
 
                         return;
+
                     }
 
                     //인증 절차 브라우져 종료 처리
-                   
+
                     // res.end('<script>window.close();</script>');
 
                     //정상일 경우 I/F 파라메터 변경
@@ -290,8 +352,16 @@ exports.send = function (sParams, oChoiceInfo, CB) {
                     //서버 종료
                     Lfn_serverClose();
 
-                    //callback 
-                    CB(sParams);
+                    // //callback 
+                    // CB(sParams);
+
+                    // youtube 인증 팝업이 닫혀있지 않을 경우에만 윈도우 클로즈를 실행
+                    if (oAPP.authWIN) {
+
+                        // 브라우저를 닫는다.
+                        oAPP.authWIN.close();
+
+                    }
 
                     return;
 
@@ -336,8 +406,10 @@ exports.send = function (sParams, oChoiceInfo, CB) {
         scope: ["https://www.googleapis.com/auth/youtube.upload"]
     });
 
+
     //로그인 인증 화면 호출
-    oAPP.onAuthCall(Lurl);
+    oAPP.onAuthCall(Lurl, CB, sParams, oServer);
+
     // opn(Lurl);
 
 };

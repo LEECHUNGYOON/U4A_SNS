@@ -144,30 +144,6 @@
         polling: false
     });
 
-    // 테스트
-    oAPP.auth.youtube = {"web":{"client_id":"611137754974-3lablfvb16jrvltl2espb3e30vdqnn52.apps.googleusercontent.com","project_id":"u4aide","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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","redirect_uris":["http://localhost:1977","http://localhost:5000"],"javascript_origins":["http://localhost","http://localhost:1977","http://localhost:5000"]}};
-    // oAPP.auth.youtube = {"web":{"client_id":"1078653778696-ubaf3gbvkfckcq3hhi10vdkf6k7ohmo0.apps.googleusercontent.com","project_id":"yoon-youtube-1977","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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","redirect_uris":["http://localhost:1977","http://localhost:5000"],"javascript_origins":["http://localhost","http://localhost:1977","http://localhost:5000"]}}
-    // oAPP.auth.youtube = {
-    //     "web": {
-    //         "client_id": "611137754974-2l0bcstcp3a6hc9jd8k0sigb04e6q759.apps.googleusercontent.com",
-    //         "project_id": "u4aide",
-    //         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    //         "token_uri": "https://oauth2.googleapis.com/token",
-    //         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    //         "client_secret": "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",
-    //         "redirect_uris": ["http://localhost:1977", "http://localhost:5000"],
-    //         "javascript_origins": ["http://localhost", "http://localhost:1977", "http://localhost:5000"]
-    //     }
-    // }
-
-    // // 테스트
-    // oAPP.auth.facebook = {
-    //     "app_id": "488920756286607",
-    //     "page_id": "102433182683642",
-    //     "user_token": "EAAG8q7wAdI8BAAmeManlHSSq0naqQKfZCFo5Y61GHw84ZChgLYNaYRtJRrbRBIBND7UbFu48LH6cx5WaZCxNdw7491FonUvuiDvFSsiUi0cRVxlhNlcXCBOmpM0ZCaECFb7B3aYV2LD54u3nyK1tjI25u0EVvel8ZBTYZCekwGNx1FT1ZAyCHs3",
-    //     "page_token": "EAAG8q7wAdI8BAL6Ugp7px119vrxAX4hZBqzU9QZCSDvTshk6tWI1g673OXIU7JaLuwFIsjwiSa7RALXtLZCcumkUloza8cZBF4P2KgVscAaQFecIcIvGb8FJ44XZBj7LOiGMQhgueJ9IZCcAoi4mAxjr0hrBuZA14WrxjRpxR9kknr3mqLGnK19",
-    // };
-
     /************************************************************************
      * SNS (몽고DB 연결 성공 후 SNS 인증 키를 받아야하므로 반드시 여기에 있어야 함!)
      ************************************************************************/
@@ -175,7 +151,7 @@
     oAPP.youtube = require(oAPP.path.join(oAPP.JsPath, "youtube.js"));
     oAPP.instagram = require(oAPP.path.join(oAPP.JsPath, "instagram.js"));
     oAPP.kakao = require(oAPP.path.join(oAPP.JsPath, "kakao.js"));
-    oAPP.telegram = require(oAPP.path.join(oAPP.JsPath, "telegram.js"));
+    oAPP.telegram = require(oAPP.path.join(oAPP.JsPath, "telegram.js"));        
 
     /************************************************************************
      * APP 구동 시작
@@ -208,8 +184,10 @@
 
     }; // end of oAPP.isBackgroundMode
 
-
-    oAPP.onAuthCall = (URL) => {
+    /************************************************************************
+     * Youtube 인증 팝업 호출
+     ************************************************************************/
+    oAPP.onAuthCall = (URL, CB, sParams, oServer) => {
 
         // 테스트 웹뷰 
         var op = {
@@ -230,7 +208,6 @@
 
         };
 
-
         oAPP.authWIN = new oAPP.remote.BrowserWindow(op);
         oAPP.authWIN.loadURL(`file://${__dirname}/auth.html`);
         oAPP.authWIN.webContents.on('did-finish-load', () => {
@@ -242,24 +219,19 @@
         });
 
         oAPP.authWIN.on('close', () => {
-            delete oAPP.authWIN;
-        });
 
+            delete oAPP.authWIN;
+
+            oServer.close();
+
+            CB(sParams);
+
+        });
 
         var remote = require('@electron/remote');
         remote.require('@electron/remote/main').enable(oAPP.authWIN.webContents);
 
-    };
-
-
-
-
-
-
-
-
-
-
+    }; // end of oAPP.onAuthCall
 
     /************************************************************************
      * 스크립트 오류 감지

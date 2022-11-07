@@ -17,10 +17,16 @@
             oAPP.server.onReq,
             () => { // success             
 
-                //                 
+                //          
                 // 서버가 정상적으로 붙으면 Hide 처리
                 let oCurrWin = oAPP.remote.getCurrentWindow();
                 oCurrWin.hide();
+
+                // 서버가 정상적으로 붙으면 콘솔창 닫기
+                let oWebCon = oAPP.remote.getCurrentWebContents();
+                if (oWebCon.isDevToolsOpened()) {
+                    oWebCon.closeDevTools();
+                }
 
             },
             (error) => { // error
@@ -471,7 +477,7 @@
                                                 text: "{MODNM}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -578,7 +584,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -612,7 +618,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -691,7 +697,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -729,7 +735,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -1063,7 +1069,7 @@
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function() {
+        reader.onloadend = function () {
 
             var base64data = reader.result;
 
@@ -1199,9 +1205,23 @@
             return;
         }
 
-        let oTableModel = oHashTable.getModel();
+        let oTableModel = oHashTable.getModel(),
+            aHashTags = oTableModel.getObject("/SNS/HASHTAG"),
+            aHash = [];
 
-        return oTableModel.getObject("/SNS/HASHTAG");
+        for (var i = 0; i < aHashTags.length; i++) {
+
+            var oHashInfo = aHashTags[i];
+
+            if (!oHashInfo.TAG) {
+                continue;
+            }
+
+            aHash.push(oHashInfo.TAG);
+
+        }
+
+        return aHash;
 
     }; // end of oAPP.fn.getHashTagList
 
@@ -1476,7 +1496,7 @@
                 template: new sap.m.MessageItem({
                     title: "{RTMSG}",
                     description: "{RTMSG}",
-                }).bindProperty("type", "RETCD", function(RETCD) {
+                }).bindProperty("type", "RETCD", function (RETCD) {
 
                     switch (RETCD) {
                         case "S":
@@ -1661,6 +1681,7 @@
 
         // [배포시 주석] Tray 아이콘 만들고
         oAPP.fn.createTrayIcon();
+
 
         // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기        
         let bIsBackgroundMode = oAPP.isBackgroundMode();

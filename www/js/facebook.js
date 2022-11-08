@@ -24,6 +24,8 @@ const
  ************************************************************************/
 oFaceBook.send = (oParams, oChoiceInfo, cb) => {
 
+    debugger;
+    
     window.jQuery = WINDOW.jQuery;
 
     console.log("페이스북 진입");
@@ -126,6 +128,7 @@ function sendPhoto(oParams, cb) {
     let oFormData = new FormData();
     oFormData.append("access_token", PAGETOKEN);
     oFormData.append("message", sMessage);
+    oFormData.append("published", true);
 
     let sUrl = oAPP.fbApi + "/" + sPath;
 

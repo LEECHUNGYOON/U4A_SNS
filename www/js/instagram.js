@@ -60,23 +60,23 @@ oInstagram.send = (oParams, oChoiceInfo, cb) => {
             ETMSG: "[INSTAGRAM] 이미지 URL은 필수 입니다!!"
         }
 
-        // 공통 에러
+        // Error Collect
         onError(oParams, oErr, cb);
 
         return;
 
     }
 
-    // 인스타 계정 정보 구하기
+    // get instagram account
     getAccount(
         (oAccInfo) => { // success
 
-            // 게시물 전송
+            // Send a post
             sendPost(oParams, oAccInfo, cb);
 
         }, (oErr) => { // error
 
-            // 공통 에러
+            // Error Collect
             onError(oParams, oErr, cb);
 
         });

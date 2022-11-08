@@ -100,30 +100,53 @@ async function sendMessage(chat_id, sParams) {
 
     }
 
-    if(sParams.IMAGE !== ""){
+    // 대표 이미지가 존재할 경우
+    if(sParams.IMAGE.URL !== ""){
 
-    //서브 이미지 URL 존재시
-    if(sParams.IMAGE.T_URL.length != 0){
+        //서브 이미지 URL 존재시
+        if(sParams.IMAGE.T_URL.length != 0){
 
-        Lbody   = Lbody 
-                + "★ 추가 참조 이미지"   + " \n ";
+            Lbody   = Lbody 
+                    + "★ 추가 참조 이미지"   + " \n ";
 
-            for (var i = 0; i < sParams.IMAGE.T_URL.length; i++) {
-                    var sUrl = sParams.IMAGE.T_URL[i];
+                for (var i = 0; i < sParams.IMAGE.T_URL.length; i++) {
+                        var sUrl = sParams.IMAGE.T_URL[i];
 
-                    Lbody   = Lbody 
-                            + sUrl.URL   + " \n\n ";
+                        Lbody   = Lbody 
+                                + sUrl.URL   + " \n\n ";
 
-            }
+                }
+
+        }
+
+        //미리보기 사진 형식 본문 포멧 전송
+        await BOT.sendPhoto(chat_id, sParams.IMAGE.URL , { caption: Lbody } );
 
     }
 
-    //미리보기 사진 형식 본문 포멧 전송
-    await BOT.sendPhoto(chat_id, sParams.IMAGE.URL , { caption: Lbody } );
+    // url 형식의 비디오가 있다면.
+    if (sParams.VIDEO.URL !== ""){
 
-    return;
+        // 확장자 점검 해야함!!
+        // mp4, mov ??
 
+        // await BOT.sendVideo(chat_id, sParams.VIDEO.URL, { caption: Lbody });
+
+
+        return;
     }
+
+    // // 로컬 pc에 비디오 파일이 있다면
+    // if (sParams.VIDEO.FPATH !== ""){
+
+
+
+
+
+
+    //     return;
+
+    // }
 
     //일반 본문 포멧 전송 
     await BOT.sendMessage(chat_id, Lbody);

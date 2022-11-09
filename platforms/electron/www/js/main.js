@@ -346,6 +346,11 @@
                                                 selected: "{/PRC/CHOICE/YOUTUBE}"
                                             }),
                                             new sap.m.CheckBox({
+                                                text: "Telegram",
+                                                editable: false,
+                                                selected: "{/PRC/CHOICE/TELEGRAM}"
+                                            }),
+                                            new sap.m.CheckBox({
                                                 text: "Facebook",
                                                 selected: "{/PRC/CHOICE/FACEBOOK}"
                                             }),
@@ -356,11 +361,7 @@
                                             new sap.m.CheckBox({
                                                 text: "Kakao Story",
                                                 selected: "{/PRC/CHOICE/KAKAO_STORY}"
-                                            }),
-                                            new sap.m.CheckBox({
-                                                text: "Telegram",
-                                                selected: "{/PRC/CHOICE/TELEGRAM}"
-                                            }),
+                                            }),                                           
                                             new sap.m.Button({
                                                 icon: "sap-icon://paper-plane",
                                                 text: "Send Post",
@@ -433,6 +434,25 @@
      * SNS 입력 부분 페이지 Content 영역 UI 그리기
      ************************************************************************/
     oAPP.fn.getSnsPageContent = () => {
+
+
+        oAPP.oEditor = new sap.ui.codeeditor.CodeEditor({
+            type: "plain_text",
+            lineNumbers: false,
+            syntaxHints: false,
+            height: "500px",
+            value: "{/SNS/DESC}",
+            change: () => {
+
+                // 미리보기 갱신
+                oAPP.fn.prevText();
+
+            }
+        }).addStyleClass("sapUiTinyMarginTop");
+
+        oAPP.oCodeEditor = oAPP.oEditor._oEditor;
+
+        oAPP.oCodeEditor.setFontSize("20px");
 
         let oForm1 = new sap.ui.layout.form.Form({
                 editable: true,
@@ -522,22 +542,24 @@
                                     new sap.m.VBox({
                                         renderType: sap.m.FlexRendertype.Bare,
                                         items: [
-                                            new sap.m.TextArea({
-                                                width: "100%",
-                                                rows: 20,
-                                                value: "{/SNS/DESC}",
-                                                change: () => {
 
-                                                    // 미리보기 갱신
-                                                    oAPP.fn.prevText();
+                                            oAPP.oEditor,
+                                            // new sap.m.TextArea({
+                                            //     width: "100%",
+                                            //     rows: 20,
+                                            //     value: "{/SNS/DESC}",
+                                            //     change: () => {
 
-                                                }
-                                            }),
+                                            //         // 미리보기 갱신
+                                            //         oAPP.fn.prevText();
+
+                                            //     }
+                                            // }),
                                             new sap.m.Bar({
                                                 contentRight: [
                                                     new sap.m.Button({
                                                         icon: "sap-icon://feedback",
-                                                        press: (oEvent) => {                                                         
+                                                        press: (oEvent) => {
 
                                                             oAPP.fn.openEmogiPopup(oEvent);
                                                         }
@@ -777,10 +799,13 @@
                                     oAPP.setModelProperty("/SNS/IMAGE/LURL", "");
 
                                     // Blob 파일 정보를 지운다.
-                                    sap.ui.getCore().getModel().setProperty("/SNS/IMAGE/DATA", "");
+                                    oAPP.setModelProperty("/SNS/IMAGE/DATA", "");
+
+                                    // 이미지 로컬 경로 데이터를 지운다
+                                    oAPP.setModelProperty("/SNS/IMAGE/FPATH", "");
 
                                     // 미리보기쪽 이미지를 지운다.
-                                    sap.ui.getCore().getModel().setProperty("/PREV/IMAGE/URL", "");
+                                    oAPP.setModelProperty("/PREV/IMAGE/URL", "");
 
                                     return false;
                                 }
@@ -1191,6 +1216,8 @@
 
             let sFilePath = oPathInfo.filePaths[0];
 
+            oAPP.setModelProperty("/SNS/IMAGE/FPATH", sFilePath);
+
             // 현재 선택한 경로 저장
             oAPP._filedownPath = sFilePath;
 
@@ -1259,7 +1286,8 @@
             "IMAGE": {
                 "URL": "", // 대표 이미지 URL
                 "T_URL": [], // 서브 이미지 URL 
-                "DATA": "" // 대표 이미지 Data (Base64)
+                "DATA": "", // 대표 이미지 Data (Base64)
+                "FPATH": "" // 이미지 path(PC 디렉토리 경로)
             },
             "VIDEO": {
                 "URL": "", // 동영상 URL 
@@ -1278,6 +1306,7 @@
         TY_IFDATA.SAMPLE_URL = oSns.SAMPLE_URL;
         TY_IFDATA.IMAGE.URL = oSns.IMAGE.URL;
         TY_IFDATA.IMAGE.DATA = oSns.IMAGE.DATA;
+        TY_IFDATA.IMAGE.FPATH = oSns.IMAGE.FPATH;
         TY_IFDATA.VIDEO.URL = oSns.VIDEO.URL;
         TY_IFDATA.VIDEO.FPATH = oSns.VIDEO.LURL;
         TY_IFDATA.HASHTAG = oAPP.fn.getHashTagList() || [];
@@ -1350,39 +1379,39 @@
 
             oAPP.youtube.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                oAPP.setBusyMsg("Facebook 전송중...");
+                oAPP.setBusyMsg("telegram 전송중...");
 
                 console.log("Youtube 종료");
 
-                console.log("페이스북 시작");
+                console.log("텔레그램 시작");
 
-                oAPP.facebook.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                oAPP.telegram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                    console.log("페이스북 종료");
+                    oAPP.setBusyMsg("Facebook 전송중...");
 
-                    oAPP.setBusyMsg("Instagram 전송중...");
+                    console.log("텔레그램 종료");
 
-                    console.log("인스타그램 시작");
+                    console.log("페이스북 시작");
 
-                    oAPP.instagram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                    oAPP.facebook.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                        console.log("인스타그램 종료");
+                        oAPP.setBusyMsg("Instagram 전송중...");
 
-                        oAPP.setBusyMsg("Kakao Story 전송중...");
+                        console.log("페이스북 종료");
 
-                        console.log("카카오 시작");
+                        console.log("인스타그램 시작");
 
-                        oAPP.kakao.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                        oAPP.instagram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                            console.log("카카오 종료");
+                            oAPP.setBusyMsg("Kakao Story 전송중...");
 
-                            oAPP.setBusyMsg("telegram 전송중...");
+                            console.log("인스타그램 종료");
 
-                            console.log("텔레그램 시작");
+                            console.log("카카오 시작");
 
-                            oAPP.telegram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                            oAPP.kakao.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
-                                console.log("텔레그램 종료");
+                                console.log("카카오 종료");
 
                                 resolve();
 
@@ -1650,7 +1679,7 @@
                                         press: (oEvent) => {
                                             oAPP.fn.onPressEmoIcon(oEvent);
                                         }
-                                    })
+                                    }).addStyleClass("emogiButtons")
 
                             }
                         })
@@ -1686,14 +1715,16 @@
 
     oAPP.fn.onPressEmoIcon = (oEvent) => {
 
-        var oSnsData = jQuery.extend(true, {}, oAPP.getModelProperty("/SNS"));
+        // var oSnsData = jQuery.extend(true, {}, oAPP.getModelProperty("/SNS"));
 
         let oBtn = oEvent.getSource(),
             icon = oBtn.getText();
 
-        oSnsData.DESC += icon;
+        oAPP.oCodeEditor.insert(icon);
 
-        oAPP.setModelProperty("/SNS", oSnsData);
+        // oSnsData.DESC += icon;
+
+        // oAPP.setModelProperty("/SNS", oSnsData);
 
     }; // end of oAPP.fn.onPressEmoIcon
 

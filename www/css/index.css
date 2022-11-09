@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
     margin: 0px;
     height: 100%;
     background-color: #030303;
@@ -6,10 +7,18 @@ html, body {
 
 .u4aBusyIndicator .sapMLabel {
     margin-top: 1rem;
-} 
+}
 
 
 
 .emogiPage .sapMBtnInner {
     border: none !important;
+}
+
+
+.sapCEd .ace_editor .ace_print-margin {
+    visibility: hidden !important;
+}
+.emogiButtons .sapMBtnInner {
+    font-size: 1.5rem;
 }

@@ -1319,6 +1319,8 @@
         // SNS 일괄 전송!!
         oAPP.fn.sendSNS(TY_IFDATA, oChoice)
             .then(() => {
+                
+                debugger;
 
                 // SNS 전송시 오류가 있을 경우 오류에 대한 정보 기록하기
                 oAPP.fn.setErrorLogSNS();

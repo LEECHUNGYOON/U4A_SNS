@@ -725,9 +725,7 @@ async function sendMessage(chat_id, sParams) {
 /* ================================================================= */
 /* Export Module Function 
 /* ================================================================= */
-exports.send = function (sParams, oChoiceInfo, CB) {
-
-    debugger;
+exports.send = function(sParams, oChoiceInfo, CB) {
 
     if (!oChoiceInfo || !oChoiceInfo.TELEGRAM) {
 
@@ -745,7 +743,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
     let oErrLog = oAPP.errorlog;
 
     //몽고 DB에 전체 사용자 정보 얻기 
-    MongClinet.connect(MongDB_HOST, function (err, db) {
+    MongClinet.connect(MongDB_HOST, function(err, db) {
 
         if (err) {
 
@@ -764,7 +762,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
             dbname = "USER_INFO";
         var query = {};
 
-        dbo.collection(dbname).find(query).toArray(function (err, result) {
+        dbo.collection(dbname).find(query).toArray(function(err, result) {
 
             db.close();
 

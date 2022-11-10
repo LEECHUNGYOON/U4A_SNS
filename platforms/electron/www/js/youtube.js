@@ -160,10 +160,8 @@ let oErrLog = oAPP.errorlog;
 /* ================================================================= */
 /* Export Module Function 
 /* ================================================================= */
-exports.send = function (sParams, oChoiceInfo, CB) {
-
-    debugger;
-
+exports.send = function(sParams, oChoiceInfo, CB) {
+ 
     if (!oChoiceInfo || !oChoiceInfo.YOUTUBE) {
 
         //Callback 
@@ -217,7 +215,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
     }
 
     //HTTP 서버 생성
-    oServer = http.createServer(function (req, res) {
+    oServer = http.createServer(function(req, res) {
 
         res.writeHead(200, {
             'Content-Type': 'text/html'

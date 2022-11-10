@@ -16,15 +16,12 @@ let oErrLog = oAPP.errorlog;
 
 oInstagram.send = (oParams, oChoiceInfo, cb) => {
 
-    debugger;
-
     window.jQuery = WINDOW.jQuery;
 
     if (!oChoiceInfo || !oChoiceInfo.INSTAGRAM) {
 
         //Callback 
         cb(oParams);
-
         return;
 
     }
@@ -95,7 +92,7 @@ function getAccount(cbSuccess, cbError) {
     jQuery.ajax({
         url: sUrl,
         type: sMethod,
-        success: function (res) {
+        success: function(res) {
 
             if (!res.instagram_business_account) {
 
@@ -118,7 +115,7 @@ function getAccount(cbSuccess, cbError) {
             cbSuccess(oAccInfo);
 
         },
-        error: function (e) {
+        error: function(e) {
 
             let oRes = e.responseJSON,
                 oErr = oRes.error;
@@ -173,7 +170,7 @@ function sendVideo(oParams, oAccInfo, cb) {
         contentType: false,
         data: oFormData,
         type: sMethod,
-        success: function (res) {
+        success: function(res) {
 
             setTimeout(() => {
 
@@ -182,7 +179,7 @@ function sendVideo(oParams, oAccInfo, cb) {
             }, 3000);
 
         },
-        error: function (e) {
+        error: function(e) {
 
             let oRes = e.responseJSON,
                 oErr = oRes.error;
@@ -235,7 +232,7 @@ function sendPost(oParams, oAccInfo, cb) {
         contentType: false,
         data: oFormData,
         type: sMethod,
-        success: function (res) {
+        success: function(res) {
 
             setTimeout(() => {
 
@@ -244,7 +241,7 @@ function sendPost(oParams, oAccInfo, cb) {
             }, 5000);
 
         },
-        error: function (e) {
+        error: function(e) {
 
             let oRes = e.responseJSON,
                 oErr = oRes.error;
@@ -279,7 +276,7 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
     jQuery.ajax({
         url: sUrl,
         type: sMethod,
-        success: function (res) {
+        success: function(res) {
 
             let oErr = {
                 RETCD: "",
@@ -330,7 +327,7 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
             // cb(oParams);
 
         },
-        error: function (e) {
+        error: function(e) {
 
             let oRes = e.responseJSON,
                 oErr = oRes.error;
@@ -372,12 +369,12 @@ function sendPublish(oParams, oAccInfo, oRes, cb) {
         contentType: false,
         data: oFormData,
         type: sMethod,
-        success: function (res) {
+        success: function(res) {
 
             cb(oParams);
 
         },
-        error: function (e) {
+        error: function(e) {
 
             let oRes = e.responseJSON,
                 oErr = oRes.error;
@@ -443,7 +440,7 @@ function getMessage(oParams) {
 
         for (var i = 0; i < iHashLength; i++) {
 
-            let sHash = oParams.HASHTAG[i];      
+            let sHash = oParams.HASHTAG[i];
 
             sMsg += sHash + " \n ";
 

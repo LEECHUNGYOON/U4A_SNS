@@ -24,8 +24,6 @@ const
  ************************************************************************/
 oFaceBook.send = (oParams, oChoiceInfo, cb) => {
 
-    debugger;
-
     window.jQuery = WINDOW.jQuery;
 
     console.log("페이스북 진입");
@@ -34,7 +32,6 @@ oFaceBook.send = (oParams, oChoiceInfo, cb) => {
 
         //Callback 
         cb(oParams);
-
         return;
 
     }
@@ -113,12 +110,12 @@ function sendFeed(oParams, cb) {
         contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
         data: oFormData, // 위에서 선언한 fromdata
         type: sMethod,
-        success: function (result) {
+        success: function(result) {
 
             cb(oParams);
 
         },
-        error: function (e) {
+        error: function(e) {
 
             let oRes = e.responseJSON,
                 oErr = oRes.error;
@@ -166,12 +163,12 @@ function sendPhoto(oParams, cb) {
             contentType: false,
             data: oFormData,
             type: sMethod,
-            success: function (result) {
+            success: function(result) {
 
                 cb(oParams);
 
             },
-            error: function (e) {
+            error: function(e) {
 
                 let oRes = e.responseJSON,
                     oErr = oRes.error;
@@ -205,12 +202,12 @@ function sendPhoto(oParams, cb) {
             contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
             data: oFormData, // 위에서 선언한 fromdata
             type: sMethod,
-            success: function (result) {
+            success: function(result) {
 
                 cb(oParams);
 
             },
-            error: function (e) {
+            error: function(e) {
 
                 let oRes = e.responseJSON,
                     oErr = oRes.error;

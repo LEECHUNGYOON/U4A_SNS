@@ -25,7 +25,7 @@ const
 oFaceBook.send = (oParams, oChoiceInfo, cb) => {
 
     debugger;
-    
+
     window.jQuery = WINDOW.jQuery;
 
     console.log("페이스북 진입");
@@ -42,11 +42,24 @@ oFaceBook.send = (oParams, oChoiceInfo, cb) => {
     // oParams.VIDEO.URL = "https://youtu.be/S1j3i3Wxh7M";
 
     // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
-    if (oParams.VIDEO.URL !== "") {
+
+    // if (oParams.VIDEO.URL !== "") {
+
+    //     sendFeed(oParams, cb);
+
+    //     return;
+
+    // }
+
+    // 동영상 또는 이미지 전송 여부 flag
+    let bSend = false;
+
+    // 유투브 전송한 동영상 링크 정보가 있을 경우
+    if (oParams.VIDEO.YOUTUBE_URL) {
 
         sendFeed(oParams, cb);
 
-        return;
+        bSend = true;
 
     }
 
@@ -54,6 +67,16 @@ oFaceBook.send = (oParams, oChoiceInfo, cb) => {
     if (oParams.IMAGE.URL !== "" || oParams.IMAGE.DATA !== "") {
 
         sendPhoto(oParams, cb);
+
+        bSend = true;
+
+    }
+
+    // 동영상 또는 이미지 둘중 하나라도 전송했다면 빠져나간다.
+    if (bSend) {
+
+        //Callback 
+        cb(oParams);
 
         return;
 
@@ -257,7 +280,7 @@ function getMessage(oParams) {
 
         for (var i = 0; i < iHashLength; i++) {
 
-            let sHash = oParams.HASHTAG[i];        
+            let sHash = oParams.HASHTAG[i];
 
             sMsg += sHash + " \n ";
 

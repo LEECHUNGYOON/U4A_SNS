@@ -662,7 +662,7 @@
                                 fields: [
 
                                     new sap.m.Input({
-                                        value: "{/SNS/VIDEO/LURL}",
+                                        value: "{/SNS/VIDEO/FPATH}",
                                         showValueHelp: true,
                                         valueHelpIconSrc: "sap-icon://attachment",
                                         valueHelpOnly: true,
@@ -679,7 +679,7 @@
                                     // // 입력된 값 초기화
                                     // this.setValue("");
 
-                                    oAPP.setModelProperty("/SNS/VIDEO/LURL", "");
+                                    oAPP.setModelProperty("/SNS/VIDEO/FPATH", "");
 
                                     return false;
                                 }
@@ -699,7 +699,7 @@
                 headerToolbar: new sap.m.Toolbar({
                     content: [
                         new sap.m.Title({
-                            text: "2. Youtube 동영상 첨부"
+                            text: "2. 동영상 첨부"
                         }),
 
                         new sap.m.RadioButtonGroup({
@@ -1165,7 +1165,7 @@
             // 현재 선택한 경로 저장
             oAPP._filedownPath = sFilePath;
 
-            sap.ui.getCore().getModel().setProperty("/SNS/VIDEO/LURL", sFilePath);
+            sap.ui.getCore().getModel().setProperty("/SNS/VIDEO/FPATH", sFilePath);
 
         });
 
@@ -1308,7 +1308,7 @@
         TY_IFDATA.IMAGE.DATA = oSns.IMAGE.DATA;
         TY_IFDATA.IMAGE.FPATH = oSns.IMAGE.FPATH;
         TY_IFDATA.VIDEO.URL = oSns.VIDEO.URL;
-        TY_IFDATA.VIDEO.FPATH = oSns.VIDEO.LURL;
+        TY_IFDATA.VIDEO.FPATH = oSns.VIDEO.FPATH;
         TY_IFDATA.HASHTAG = oAPP.fn.getHashTagList() || [];
 
         oAPP.setBusy(true);
@@ -1810,7 +1810,7 @@
         oParams.IMAGE.URL = oSns.IMAGE.URL;
         oParams.IMAGE.DATA = oSns.IMAGE.DATA;
         oParams.VIDEO.URL = oSns.VIDEO.URL;
-        oParams.VIDEO.FPATH = oSns.VIDEO.LURL;
+        oParams.VIDEO.FPATH = oSns.VIDEO.FPATH;
         oParams.HASHTAG = oAPP.fn.getHashTagList() || [];
 
         let oSubJect = oAPP.subject;

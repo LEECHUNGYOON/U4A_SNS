@@ -40,32 +40,161 @@ var TY_IFDATA = {
 const
     BOT = oAPP.telegramBOT,
     axios = oAPP.remote.require('axios'),
-    FormData = oAPP.remote.require('form-data');
+    FormData = oAPP.remote.require('form-data'),
+    PATH = oAPP.path,
+    telegramUrl = `https://api.telegram.org/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/sendDocument`,
+    U4ABOT_ID = "-1001817590912";
+
+let VIDEO_FILE_ID = "",
+    IMAGE_FILE_ID = "";
+
+
 /* ================================================================= */
 /* 내부 펑션 
 /* ================================================================= */
 
+// 메시지 본문
+function Lfn_getBody(sParams) {
+
+    var Lbody = "★ 제목" + " \n " +
+        sParams.TITLE + " \n\n " +
+        "★ 모듈(업무)" + " \n " +
+        sParams.TYPE + " \n\n " +
+        "★ 상세설명" + " \n " +
+        sParams.DESC + " \n\n ";
+
+    //샘플 URL 정보가 존재한다면 
+    if (sParams.SAMPLE_URL !== "") {
+
+        Lbody = Lbody + "★ 샘플 HOME 이동" + " \n " +
+            sParams.SAMPLE_URL + " \n\n ";
+
+    }
+
+    //서브 이미지 URL 존재시
+    if (sParams.IMAGE.T_URL.length != 0) {
+
+        Lbody = Lbody +
+            "★ 추가 참조 이미지" + " \n ";
+
+        for (var i = 0; i < sParams.IMAGE.T_URL.length; i++) {
+            var sUrl = sParams.IMAGE.T_URL[i];
+
+            Lbody = Lbody +
+                sUrl.URL + " \n\n ";
+
+        }
+
+    }
+
+
+    return Lbody;
+
+}
+
+
 //텔레그램 고객 전체에 메시지 전송
 async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
 
+    VIDEO_FILE_ID = "";
+    IMAGE_FILE_ID = "";
+
+    let oErrLog = oAPP.errorlog;
+
     if (USER_INFO.length == 0) {
+
+        //오류 메시지 수집
+        oErrLog.addLog({
+            RETCD: "E",
+            RTMSG: "[ TELEGRAM send Message #1 ] 메시지 전송할 User가 없습니다."
+        });
+
+        CB(sParams);
         return;
     }
 
-    await getImageVideoUrl(sParams);
+    // 메시지 본문
+    var Lbody = Lfn_getBody(sParams);
 
-    // await BOT.sendMessage("-1001817590912", sParams.DESC);
-    // CB(sParams);
+    if (sParams.VIDEO.FPATH !== "") {
+        sParams.VIDEO.URL = "";
+    }
 
-    // return;
+    // URL 이 있으면 
+    if (sParams.VIDEO.URL !== "") {
+
+        // 여기서 채널봇으로 전송
+        try {
+
+            await BOT.sendVideo(U4ABOT_ID, sParams.VIDEO.URL, {
+                caption: Lbody
+            });
+
+        } catch (error) {
+
+            debugger;
+
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM send Message #2 ]: " + error.toString()
+            });
+
+        }
+
+    }
+
+
+    // 로컬 pc의 동영상 경로일 경우
+    if (sParams.VIDEO.FPATH !== "") {
+
+        await sendVideo(sParams);
+
+    }
+
+
+    // URL 이 있으면 
+    if (sParams.IMAGE.URL !== "") {
+
+        // 여기서 채널봇으로 전송
+
+        try {
+            await BOT.sendPhoto(U4ABOT_ID, sParams.IMAGE.URL, {
+                caption: Lbody
+            });
+
+        } catch (error) {
+
+            debugger;
+
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM send Message #2 ]: " + error.toString()
+            });
+
+        }
+        // await sendImage(sParams);
+
+    }
+
+    // URL 이 있으면 여기서 채널봇으로 전송
+
+    // 로컬 pc의 이미지 경로일 경우
+    if (sParams.IMAGE.FPATH !== "") {
+
+        await sendImage(sParams);
+
+    }
+
+    debugger;
 
     for (let index = 0; index < USER_INFO.length; index++) {
         var sUserInfo = USER_INFO[index];
 
-        // if (sUserInfo.chat_id === "-1001817590912") {
-        //     await BOT.sendMessage(sUserInfo.chat_id, sParams.DESC);
-        //     break;
-        // }
+        if (sUserInfo.chat_id === U4ABOT_ID) {
+            continue;
+        }
 
         // continue;
 
@@ -85,37 +214,381 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
 }
 
 /************************************************************************
- * 텔레그램에 전송한 이미지, 동영상 url을 구한다.
+ * 로컬 pc의 동영상 텔레그램 업로드 하여 http url을 구한다.
  ************************************************************************/
-function getImageVideoUrl(sParams) {
+function sendVideo(sParams) {
 
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
 
-        // 이미지 로컬 경로가 있을 경우
-        if ((typeof sParams.IMAGE.FPATH !== "undefined") && sParams.IMAGE.FPATH !== "") {
+        debugger;
 
-            // 이미지파일을 텔레그램에 던진다.
+        let oErrLog = oAPP.errorlog;
 
+        // 로컬 pc의 동영상 경로
+        let sPath = sParams.VIDEO.FPATH;
 
+        // 파일이 진짜로 있는지 확인
+        let bIsExists = oAPP.fs.existsSync(sPath);
+        if (!bIsExists) {
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Video 전송오류 ] 로컬pc 경로에 동영상이 없습니다."
+            });
+            resolve();
+            return;
+        }
 
+        // 파일명
+        let sFileName = PATH.basename(sPath);
 
+        // 메시지 본문
+        var Lbody = Lfn_getBody(sParams);
 
-            // 텔레그램 url을 파라미터에 매핑한다.
-            sParams.IMAGE.URL = "";
+        const formData = new FormData();
+        formData.append('chat_id', U4ABOT_ID);
+        formData.append('caption', Lbody);
+        formData.append('document', oAPP.fs.createReadStream(sPath), sFileName);
+
+        try {
+
+            var sRET = await axios.post(telegramUrl, formData, {
+                headers: formData.getHeaders(),
+
+            });
+
+        } catch (error) {
+
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Video 전송 오류 #1] " + error.toString()
+            });
+
+            resolve();
+            return;
 
         }
 
-        // // 로컬 pc에 비디오 파일이 있다면
-        if (sParams.VIDEO.FPATH !== "") {
+        //오류 
+        if (sRET.status != 200) {
 
-            // 비디오 파일을 텔레그램에 던진다.
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Video 전송 오류 #2] "
+            });
 
+            resolve();
+            return;
+        }
 
-
-            // 텔레그램 비디오 url을 파라미터에 매핑한다.
-            sParams.VIDEO.URL = "";
+        //오류
+        if (typeof sRET.data === "undefined") {
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Video 전송 오류 #3] "
+            });
+            resolve();
+            return;
 
         }
+
+        //오류
+        if (typeof sRET.data.result === "undefined") {
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Video 전송 오류 #4] "
+            });
+            resolve();
+            return;
+
+        }
+
+        // 비디오 전송 결과
+        let sResult = sRET.data.result,
+            sFile_id = "";
+
+        // Object 구조에 따라 file_id 를 구한다.
+        if (sResult.video && sResult.video.file_id) {
+            sFile_id = sResult.video.file_id;
+        }
+
+        if (sResult.document && sResult.document.file_id) {
+            sFile_id = sResult.document.file_id;
+        }
+
+        // file id가 없으면 오류
+        if (sFile_id == "") {
+
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Video 전송 오류 #5] "
+            });
+
+            resolve();
+
+            return;
+        }
+
+
+        // 실제 파일 경로
+        var LURL = "https://api.telegram.org/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/getFile?file_id=" + sFile_id
+        // sRET.data.result.video.file_id;
+        // sRET.data.result.document.file_id;
+
+        // 임시 글로벌에 file id를 담는다.
+        // VIDEO_FILE_ID = sRET.data.result.video.file_id;
+        VIDEO_FILE_ID = sFile_id;
+
+        try {
+            var sRET = await axios.get(LURL);
+        } catch (error) {
+
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Video 전송 오류 #6] "
+            });
+            resolve();
+            return;
+
+        }
+
+
+        //오류 
+        if (sRET.status != 200) {
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Video 전송 오류 #7] "
+            });
+            resolve();
+            return;
+        }
+
+        //오류
+        if (typeof sRET.data === "undefined") {
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Video 전송 오류 #8] "
+            });
+            resolve();
+            return;
+
+        }
+
+        //오류
+        if (typeof sRET.data.result === "undefined") {
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Video 전송 오류 #9] "
+            });
+            resolve();
+            return;
+
+        }
+
+        sParams.VIDEO.FPATH = "";
+        sParams.VIDEO.URL = "https://api.telegram.org/file/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/" + sRET.data.result.file_path;
+
+        resolve();
+
+    });
+
+}
+
+
+/************************************************************************
+ * 로컬 pc의 이미지를 텔레그램 업로드 하여 http url을 구한다.
+ ************************************************************************/
+function sendImage(sParams) {
+
+    return new Promise(async (resolve) => {
+
+        debugger;
+
+        let oErrLog = oAPP.errorlog;
+
+        // 로컬 pc의 이미지 경로
+        let sPath = sParams.IMAGE.FPATH;
+
+        // 파일이 진짜로 있는지 확인
+        let bIsExists = oAPP.fs.existsSync(sPath);
+        if (!bIsExists) {
+
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Image 전송오류 ] 로컬pc 경로에 이미지가 없습니다."
+            });
+
+            resolve();
+
+            return;
+        }
+
+        // 파일명
+        let sFileName = PATH.basename(sPath);
+
+        // 메시지 본문
+        var Lbody = Lfn_getBody(sParams);
+
+        const formData = new FormData();
+
+        formData.append('chat_id', U4ABOT_ID);
+        formData.append('caption', Lbody);
+        formData.append('document', oAPP.fs.createReadStream(sPath), sFileName);
+
+        try {
+
+            var sRET = await axios.post(telegramUrl, formData, {
+                headers: formData.getHeaders(),
+
+            });
+
+        } catch (error) {
+
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Image 전송 오류 #1] " + error.toString()
+            });
+
+            resolve();
+            return;
+
+        }
+
+        debugger;
+
+        //오류 
+        if (sRET.status != 200) {
+
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Image 전송 오류 #2] "
+            });
+
+            resolve();
+            return;
+        }
+
+        //오류
+        if (typeof sRET.data === "undefined") {
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Image 전송 오류 #3] "
+            });
+            resolve();
+            return;
+
+        }
+
+        //오류
+        if (typeof sRET.data.result === "undefined") {
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Image 전송 오류 #4] "
+            });
+            resolve();
+            return;
+
+        }
+
+        // 이미지 전송 결과
+        let sResult = sRET.data.result,
+            sFile_id = "";
+
+        // // Object 구조에 따라 file_id 를 구한다.
+        // if (sResult.video && sResult.video.file_id) {
+        //     sFile_id = sResult.video.file_id;
+        // }
+
+        if (sResult.document && sResult.document.file_id) {
+            sFile_id = sResult.document.file_id;
+        }
+
+        // file id가 없으면 오류
+        if (sFile_id == "") {
+
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Image 전송 오류 #5] "
+            });
+
+            resolve();
+
+            return;
+        }
+
+        // 실제 파일 경로
+        var LURL = "https://api.telegram.org/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/getFile?file_id=" + sFile_id;
+        // sRET.data.result.document.file_id;
+
+        // IMAGE_FILE_ID = sRET.data.result.document.file_id;
+        IMAGE_FILE_ID = sFile_id;
+
+        try {
+            var sRET = await axios.get(LURL);
+        } catch (error) {
+
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Image 전송 오류 #6] "
+            });
+            resolve();
+            return;
+
+        }
+
+        //오류 
+        if (sRET.status != 200) {
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Image 전송 오류 #7] "
+            });
+            resolve();
+            return;
+        }
+
+        //오류
+        if (typeof sRET.data === "undefined") {
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Image 전송 오류 #8] "
+            });
+            resolve();
+            return;
+
+        }
+
+        //오류
+        if (typeof sRET.data.result === "undefined") {
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: "[ TELEGRAM Image 전송 오류 #10] "
+            });
+            resolve();
+            return;
+
+        }
+
+        sParams.IMAGE.FPATH = "";
+        sParams.IMAGE.URL = "https://api.telegram.org/file/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/" + sRET.data.result.file_path;
 
         resolve();
 
@@ -127,80 +600,125 @@ function getImageVideoUrl(sParams) {
  * 게시글 본문 구성하기
  ************************************************************************/
 async function sendMessage(chat_id, sParams) {
+    debugger;
+    // var Lbody = "★ 제목" + " \n " +
+    //     sParams.TITLE + " \n\n " +
+    //     "★ 모듈(업무)" + " \n " +
+    //     sParams.TYPE + " \n\n " +
+    //     "★ 상세설명" + " \n " +
+    //     sParams.DESC + " \n\n ";
 
-    var Lbody = "★ 제목" + " \n " +
-        sParams.TITLE + " \n\n " +
-        "★ 모듈(업무)" + " \n " +
-        sParams.TYPE + " \n\n " +
-        "★ 상세설명" + " \n " +
-        sParams.DESC + " \n\n ";
+    // //샘플 URL 정보가 존재한다면 
+    // if (sParams.SAMPLE_URL !== "") {
 
-    //샘플 URL 정보가 존재한다면 
-    if (sParams.SAMPLE_URL !== "") {
+    //     Lbody = Lbody + "★ 샘플 HOME 이동" + " \n " +
+    //         sParams.SAMPLE_URL + " \n\n ";
 
-        Lbody = Lbody + "★ 샘플 HOME 이동" + " \n " +
-            sParams.SAMPLE_URL + " \n\n ";
+    // }
 
-    }
+    var bSend = false;
 
-
-    // 우선순위
-    // 1. FPATH
-
+    // 메시지 본문
+    var Lbody = Lfn_getBody(sParams);
 
     // 대표 이미지가 존재할 경우
     if (sParams.IMAGE.URL !== "") {
 
-        //서브 이미지 URL 존재시
-        if (sParams.IMAGE.T_URL.length != 0) {
+        bSend = true;
 
-            Lbody = Lbody +
-                "★ 추가 참조 이미지" + " \n ";
+        // //서브 이미지 URL 존재시
+        // if (sParams.IMAGE.T_URL.length != 0) {
 
-            for (var i = 0; i < sParams.IMAGE.T_URL.length; i++) {
-                var sUrl = sParams.IMAGE.T_URL[i];
+        //     Lbody = Lbody +
+        //         "★ 추가 참조 이미지" + " \n ";
 
-                Lbody = Lbody +
-                    sUrl.URL + " \n\n ";
+        //     for (var i = 0; i < sParams.IMAGE.T_URL.length; i++) {
+        //         var sUrl = sParams.IMAGE.T_URL[i];
+
+        //         Lbody = Lbody +
+        //             sUrl.URL + " \n\n ";
+
+        //     }
+
+        // }
+
+        debugger;
+
+
+        let sImgUrl = sParams.IMAGE.URL;
+
+        // 이미지 경로가 텔레그램 경로인지 확인
+        if (IMAGE_FILE_ID !== "") {
+            sImgUrl = IMAGE_FILE_ID;
+        }
+
+        //미리보기 사진 형식 본문 포멧 전송
+        try {
+
+            debugger;
+
+            await BOT.sendPhoto(chat_id, sImgUrl, {
+                caption: Lbody
+            });
+
+        } catch (error) {
+
+            debugger;
+
+            try {
+
+                await BOT.sendDocument(chat_id, sImgUrl, {
+                    caption: Lbody
+                });
+
+            } catch (error) {
+                debugger;
+                // 진짜 오류
 
             }
 
         }
 
-        //미리보기 사진 형식 본문 포멧 전송
-        await BOT.sendPhoto(chat_id, sParams.IMAGE.URL, {
-            caption: Lbody
-        });
-
     }
-
-    // 이미지 로컬 경로가 있을 경우
-    if ((typeof sParams.IMAGE.FPATH !== "undefined") && sParams.IMAGE.FPATH !== "") {
-
-
-        const url = `https://api.telegram.org/bot` + oAPP.auth.telegram + `/sendDocument`;
-
-
-        return;
-
-    }
-
 
     // url 형식의 비디오가 있다면.
     if (sParams.VIDEO.URL !== "") {
 
-        // 확장자 점검 해야함!!
-        // mp4, mov ??
+        bSend = true;
 
-        // await BOT.sendVideo(chat_id, sParams.VIDEO.URL, { caption: Lbody });
+        let sVideoUrl = sParams.VIDEO.URL;
 
+        // 비디오 경로가 텔레그램 경로인지 확인
+        if (VIDEO_FILE_ID !== "") {
+            sVideoUrl = VIDEO_FILE_ID;
+        }
 
+        try {
+
+            await BOT.sendVideo(chat_id, sVideoUrl, {
+                caption: Lbody
+            });
+
+        } catch (error) {
+
+            debugger;
+
+        }
+
+        return;
+
+    }
+
+    if (bSend) {
         return;
     }
 
     //일반 본문 포멧 전송 
-    await BOT.sendMessage(chat_id, Lbody);
-
+    try {
+        await BOT.sendMessage(chat_id, Lbody);
+    } catch (error) {
+        debugger;
+    }
 
 }; // end of getMessage
 
@@ -247,7 +765,6 @@ exports.send = function (sParams, oChoiceInfo, CB) {
         var query = {};
 
         dbo.collection(dbname).find(query).toArray(function (err, result) {
-            debugger;
 
             db.close();
 

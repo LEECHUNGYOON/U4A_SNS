@@ -173,7 +173,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
     }
 
     const FPATH = sParams.VIDEO.FPATH;
-    sParams.VIDEO.FPATH = "";
+    //sParams.VIDEO.FPATH = "";
 
     // 첨부 동영상 경로 가 존재하지않다면 현재 프로세스를 종료한다 
     if (FPATH === "") {
@@ -218,8 +218,6 @@ exports.send = function (sParams, oChoiceInfo, CB) {
 
     //HTTP 서버 생성
     oServer = http.createServer(function (req, res) {
-
-        debugger;
 
         res.writeHead(200, {
             'Content-Type': 'text/html'
@@ -278,8 +276,6 @@ exports.send = function (sParams, oChoiceInfo, CB) {
                 return;
 
             }
-
-            debugger;
 
             //내역 정보 구성 
             let BodyDesc = Lfn_setSendBody(sParams);
@@ -347,7 +343,8 @@ exports.send = function (sParams, oChoiceInfo, CB) {
                     // res.end('<script>window.close();</script>');
 
                     //정상일 경우 I/F 파라메터 변경
-                    sParams.VIDEO.URL = "https://youtube.com/shorts/" + data.data.id;
+                    // sParams.VIDEO.URL = "https://youtube.com/shorts/" + data.data.id;
+                    sParams.VIDEO.YOUTUBE_URL = "https://youtube.com/shorts/" + data.data.id;
 
                     //서버 종료
                     Lfn_serverClose();
@@ -364,26 +361,6 @@ exports.send = function (sParams, oChoiceInfo, CB) {
                     }
 
                     return;
-
-
-
-                    /*
-                    console.log(data.data.etag);
-                    console.log(data.data.id);     //<-- 동영상 url만드는 key
-
-                    var LvdURL = "https://youtube.com/shorts/" + data.data.id;
-                    console.log(LvdURL);
-
-                    opn(LvdURL);
-
-                    console.log(data.data.kind);
-                    console.log(data.data.snippet.thumbnails.default.url);
-                    console.log(data.data.snippet.thumbnails.high.url);
-                    console.log(data.data.snippet.thumbnails.medium.url);
-                    console.log(data.data.snippet.categoryId);
-                    console.log(data.data.snippet.channelId);
-                    */
-
 
                 });
         });

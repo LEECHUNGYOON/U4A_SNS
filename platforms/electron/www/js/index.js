@@ -81,7 +81,9 @@
         TYPE: "모듈(업무)",
         DESC: "상세설명",
         SAMPLE_URL: "Sample URL",
-        REF_IMG: "참고이미지"
+        REF_IMG: "참고이미지",
+        REF_IMG_URL: "참고이미지 URL Link",
+        REF_VDO_URL: "참고동영상 URL Link"
     };
 
     /************************************************************************

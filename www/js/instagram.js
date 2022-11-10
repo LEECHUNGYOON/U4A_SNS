@@ -14,7 +14,52 @@ const
 
 let oErrLog = oAPP.errorlog;
 
-oInstagram.send = (oParams, oChoiceInfo, cb) => {
+
+function fnSendVideo(oParams) {
+
+    return new Promise((resolve) => {
+
+        // 인스타 계정 정보 구하기
+        getAccount(
+            (oAccInfo) => { // success
+
+                // 동영상 전송!!
+                sendVideo(oParams, oAccInfo, resolve);
+
+            }, (oErr) => { // error
+
+                // 공통 에러
+                onError(oErr, resolve);
+
+            });
+
+    });
+
+}
+
+function fnSendPhoto(oParams) {
+
+    return new Promise((resolve) => {
+
+        getAccount(
+            (oAccInfo) => { // success
+
+                // Send a post
+                sendPost(oParams, oAccInfo, resolve);
+
+            }, (oErr) => { // error
+
+                // 공통 에러
+                onError(oErr, resolve);
+
+            });
+
+    });
+
+}
+
+
+oInstagram.send = async (oParams, oChoiceInfo, cb) => {
 
     debugger;
 
@@ -32,54 +77,70 @@ oInstagram.send = (oParams, oChoiceInfo, cb) => {
     // 동영상 URL 경로가 있을 경우
     if (oParams.VIDEO.URL !== "") {
 
-        // 인스타 계정 정보 구하기
-        getAccount(
-            (oAccInfo) => { // success
+        await fnSendVideo(oParams);
 
-                // 동영상 전송!!
-                sendVideo(oParams, oAccInfo, cb);
+        bSend = true;
 
-            }, (oErr) => { // error
+        // // 인스타 계정 정보 구하기
+        // getAccount(
+        //     (oAccInfo) => { // success
 
-                // 공통 에러
-                onError(oParams, oErr, cb);
+        //         // 동영상 전송!!
+        //         sendVideo(oParams, oAccInfo, cb);
 
-            });
+        //     }, (oErr) => { // error
 
-        return;
+        //         // 공통 에러
+        //         onError(oParams, oErr, cb);
 
-    }
+        //     });
 
-    // 이미지가 없다면 오류찍고 빠져나간다.
-    if (!oParams.IMAGE.URL) {
-
-        // 오류메시지 수집
-
-        var oErr = {
-            RETCD: "E",
-            ETMSG: "[INSTAGRAM] 이미지 URL은 필수 입니다!!"
-        }
-
-        // Error Collect
-        onError(oParams, oErr, cb);
-
-        return;
+        // return;
 
     }
 
-    // get instagram account
-    getAccount(
-        (oAccInfo) => { // success
+    // 이미지 경로가 있을 경우
+    if (oParams.IMAGE.URL !== "") {
 
-            // Send a post
-            sendPost(oParams, oAccInfo, cb);
+        await fnSendPhoto(oParams);
 
-        }, (oErr) => { // error
+    }
 
-            // Error Collect
-            onError(oParams, oErr, cb);
+    //Callback 
+    cb(oParams);
 
-        });
+
+
+    // // 이미지가 없다면 오류찍고 빠져나간다.
+    // if (!oParams.IMAGE.URL) {
+
+    //     // 오류메시지 수집
+
+    //     var oErr = {
+    //         RETCD: "E",
+    //         ETMSG: "[INSTAGRAM] 이미지 URL은 필수 입니다!!"
+    //     }
+
+    //     // Error Collect
+    //     onError(oParams, oErr, cb);
+
+    //     return;
+
+    // }
+
+    // // get instagram account
+    // getAccount(
+    //     (oAccInfo) => { // success
+
+    //         // Send a post
+    //         sendPost(oParams, oAccInfo, cb);
+
+    //     }, (oErr) => { // error
+
+    //         // Error Collect
+    //         onError(oParams, oErr, cb);
+
+    //     });
 
 }; // end of oInstagram.send
 
@@ -195,7 +256,7 @@ function sendVideo(oParams, oAccInfo, cb) {
             console.error(oErr.message);
 
             // 오류 수집 
-            onError(oParams, oErrMsg, cb);
+            onError(oErrMsg, cb);
 
         }
 
@@ -241,7 +302,7 @@ function sendPost(oParams, oAccInfo, cb) {
 
                 sendStatus(oParams, oAccInfo, res, cb);
 
-            }, 5000);
+            }, 3000);
 
         },
         error: function (e) {
@@ -257,7 +318,7 @@ function sendPost(oParams, oAccInfo, cb) {
             console.error(oErr.message);
 
             // 오류 수집 
-            onError(oParams, oErrMsg, cb);
+            onError(oErrMsg, cb);
 
         }
 
@@ -294,7 +355,7 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
                     oErr.RTMSG = "The container was not published within 24 hours and has expired.";
 
                     // 오류 수집
-                    onError(oParams, oErr, cb);
+                    onError(oErr, cb);
 
                     return;
 
@@ -304,7 +365,7 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
                     oErr.RTMSG = "The container failed to complete the publishing process.";
 
                     // 오류 수집
-                    onError(oParams, oErr, cb);
+                    onError(oErr, cb);
 
                     return;
 
@@ -343,7 +404,7 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
             console.error(oErr.message);
 
             // 오류 수집 
-            onError(oParams, oErrMsg, cb);
+            onError(oErrMsg, cb);
 
         }
 
@@ -374,7 +435,8 @@ function sendPublish(oParams, oAccInfo, oRes, cb) {
         type: sMethod,
         success: function (res) {
 
-            cb(oParams);
+            cb();
+            // cb(oParams);
 
         },
         error: function (e) {
@@ -390,7 +452,7 @@ function sendPublish(oParams, oAccInfo, oRes, cb) {
             console.error(oErr.message);
 
             // 오류 수집 
-            onError(oParams, oErrMsg, cb);
+            onError(oErrMsg, cb);
 
         }
 
@@ -443,7 +505,7 @@ function getMessage(oParams) {
 
         for (var i = 0; i < iHashLength; i++) {
 
-            let sHash = oParams.HASHTAG[i];      
+            let sHash = oParams.HASHTAG[i];
 
             sMsg += sHash + " \n ";
 
@@ -458,12 +520,14 @@ function getMessage(oParams) {
 /************************************************************************
  * 공통 에러
  ************************************************************************/
-function onError(oParams, oErr, cb) {
+function onError(oErr, cb) {
 
     // 공통 에러 수집..
     oErrLog.addLog(oErr);
 
-    cb(oParams);
+    cb();
+
+    // cb(oParams);
 
 } // end of onError
 

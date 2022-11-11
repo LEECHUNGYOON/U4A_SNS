@@ -132,8 +132,6 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
 
         } catch (error) {
 
-            debugger;
-
             //오류 메시지 수집
             oErrLog.addLog({
                 RETCD: "E",
@@ -144,14 +142,12 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
 
     }
 
-
     // 로컬 pc의 동영상 경로일 경우
     if (sParams.VIDEO.FPATH !== "") {
 
         await sendVideo(sParams);
 
     }
-
 
     // URL 이 있으면 
     if (sParams.IMAGE.URL !== "") {
@@ -165,8 +161,6 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
 
         } catch (error) {
 
-            debugger;
-
             //오류 메시지 수집
             oErrLog.addLog({
                 RETCD: "E",
@@ -174,7 +168,6 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
             });
 
         }
-        // await sendImage(sParams);
 
     }
 
@@ -187,20 +180,12 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
 
     }
 
-    debugger;
-
     for (let index = 0; index < USER_INFO.length; index++) {
         var sUserInfo = USER_INFO[index];
 
         if (sUserInfo.chat_id === U4ABOT_ID) {
             continue;
         }
-
-        // continue;
-
-        // if (sParams.DESC === "") {
-        //     continue;
-        // }
 
         await sendMessage(sUserInfo.chat_id, sParams);
 

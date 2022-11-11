@@ -69,7 +69,6 @@ oInstagram.send = async (oParams, oChoiceInfo, cb) => {
 
         //Callback 
         cb(oParams);
-
         return;
 
     }
@@ -80,22 +79,6 @@ oInstagram.send = async (oParams, oChoiceInfo, cb) => {
         await fnSendVideo(oParams);
 
         bSend = true;
-
-        // // 인스타 계정 정보 구하기
-        // getAccount(
-        //     (oAccInfo) => { // success
-
-        //         // 동영상 전송!!
-        //         sendVideo(oParams, oAccInfo, cb);
-
-        //     }, (oErr) => { // error
-
-        //         // 공통 에러
-        //         onError(oParams, oErr, cb);
-
-        //     });
-
-        // return;
 
     }
 
@@ -108,39 +91,6 @@ oInstagram.send = async (oParams, oChoiceInfo, cb) => {
 
     //Callback 
     cb(oParams);
-
-
-
-    // // 이미지가 없다면 오류찍고 빠져나간다.
-    // if (!oParams.IMAGE.URL) {
-
-    //     // 오류메시지 수집
-
-    //     var oErr = {
-    //         RETCD: "E",
-    //         ETMSG: "[INSTAGRAM] 이미지 URL은 필수 입니다!!"
-    //     }
-
-    //     // Error Collect
-    //     onError(oParams, oErr, cb);
-
-    //     return;
-
-    // }
-
-    // // get instagram account
-    // getAccount(
-    //     (oAccInfo) => { // success
-
-    //         // Send a post
-    //         sendPost(oParams, oAccInfo, cb);
-
-    //     }, (oErr) => { // error
-
-    //         // Error Collect
-    //         onError(oParams, oErr, cb);
-
-    //     });
 
 }; // end of oInstagram.send
 

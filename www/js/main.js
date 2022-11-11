@@ -361,7 +361,7 @@
                                             new sap.m.CheckBox({
                                                 text: "Kakao Story",
                                                 selected: "{/PRC/CHOICE/KAKAO_STORY}"
-                                            }),                                           
+                                            }),
                                             new sap.m.Button({
                                                 icon: "sap-icon://paper-plane",
                                                 text: "Send Post",
@@ -713,6 +713,17 @@
                                     text: "Local File",
                                 }),
                             ]
+                        }),
+
+                        new sap.m.ToolbarSpacer(),
+
+                        new sap.m.Button({
+                            icon: "sap-icon://sys-help",
+                            press: (oEvent) => {
+
+                                oAPP.fn.helpVideo(oEvent);
+
+                            }
                         })
 
                     ]
@@ -839,6 +850,17 @@
                                     text: "Local File",
                                 }),
                             ]
+                        }),
+
+                        new sap.m.ToolbarSpacer(),
+
+                        new sap.m.Button({
+                            icon: "sap-icon://sys-help",
+                            press: (oEvent) => {
+
+                                oAPP.fn.helpImage(oEvent);
+
+                            }
                         })
 
                     ]
@@ -1192,7 +1214,7 @@
             defaultPath: defaultDownPath,
             filters: [{
                 name: "Image",
-                extensions: ["jpg", "jpeg", "png", "gif", "bmp"]
+                extensions: ["jpg", "jpeg", "png", "bmp"]
             }],
 
             properties: ['openFile', 'dontAddToRecent']
@@ -1587,7 +1609,7 @@
 
         var oSplitApp = oAPP.fn.emogiSplitApp();
 
-        var oPopup = new sap.m.Popover({
+        var oPopup = new sap.m.Popover(sPopId, {
             title: "이모티콘",
             contentMinWidth: "500px",
             contentHeight: "500px",
@@ -1598,24 +1620,6 @@
             content: [
 
                 oSplitApp
-
-                // new sap.m.HBox({
-                //     renderType: sap.m.FlexRendertype.Bare,
-                //     wrap: sap.m.FlexWrap.Wrap,
-                //     items: {
-                //         path: "/EMO",
-                //         template:
-
-                //             new sap.m.Button({
-                //                 text: "{ICON}",
-                //                 type: sap.m.ButtonType.Ghost,
-                //                 press: (oEvent) => {
-                //                     oAPP.fn.onPressEmoIcon(oEvent);
-                //                 }
-                //             })
-
-                //     }
-                // })
 
             ],
             afterClose: () => {
@@ -1924,6 +1928,232 @@
         });
 
     }; // end of oAPP.fn.createTrayIcon
+
+    /************************************************************************
+     * 동영상 전송 Help Popover
+     ************************************************************************/
+    oAPP.fn.helpVideo = (oEvent) => {
+
+        let sPopId = "helpVideo",
+            oBtn = oEvent.getSource();
+
+        var oPopup = sap.ui.getCore().byId(sPopId);
+        if (oPopup) {
+            oPopup.openBy(oBtn);
+            return;
+        }
+
+        var oPopup = new sap.m.Popover({
+            title: "Video Help",
+            horizontalScrolling: true,
+            resizable: true,
+            placement: sap.m.PlacementType.Auto,
+            content: [
+
+                new sap.ui.layout.form.Form({
+                    editable: true,
+                    layout: new sap.ui.layout.form.ResponsiveGridLayout({
+                        labelSpanL: 12,
+                        labelSpanM: 12,
+                        labelSpanS: 12,
+                        labelSpanXL: 12
+                    }),
+                    formContainers: [
+
+                        new sap.ui.layout.form.FormContainer({
+                            toolbar: new sap.m.Toolbar({
+                                content: [
+                                    new sap.m.Title({
+                                        text: "Youtube",
+                                        level: sap.ui.core.TitleLevel.H4,
+                                        titleStyle: sap.ui.core.TitleLevel.H4
+                                    })
+                                ]
+                            }),
+                            formElements: [
+                                new sap.ui.layout.form.FormElement({
+                                    label: new sap.m.Label({
+                                        design: sap.m.LabelDesign.Bold,
+                                        text: "최대 파일크기"
+                                    }),
+                                    fields: new sap.m.Text({
+                                        text: "64 GB",
+                                    })
+                                })
+                            ]
+                        }),
+                        new sap.ui.layout.form.FormContainer({
+                            toolbar: new sap.m.Toolbar({
+                                content: [
+                                    new sap.m.Title({
+                                        text: "Facebook",
+                                        level: sap.ui.core.TitleLevel.H4,
+                                        titleStyle: sap.ui.core.TitleLevel.H4
+                                    })
+                                ]
+                            }),
+                            formElements: [
+                                new sap.ui.layout.form.FormElement({
+                                    label: new sap.m.Label({
+                                        design: sap.m.LabelDesign.Bold,
+                                        text: "최대 파일크기"
+                                    }),
+                                    fields: new sap.m.Text({
+                                        text: "[해당사항 없음] Youtube 업로드 링크방식",
+                                    })
+                                })
+                            ]
+                        }),
+                        new sap.ui.layout.form.FormContainer({
+                            toolbar: new sap.m.Toolbar({
+                                content: [
+                                    new sap.m.Title({
+                                        text: "Instagram",
+                                        level: sap.ui.core.TitleLevel.H4,
+                                        titleStyle: sap.ui.core.TitleLevel.H4
+                                    })
+                                ]
+                            }),
+                            formElements: [
+                                new sap.ui.layout.form.FormElement({
+                                    label: new sap.m.Label({
+                                        design: sap.m.LabelDesign.Bold,
+                                        text: "최대 파일크기"
+                                    }),
+                                    fields: new sap.m.Text({
+                                        text: "100 MB",
+                                    })
+                                }),
+                                new sap.ui.layout.form.FormElement({
+                                    label: new sap.m.Label({
+                                        design: sap.m.LabelDesign.Bold,
+                                        text: "파일 타입"
+                                    }),
+                                    fields: new sap.m.Text({
+                                        text: "MOV, MP4",
+                                    })
+                                }),
+                            ]
+                        }),
+                    ]
+                })
+            ]
+        }).addStyleClass("u4aSnsHelpPopover");
+
+        oPopup.openBy(oBtn);
+
+    }; // end of oAPP.fn.helpVideo
+
+    /************************************************************************
+     * 이미지 전송 Help Popover
+     ************************************************************************/
+    oAPP.fn.helpImage = (oEvent) => {
+
+        let sPopId = "helpImage",
+            oBtn = oEvent.getSource();
+
+        var oPopup = sap.ui.getCore().byId(sPopId);
+        if (oPopup) {
+            oPopup.openBy(oBtn);
+            return;
+        }
+
+        var oPopup = new sap.m.Popover({
+            title: "Image Help",
+            horizontalScrolling: true,
+            resizable: true,
+            placement: sap.m.PlacementType.Auto,
+            content: [
+
+                new sap.ui.layout.form.Form({
+                    editable: true,
+                    layout: new sap.ui.layout.form.ResponsiveGridLayout({
+                        labelSpanL: 12,
+                        labelSpanM: 12,
+                        labelSpanS: 12,
+                        labelSpanXL: 12
+                    }),
+                    formContainers: [
+
+                        new sap.ui.layout.form.FormContainer({
+                            toolbar: new sap.m.Toolbar({
+                                content: [
+                                    new sap.m.Title({
+                                        text: "Facebook",
+                                        level: sap.ui.core.TitleLevel.H4,
+                                        titleStyle: sap.ui.core.TitleLevel.H4
+                                    })
+                                ]
+                            }),
+                            formElements: [
+                                new sap.ui.layout.form.FormElement({
+                                    label: new sap.m.Label({
+                                        design: sap.m.LabelDesign.Bold,
+                                        text: "최대 파일크기"
+                                    }),
+                                    fields: new sap.m.Text({
+                                        text: "4 MB 이하 \n PNG 경우 가급적 1 MB 이하 권장",
+                                    })
+                                }),
+                                new sap.ui.layout.form.FormElement({
+                                    label: new sap.m.Label({
+                                        design: sap.m.LabelDesign.Bold,
+                                        text: "허용 가능한 Format"
+                                    }),
+                                    fields: new sap.m.Text({
+                                        text: "JPEG, BMP, PNG",
+                                    })
+                                })
+                            ]
+                        }),
+                        new sap.ui.layout.form.FormContainer({
+                            toolbar: new sap.m.Toolbar({
+                                content: [
+                                    new sap.m.Title({
+                                        text: "Instagram",
+                                        level: sap.ui.core.TitleLevel.H4,
+                                        titleStyle: sap.ui.core.TitleLevel.H4
+                                    })
+                                ]
+                            }),
+                            formElements: [
+                                new sap.ui.layout.form.FormElement({
+                                    label: new sap.m.Label({
+                                        design: sap.m.LabelDesign.Bold,
+                                        text: "최대 파일크기"
+                                    }),
+                                    fields: new sap.m.Text({
+                                        text: "8 MB 이하",
+                                    })
+                                }),
+                                new sap.ui.layout.form.FormElement({
+                                    label: new sap.m.Label({
+                                        design: sap.m.LabelDesign.Bold,
+                                        text: "최대 너비"
+                                    }),
+                                    fields: new sap.m.Text({
+                                        text: "1,440",
+                                    })
+                                }),
+                                new sap.ui.layout.form.FormElement({
+                                    label: new sap.m.Label({
+                                        design: sap.m.LabelDesign.Bold,
+                                        text: "최소 너비"
+                                    }),
+                                    fields: new sap.m.Text({
+                                        text: "320",
+                                    })
+                                })
+                            ]
+                        }),
+                    ]
+                })
+            ]
+        }).addStyleClass("u4aSnsHelpPopover");
+
+        oPopup.openBy(oBtn);
+
+    }; // end of oAPP.fn.helpVideo
 
     /************************************************************************
      * Tray Icon의 종료 이벤트

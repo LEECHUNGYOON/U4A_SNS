@@ -34,23 +34,10 @@ oFaceBook.send = async (oParams, oChoiceInfo, cb) => {
 
         //Callback 
         cb(oParams);
-
         return;
 
     }
-
-    // oParams.VIDEO.URL = "https://youtu.be/S1j3i3Wxh7M";
-
-    // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
-
-    // if (oParams.VIDEO.URL !== "") {
-
-    //     sendFeed(oParams, cb);
-
-    //     return;
-
-    // }
-
+  
     // 동영상 또는 이미지 전송 여부 flag
     let bSend = false;
 
@@ -104,11 +91,6 @@ function sendFeed(oParams) {
         let oFormData = new FormData();
         oFormData.append("access_token", PAGETOKEN);
         oFormData.append("message", sMessage);
-
-        // // // oParams.VIDEO.URL <-- 있으면 이미지 무시하고 동영상 링크로 전송하기.
-        // if (oParams.VIDEO.URL !== "") {
-        //     oFormData.append("link", oParams.VIDEO.URL);
-        // }
 
         // 유투브 URL이 있을 경우에만 Link 파라미터에 Url 값을 넣는다.
         if (oParams.VIDEO.YOUTUBE_URL !== "") {

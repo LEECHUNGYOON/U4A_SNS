@@ -22,3 +22,7 @@ body {
 .emogiButtons .sapMBtnInner {
     font-size: 1.5rem;
 }
+
+.u4aSnsHelpPopover .sapUiFormContainerToolbar .sapMIBar {
+    background-color: var(--sapIllus_Layering1);
+}

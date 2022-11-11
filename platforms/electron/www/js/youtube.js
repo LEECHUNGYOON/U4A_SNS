@@ -162,7 +162,10 @@ let oErrLog = oAPP.errorlog;
 /* ================================================================= */
 exports.send = function (sParams, oChoiceInfo, CB) {
 
-    debugger;
+    // Youtube Url이 있다면 지우고 시작한다.
+    if (sParams.VIDEO.YOUTUBE_URL) {
+        delete sParams.VIDEO.YOUTUBE_URL;
+    }
 
     if (!oChoiceInfo || !oChoiceInfo.YOUTUBE) {
 
@@ -343,7 +346,8 @@ exports.send = function (sParams, oChoiceInfo, CB) {
                     // res.end('<script>window.close();</script>');
 
                     //정상일 경우 I/F 파라메터 변경
-                    // sParams.VIDEO.URL = "https://youtube.com/shorts/" + data.data.id;
+                    // sParams.VIDEO.URL = "https://youtube.com/shorts/" + data.data.id;                    
+
                     sParams.VIDEO.YOUTUBE_URL = "https://youtube.com/shorts/" + data.data.id;
 
                     //서버 종료
@@ -364,7 +368,6 @@ exports.send = function (sParams, oChoiceInfo, CB) {
 
                 });
         });
-
 
     }).listen(oAPP.conf.youtube_server_port);
 

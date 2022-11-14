@@ -64,10 +64,10 @@ function Lfn_getBody(sParams) {
         sParams.DESC + " \n\n ";
 
     //샘플 URL 정보가 존재한다면 
-    if (sParams.SAMPLE_URL !== "") {
+    if (sParams.SAMPLE_URL && sParams.SAMPLE_URL !== "") {
 
         Lbody = Lbody + "★ 샘플 HOME 이동" + " \n " +
-            sParams.SAMPLE_URL + " \n\n ";
+        encodeURI(sParams.SAMPLE_URL) + " \n\n ";
 
     }
 
@@ -81,12 +81,11 @@ function Lfn_getBody(sParams) {
             var sUrl = sParams.IMAGE.T_URL[i];
 
             Lbody = Lbody +
-                sUrl.URL + " \n\n ";
+            encodeURI(sUrl.URL) + " \n\n ";
 
         }
 
     }
-
 
     return Lbody;
 
@@ -116,12 +115,12 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
     // 메시지 본문
     var Lbody = Lfn_getBody(sParams);
 
-    if (sParams.VIDEO.FPATH !== "") {
+    if (sParams.VIDEO.FPATH && sParams.VIDEO.FPATH !== "") {
         sParams.VIDEO.URL = "";
     }
 
     // URL 이 있으면 
-    if (sParams.VIDEO.URL !== "") {
+    if (sParams.VIDEO.URL && sParams.VIDEO.URL !== "") {
 
         // 여기서 채널봇으로 전송
         try {
@@ -143,14 +142,14 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
     }
 
     // 로컬 pc의 동영상 경로일 경우
-    if (sParams.VIDEO.FPATH !== "") {
+    if (sParams.VIDEO.FPATH && sParams.VIDEO.FPATH !== "") {
 
         await sendVideo(sParams);
 
     }
 
     // URL 이 있으면 
-    if (sParams.IMAGE.URL !== "") {
+    if (sParams.IMAGE.URL && sParams.IMAGE.URL !== "") {
 
         // 여기서 채널봇으로 전송
 
@@ -174,7 +173,7 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
     // URL 이 있으면 여기서 채널봇으로 전송
 
     // 로컬 pc의 이미지 경로일 경우
-    if (sParams.IMAGE.FPATH !== "") {
+    if (sParams.IMAGE.FPATH && sParams.IMAGE.FPATH !== "") {
 
         await sendImage(sParams);
 
@@ -203,9 +202,7 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
  ************************************************************************/
 function sendVideo(sParams) {
 
-    return new Promise(async (resolve) => {
-
-        debugger;
+    return new Promise(async (resolve) => {        
 
         let oErrLog = oAPP.errorlog;
 
@@ -239,7 +236,7 @@ function sendVideo(sParams) {
 
             var sRET = await axios.post(telegramUrl, formData, {
                 headers: formData.getHeaders(),
-
+                validateStatus: false
             });
 
         } catch (error) {
@@ -330,7 +327,7 @@ function sendVideo(sParams) {
         VIDEO_FILE_ID = sFile_id;
 
         try {
-            var sRET = await axios.get(LURL);
+            var sRET = await axios.get(LURL, {validateStatus: false});
         } catch (error) {
 
             //오류 메시지 수집
@@ -342,7 +339,6 @@ function sendVideo(sParams) {
             return;
 
         }
-
 
         //오류 
         if (sRET.status != 200) {
@@ -394,9 +390,7 @@ function sendVideo(sParams) {
  ************************************************************************/
 function sendImage(sParams) {
 
-    return new Promise(async (resolve) => {
-
-        debugger;
+    return new Promise(async (resolve) => {        
 
         let oErrLog = oAPP.errorlog;
 
@@ -434,6 +428,7 @@ function sendImage(sParams) {
 
             var sRET = await axios.post(telegramUrl, formData, {
                 headers: formData.getHeaders(),
+                validateStatus: false
 
             });
 
@@ -450,7 +445,7 @@ function sendImage(sParams) {
 
         }
 
-        debugger;
+        
 
         //오류 
         if (sRET.status != 200) {
@@ -524,7 +519,7 @@ function sendImage(sParams) {
         IMAGE_FILE_ID = sFile_id;
 
         try {
-            var sRET = await axios.get(LURL);
+            var sRET = await axios.get(LURL, {validateStatus: false});
         } catch (error) {
 
             //오류 메시지 수집
@@ -585,7 +580,7 @@ function sendImage(sParams) {
  * 게시글 본문 구성하기
  ************************************************************************/
 async function sendMessage(chat_id, sParams) {
-    debugger;
+    
     // var Lbody = "★ 제목" + " \n " +
     //     sParams.TITLE + " \n\n " +
     //     "★ 모듈(업무)" + " \n " +
@@ -607,7 +602,7 @@ async function sendMessage(chat_id, sParams) {
     var Lbody = Lfn_getBody(sParams);
 
     // 대표 이미지가 존재할 경우
-    if (sParams.IMAGE.URL !== "") {
+    if (sParams.IMAGE.URL && sParams.IMAGE.URL !== "") {
 
         bSend = true;
 
@@ -627,7 +622,7 @@ async function sendMessage(chat_id, sParams) {
 
         // }
 
-        debugger;
+        
 
 
         let sImgUrl = sParams.IMAGE.URL;
@@ -638,9 +633,7 @@ async function sendMessage(chat_id, sParams) {
         }
 
         //미리보기 사진 형식 본문 포멧 전송
-        try {
-
-            debugger;
+        try {           
 
             await BOT.sendPhoto(chat_id, sImgUrl, {
                 caption: Lbody
@@ -648,7 +641,7 @@ async function sendMessage(chat_id, sParams) {
 
         } catch (error) {
 
-            debugger;
+            
 
             try {
 
@@ -657,7 +650,7 @@ async function sendMessage(chat_id, sParams) {
                 });
 
             } catch (error) {
-                debugger;
+                
                 // 진짜 오류
 
             }
@@ -667,7 +660,7 @@ async function sendMessage(chat_id, sParams) {
     }
 
     // url 형식의 비디오가 있다면.
-    if (sParams.VIDEO.URL !== "") {
+    if (sParams.VIDEO.URL && sParams.VIDEO.URL !== "") {
 
         bSend = true;
 
@@ -686,7 +679,7 @@ async function sendMessage(chat_id, sParams) {
 
         } catch (error) {
 
-            debugger;
+            
 
         }
 
@@ -702,7 +695,7 @@ async function sendMessage(chat_id, sParams) {
     try {
         await BOT.sendMessage(chat_id, Lbody);
     } catch (error) {
-        debugger;
+        
     }
 
 }; // end of getMessage
@@ -711,8 +704,6 @@ async function sendMessage(chat_id, sParams) {
 /* Export Module Function 
 /* ================================================================= */
 exports.send = function (sParams, oChoiceInfo, CB) {
-
-    debugger;
 
     if (!oChoiceInfo || !oChoiceInfo.TELEGRAM) {
 

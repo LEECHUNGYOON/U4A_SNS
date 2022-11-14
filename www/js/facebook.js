@@ -37,7 +37,7 @@ oFaceBook.send = async (oParams, oChoiceInfo, cb) => {
         return;
 
     }
-  
+
     // 동영상 또는 이미지 전송 여부 flag
     let bSend = false;
 
@@ -51,12 +51,11 @@ oFaceBook.send = async (oParams, oChoiceInfo, cb) => {
     }
 
     // 이미지가 URL로 있거나 Blob로 있을 경우
-    if (oParams.IMAGE.URL !== "" || oParams.IMAGE.DATA !== "") {
-
+    if ((oParams.IMAGE.URL && oParams.IMAGE.URL !== "") || (oParams.IMAGE.DATA && oParams.IMAGE.DATA !== "")) {
+     
         await sendPhoto(oParams);
 
         bSend = true;
-
     }
 
     // 동영상 또는 이미지 둘중 하나라도 전송했다면 빠져나간다.
@@ -93,7 +92,7 @@ function sendFeed(oParams) {
         oFormData.append("message", sMessage);
 
         // 유투브 URL이 있을 경우에만 Link 파라미터에 Url 값을 넣는다.
-        if (oParams.VIDEO.YOUTUBE_URL !== "") {
+        if (oParams.VIDEO.YOUTUBE_URL && oParams.VIDEO.YOUTUBE_URL != "") {
             oFormData.append("link", oParams.VIDEO.YOUTUBE_URL);
         }
 
@@ -154,7 +153,7 @@ function sendPhoto(oParams) {
         let sUrl = oAPP.fbApi + "/" + sPath;
 
         // 이미지 URL이 존재하는 경우
-        if (oParams.IMAGE.URL !== "") {
+        if (oParams.IMAGE.URL && oParams.IMAGE.URL !== "") {
 
             oFormData.append("url", oParams.IMAGE.URL);
 
@@ -194,7 +193,7 @@ function sendPhoto(oParams) {
         }
 
         // 이미지가 Blob로 존재하는 경우
-        if (oParams.IMAGE.DATA !== "") {
+        if (oParams.IMAGE.DATA && oParams.IMAGE.DATA !== "") {
 
             oFormData.append("source", oParams.IMAGE.DATA);
 
@@ -256,13 +255,13 @@ function getMessage(oParams) {
     sMsg += `[ ${oSubJect.DESC} ] \n\n`;
     sMsg += oParams.DESC + " \n\n\n ";
 
-    // 참고이미지
+    // Sample Url
     if (oParams.SAMPLE_URL) {
         sMsg += `[ ${oSubJect.SAMPLE_URL} ] \n\n`;
-        sMsg += oParams.SAMPLE_URL + " \n\n\n\n\n\n ";
+        sMsg += encodeURI(oParams.SAMPLE_URL) + " \n\n\n\n\n\n ";
     }
 
-    // 서브이미지 
+    // 참고이미지 
     if (oParams.IMAGE.T_URL &&
         oParams.IMAGE.T_URL.length !== 0) {
 
@@ -274,7 +273,7 @@ function getMessage(oParams) {
 
             let oSubImgUrl = oParams.IMAGE.T_URL[i];
 
-            sMsg += oSubImgUrl.URL + " \n\n ";
+            sMsg += encodeURI(oSubImgUrl.URL) + " \n\n ";
 
         }
 
@@ -283,15 +282,15 @@ function getMessage(oParams) {
     sMsg += " \n\n\n ";
 
     // 이미지 URL이 있다면 해당 url을 본문에 내용 추가
-    if (oParams.IMAGE.URL !== "") {
+    if (oParams.IMAGE.URL && oParams.IMAGE.URL !== "") {
         sMsg += `[${oSubJect.REF_IMG_URL}] ⬇️⬇️ \n\n`; // [참고이미지 URL Link]
-        sMsg += oParams.IMAGE.URL + "\n\n";
+        sMsg += encodeURI(oParams.IMAGE.URL) + "\n\n";
     }
 
     // 동영상 URL이 있다면 해당 url을 본문에 내용 추가
-    if (oParams.VIDEO.URL !== "") {
+    if (oParams.VIDEO.URL && oParams.VIDEO.URL !== "") {
         sMsg += `[${oSubJect.REF_VDO_URL}] ⬇️⬇️ \n\n`; // [참고동영상 URL Link]
-        sMsg += oParams.VIDEO.URL + "\n\n";
+        sMsg += encodeURI(oParams.VIDEO.URL) + "\n\n";
     }
 
     // 해시태그
@@ -315,7 +314,7 @@ function getMessage(oParams) {
 /************************************************************************
  * 공통 에러
  ************************************************************************/
-function onError(oParams, oErr, cb) {
+function onError(oErr, cb) {
 
     let oErrLog = oAPP.errorlog;
 

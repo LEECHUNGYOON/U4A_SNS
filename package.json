@@ -40,14 +40,7 @@
     ],
     "extraResources": [
       "./node_modules/**/*",
-      "./node_modules/@electron/remote/**",
-      {
-        "from": "node_modules/regedit/vbs",
-        "to": "regedit/vbs",
-        "filter": [
-          "**/*"
-        ]
-      }
+      "./node_modules/@electron/remote/**"    
     ]
   },
   "dependencies": {

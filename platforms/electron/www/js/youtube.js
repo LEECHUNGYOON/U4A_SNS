@@ -87,8 +87,6 @@ function cutByLen(str, maxByte) {
 //전송 내역 정보 구성 
 function Lfn_setSendBody(sParams) {
 
-    debugger;
-
     var Lbody = "";
     var Lsub_img = "";
     var Lsample_url = "";
@@ -103,13 +101,13 @@ function Lfn_setSendBody(sParams) {
     //추가 이미지가 존재한다면 ..
     for (var i = 0; i < sParams.IMAGE.T_URL.length; i++) {
         var Lurl = sParams.IMAGE.T_URL[i];
-        Lsub_img = Lsub_img + Lurl + " \n ";
+        Lsub_img = Lsub_img + encodeURI(Lurl) + " \n ";
 
     }
 
     //SAMPLE URL 정보가 존재한다면..
-    if (sParams.SAMPLE_URL !== "") {
-        Lsample_url = "Sample GO => " + sParams.SAMPLE_URL + " \n\n ";
+    if (sParams.SAMPLE_URL && sParams.SAMPLE_URL !== "") {
+        Lsample_url = "Sample GO => " + encodeURI(sParams.SAMPLE_URL) + " \n\n ";
 
     }
 
@@ -126,7 +124,7 @@ function Lfn_setSendBody(sParams) {
     Lbody = sParams.TITLE + " \n\n " +
         sParams.DESC + " \n\n " +
         "[reference image]" + " \n " +
-        sParams.IMAGE.URL + " \n\n" +
+        encodeURI(sParams.IMAGE.URL) + " \n\n" +
         Lsub_img +
         Lsample_url +
         "home : https://www.u4ainfo.com" + " \n\n " +
@@ -179,7 +177,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
     //sParams.VIDEO.FPATH = "";
 
     // 첨부 동영상 경로 가 존재하지않다면 현재 프로세스를 종료한다 
-    if (FPATH === "") {
+    if (typeof FPATH == "undefined" || FPATH == null || FPATH == "") {
 
         //Callback 
         CB(sParams);
@@ -188,7 +186,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
     }
 
     // Link 동영상 URL 존재하는 경우는 현재 프로세스를 종료한다 
-    if (sParams.VIDEO.URL !== "") {
+    if (sParams.VIDEO.URL && sParams.VIDEO.URL !== "") {
 
         //Callback 
         CB(sParams);

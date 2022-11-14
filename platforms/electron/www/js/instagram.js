@@ -74,7 +74,7 @@ oInstagram.send = async (oParams, oChoiceInfo, cb) => {
     }
 
     // 동영상 URL 경로가 있을 경우
-    if (oParams.VIDEO.URL !== "") {
+    if (oParams.VIDEO.URL && oParams.VIDEO.URL != "") {
 
         await fnSendVideo(oParams);
 
@@ -83,7 +83,7 @@ oInstagram.send = async (oParams, oChoiceInfo, cb) => {
     }
 
     // 이미지 경로가 있을 경우
-    if (oParams.IMAGE.URL !== "") {
+    if (oParams.IMAGE.URL && oParams.IMAGE.URL != "") {
 
         await fnSendPhoto(oParams);
 
@@ -292,6 +292,8 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
         type: sMethod,
         success: function (res) {
 
+            debugger;
+            
             let oErr = {
                 RETCD: "",
                 RTMSG: ""
@@ -428,7 +430,7 @@ function getMessage(oParams) {
 
     if (oParams.SAMPLE_URL) {
         sMsg += `[ ${oSubJect.SAMPLE_URL} ] \n\n`;
-        sMsg += oParams.SAMPLE_URL + " \n\n\n\n\n\n ";
+        sMsg += encodeURI(oParams.SAMPLE_URL) + " \n\n\n\n\n\n ";
     }
 
     if (oParams.IMAGE.T_URL &&
@@ -442,7 +444,7 @@ function getMessage(oParams) {
 
             let oSubImgUrl = oParams.IMAGE.T_URL[i];
 
-            sMsg += oSubImgUrl.URL + " \n\n ";
+            sMsg += encodeURI(oSubImgUrl.URL) + " \n\n ";
 
         }
 

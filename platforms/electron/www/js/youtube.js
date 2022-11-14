@@ -158,7 +158,7 @@ let oErrLog = oAPP.errorlog;
 /* ================================================================= */
 /* Export Module Function 
 /* ================================================================= */
-exports.send = function (sParams, oChoiceInfo, CB) {
+exports.send = function(sParams, oChoiceInfo, CB) {
 
     // Youtube Url이 있다면 지우고 시작한다.
     if (sParams.VIDEO.YOUTUBE_URL) {
@@ -218,7 +218,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
     }
 
     //HTTP 서버 생성
-    oServer = http.createServer(function (req, res) {
+    oServer = http.createServer(function(req, res) {
 
         res.writeHead(200, {
             'Content-Type': 'text/html'

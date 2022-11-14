@@ -282,7 +282,7 @@ function sendPost(oParams, oAccInfo, cb) {
 function sendStatus(oParams, oAccInfo, oRes, cb) {
 
     let sId = oRes.id,
-        sPath = `${sId}?fields=status_code&access_token=${PAGETOKEN}`, // 호출 API
+        sPath = `${sId}?fields=status_code,status&access_token=${PAGETOKEN}`, // 호출 API
         sMethod = "GET";
 
     let sUrl = oAPP.fbApi + "/" + sPath;
@@ -302,9 +302,10 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
             // 상태코드를 확인한다.
             switch (res.status_code) {
                 case "EXPIRED":
-
                     oErr.RETCD = "E";
-                    oErr.RTMSG = "The container was not published within 24 hours and has expired.";
+                    oErr.RTMSG = `[Instagram] status_code : ${res.status_code} \n`;
+                    oErr.RTMSG = `[Instagram] status : ${res.status} \n`;
+                    oErr.RTMSG += `The container was not published within 24 hours and has expired. `;
 
                     // 오류 수집
                     onError(oErr, cb);
@@ -312,9 +313,10 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
                     return;
 
                 case "ERROR":
-
                     oErr.RETCD = "E";
-                    oErr.RTMSG = "The container failed to complete the publishing process.";
+                    oErr.RTMSG = `[Instagram] status_code : ${res.status_code} \n`;
+                    oErr.RTMSG = `[Instagram] status : ${res.status} \n`;
+                    oErr.RTMSG += "[Instagram] The container failed to complete the publishing process.";
 
                     // 오류 수집
                     onError(oErr, cb);

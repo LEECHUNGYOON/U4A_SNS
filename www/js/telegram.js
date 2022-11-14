@@ -67,7 +67,7 @@ function Lfn_getBody(sParams) {
     if (sParams.SAMPLE_URL && sParams.SAMPLE_URL !== "") {
 
         Lbody = Lbody + "★ 샘플 HOME 이동" + " \n " +
-        encodeURI(sParams.SAMPLE_URL) + " \n\n ";
+            encodeURI(sParams.SAMPLE_URL) + " \n\n ";
 
     }
 
@@ -81,7 +81,7 @@ function Lfn_getBody(sParams) {
             var sUrl = sParams.IMAGE.T_URL[i];
 
             Lbody = Lbody +
-            encodeURI(sUrl.URL) + " \n\n ";
+                encodeURI(sUrl.URL) + " \n\n ";
 
         }
 
@@ -202,7 +202,7 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
  ************************************************************************/
 function sendVideo(sParams) {
 
-    return new Promise(async (resolve) => {        
+    return new Promise(async (resolve) => {
 
         let oErrLog = oAPP.errorlog;
 
@@ -327,7 +327,9 @@ function sendVideo(sParams) {
         VIDEO_FILE_ID = sFile_id;
 
         try {
-            var sRET = await axios.get(LURL, {validateStatus: false});
+            var sRET = await axios.get(LURL, {
+                validateStatus: false
+            });
         } catch (error) {
 
             //오류 메시지 수집
@@ -390,7 +392,7 @@ function sendVideo(sParams) {
  ************************************************************************/
 function sendImage(sParams) {
 
-    return new Promise(async (resolve) => {        
+    return new Promise(async (resolve) => {
 
         let oErrLog = oAPP.errorlog;
 
@@ -445,7 +447,7 @@ function sendImage(sParams) {
 
         }
 
-        
+
 
         //오류 
         if (sRET.status != 200) {
@@ -519,7 +521,9 @@ function sendImage(sParams) {
         IMAGE_FILE_ID = sFile_id;
 
         try {
-            var sRET = await axios.get(LURL, {validateStatus: false});
+            var sRET = await axios.get(LURL, {
+                validateStatus: false
+            });
         } catch (error) {
 
             //오류 메시지 수집
@@ -580,7 +584,7 @@ function sendImage(sParams) {
  * 게시글 본문 구성하기
  ************************************************************************/
 async function sendMessage(chat_id, sParams) {
-    
+
     // var Lbody = "★ 제목" + " \n " +
     //     sParams.TITLE + " \n\n " +
     //     "★ 모듈(업무)" + " \n " +
@@ -622,7 +626,7 @@ async function sendMessage(chat_id, sParams) {
 
         // }
 
-        
+
 
 
         let sImgUrl = sParams.IMAGE.URL;
@@ -633,7 +637,7 @@ async function sendMessage(chat_id, sParams) {
         }
 
         //미리보기 사진 형식 본문 포멧 전송
-        try {           
+        try {
 
             await BOT.sendPhoto(chat_id, sImgUrl, {
                 caption: Lbody
@@ -641,7 +645,7 @@ async function sendMessage(chat_id, sParams) {
 
         } catch (error) {
 
-            
+
 
             try {
 
@@ -650,7 +654,7 @@ async function sendMessage(chat_id, sParams) {
                 });
 
             } catch (error) {
-                
+
                 // 진짜 오류
 
             }
@@ -679,7 +683,7 @@ async function sendMessage(chat_id, sParams) {
 
         } catch (error) {
 
-            
+
 
         }
 
@@ -695,7 +699,7 @@ async function sendMessage(chat_id, sParams) {
     try {
         await BOT.sendMessage(chat_id, Lbody);
     } catch (error) {
-        
+
     }
 
 }; // end of getMessage
@@ -703,7 +707,7 @@ async function sendMessage(chat_id, sParams) {
 /* ================================================================= */
 /* Export Module Function 
 /* ================================================================= */
-exports.send = function (sParams, oChoiceInfo, CB) {
+exports.send = function(sParams, oChoiceInfo, CB) {
 
     if (!oChoiceInfo || !oChoiceInfo.TELEGRAM) {
 
@@ -721,7 +725,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
     let oErrLog = oAPP.errorlog;
 
     //몽고 DB에 전체 사용자 정보 얻기 
-    MongClinet.connect(MongDB_HOST, function (err, db) {
+    MongClinet.connect(MongDB_HOST, function(err, db) {
 
         if (err) {
 
@@ -740,7 +744,7 @@ exports.send = function (sParams, oChoiceInfo, CB) {
             dbname = "USER_INFO";
         var query = {};
 
-        dbo.collection(dbname).find(query).toArray(function (err, result) {
+        dbo.collection(dbname).find(query).toArray(function(err, result) {
 
             db.close();
 

@@ -326,6 +326,8 @@ function sendVideo(sParams) {
         // VIDEO_FILE_ID = sRET.data.result.video.file_id;
         VIDEO_FILE_ID = sFile_id;
 
+        sParams.VIDEO.FILE_ID = sFile_id;
+
         try {
             var sRET = await axios.get(LURL, {
                 validateStatus: false
@@ -520,6 +522,8 @@ function sendImage(sParams) {
         // IMAGE_FILE_ID = sRET.data.result.document.file_id;
         IMAGE_FILE_ID = sFile_id;
 
+        sParams.IMAGE.FILE_ID = sFile_id;
+
         try {
             var sRET = await axios.get(LURL, {
                 validateStatus: false
@@ -585,6 +589,8 @@ function sendImage(sParams) {
  ************************************************************************/
 async function sendMessage(chat_id, sParams) {
 
+    let oErrLog = oAPP.errorlog;
+
     // var Lbody = "★ 제목" + " \n " +
     //     sParams.TITLE + " \n\n " +
     //     "★ 모듈(업무)" + " \n " +
@@ -626,9 +632,6 @@ async function sendMessage(chat_id, sParams) {
 
         // }
 
-
-
-
         let sImgUrl = sParams.IMAGE.URL;
 
         // 이미지 경로가 텔레그램 경로인지 확인
@@ -645,8 +648,6 @@ async function sendMessage(chat_id, sParams) {
 
         } catch (error) {
 
-
-
             try {
 
                 await BOT.sendDocument(chat_id, sImgUrl, {
@@ -656,6 +657,12 @@ async function sendMessage(chat_id, sParams) {
             } catch (error) {
 
                 // 진짜 오류
+
+                //오류 메시지 수집
+                oErrLog.addLog({
+                    RETCD: "E",
+                    RTMSG: `[ TELEGRAM sendMessage 전송 오류 #1] chat_id: ${chat_id} \n ${error.toString()}`
+                });
 
             }
 
@@ -683,7 +690,11 @@ async function sendMessage(chat_id, sParams) {
 
         } catch (error) {
 
-
+            //오류 메시지 수집
+            oErrLog.addLog({
+                RETCD: "E",
+                RTMSG: `[ TELEGRAM sendMessage 전송 오류 #2] chat_id: ${chat_id} \n ${error.toString()}`
+            });
 
         }
 
@@ -700,6 +711,12 @@ async function sendMessage(chat_id, sParams) {
         await BOT.sendMessage(chat_id, Lbody);
     } catch (error) {
 
+        //오류 메시지 수집
+        oErrLog.addLog({
+            RETCD: "E",
+            RTMSG: `[ TELEGRAM sendMessage 전송 오류 #3] chat_id: ${chat_id} \n ${error.toString()}`
+        });
+
     }
 
 }; // end of getMessage
@@ -709,6 +726,10 @@ async function sendMessage(chat_id, sParams) {
 /* ================================================================= */
 exports.send = function(sParams, oChoiceInfo, CB) {
 
+    // 임시 변수 초기화
+    if(sParams.VIDEO.FILE_ID){ delete sParams.VIDEO.FILE_ID; }
+    if(sParams.IMAGE.FILE_ID){ delete sParams.IMAGE.FILE_ID; }
+
     if (!oChoiceInfo || !oChoiceInfo.TELEGRAM) {
 
         //Callback 
@@ -717,8 +738,7 @@ exports.send = function(sParams, oChoiceInfo, CB) {
 
     }
 
-    var
-        remote = oAPP.remote,
+    var remote = oAPP.remote,
         MongClinet = oAPP.MongClinet,
         MongDB_HOST = oAPP.MongDB_HOST;
 

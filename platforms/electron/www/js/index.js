@@ -73,6 +73,12 @@
         await oAPP.autoUpdate.checkUpdate();
     }
 
+    // 콘솔창 닫기
+    let oWebCon = oAPP.remote.getCurrentWebContents();
+    if (oWebCon.isDevToolsOpened()) {
+        oWebCon.closeDevTools();
+    }
+
     /************************************************************************
      * Description
      ************************************************************************/

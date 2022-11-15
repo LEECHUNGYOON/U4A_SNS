@@ -17,7 +17,6 @@
             oAPP.server.onReq,
             () => { // success             
 
-                //          
                 // 서버가 정상적으로 붙으면 Hide 처리
                 let oCurrWin = oAPP.remote.getCurrentWindow();
                 oCurrWin.hide();
@@ -515,7 +514,7 @@
                                                 text: "{MODNM}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -638,7 +637,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -672,7 +671,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -762,7 +761,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -800,7 +799,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -1131,7 +1130,7 @@
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function () {
+        reader.onloadend = function() {
 
             var base64data = reader.result;
 
@@ -1562,7 +1561,7 @@
                 template: new sap.m.MessageItem({
                     title: "{RTMSG}",
                     description: "{RTMSG}",
-                }).bindProperty("type", "RETCD", function (RETCD) {
+                }).bindProperty("type", "RETCD", function(RETCD) {
 
                     switch (RETCD) {
                         case "S":

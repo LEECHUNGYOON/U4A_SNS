@@ -52,7 +52,7 @@ oFaceBook.send = async (oParams, oChoiceInfo, cb) => {
 
     // 이미지가 URL로 있거나 Blob로 있을 경우
     if ((oParams.IMAGE.URL && oParams.IMAGE.URL !== "") || (oParams.IMAGE.DATA && oParams.IMAGE.DATA !== "")) {
-     
+
         await sendPhoto(oParams);
 
         bSend = true;
@@ -104,14 +104,14 @@ function sendFeed(oParams) {
             contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
             data: oFormData, // 위에서 선언한 fromdata
             type: sMethod,
-            success: function (result) {
+            success: function(result) {
 
                 resolve();
 
                 // cb(oParams);
 
             },
-            error: function (e) {
+            error: function(e) {
 
                 let oRes = e.responseJSON,
                     oErr = oRes.error;
@@ -163,13 +163,13 @@ function sendPhoto(oParams) {
                 contentType: false,
                 data: oFormData,
                 type: sMethod,
-                success: function (result) {
+                success: function(result) {
 
                     resolve();
                     // cb(oParams);
 
                 },
-                error: function (e) {
+                error: function(e) {
 
                     let oRes = e.responseJSON,
                         oErr = oRes.error;
@@ -203,13 +203,13 @@ function sendPhoto(oParams) {
                 contentType: false, // 해당 타입을 true로 하면 일반 text로 구분되어 진다.
                 data: oFormData, // 위에서 선언한 fromdata
                 type: sMethod,
-                success: function (result) {
+                success: function(result) {
 
                     resolve();
                     // cb(oParams);
 
                 },
-                error: function (e) {
+                error: function(e) {
 
                     let oRes = e.responseJSON,
                         oErr = oRes.error;
@@ -281,17 +281,33 @@ function getMessage(oParams) {
 
     sMsg += " \n\n\n ";
 
-    // 이미지 URL이 있다면 해당 url을 본문에 내용 추가
-    if (oParams.IMAGE.URL && oParams.IMAGE.URL !== "") {
+    let sPrefixUrl = "http://www.u4ainfo.com/u4a_sns/coproxy.html?file_id=",
+        sImageFileId = oParams.IMAGE.FILE_ID,
+        sVideoFileId = oParams.VIDEO.FILE_ID;
+
+    // 텔레그램에 이미지 파일 아이디가 있을 경우 해당 url을 본문에 내용 추가
+    if (sImageFileId && sImageFileId !== "") {
         sMsg += `[${oSubJect.REF_IMG_URL}] ⬇️⬇️ \n\n`; // [참고이미지 URL Link]
-        sMsg += encodeURI(oParams.IMAGE.URL) + "\n\n";
+        sMsg += encodeURI(sPrefixUrl + sImageFileId) + "\n\n";
     }
 
-    // 동영상 URL이 있다면 해당 url을 본문에 내용 추가
-    if (oParams.VIDEO.URL && oParams.VIDEO.URL !== "") {
+    // 텔레그램에 동영상 파일 아이디가 있을 경우 해당 url을 본문에 내용 추가
+    if (sVideoFileId && sVideoFileId !== "") {
         sMsg += `[${oSubJect.REF_VDO_URL}] ⬇️⬇️ \n\n`; // [참고동영상 URL Link]
-        sMsg += encodeURI(oParams.VIDEO.URL) + "\n\n";
+        sMsg += encodeURI(sPrefixUrl + sVideoFileId) + "\n\n";
     }
+
+    // // 이미지 URL이 있다면 해당 url을 본문에 내용 추가
+    // if (oParams.IMAGE.URL && oParams.IMAGE.URL !== "") {
+    //     sMsg += `[${oSubJect.REF_IMG_URL}] ⬇️⬇️ \n\n`; // [참고이미지 URL Link]
+    //     sMsg += encodeURI(oParams.IMAGE.URL) + "\n\n";
+    // }
+
+    // // 동영상 URL이 있다면 해당 url을 본문에 내용 추가
+    // if (oParams.VIDEO.URL && oParams.VIDEO.URL !== "") {
+    //     sMsg += `[${oSubJect.REF_VDO_URL}] ⬇️⬇️ \n\n`; // [참고동영상 URL Link]
+    //     sMsg += encodeURI(oParams.VIDEO.URL) + "\n\n";
+    // }
 
     // 해시태그
     let iHashLength = oParams.HASHTAG.length;

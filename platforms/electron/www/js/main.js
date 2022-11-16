@@ -53,17 +53,28 @@
      ************************************************************************/
     oAPP.server.onReq = async (oData, oReq, oRes) => {
 
-        debugger;
-
         // 기존 오류 로그 다 지운다.
         oAPP.errorlog.clearAll();
 
         // path 분기
+        let sReqPath = oData.PATH;
 
+        switch (sReqPath) {
+            case "/restart": // 프로그램 재시작
 
+                oRes.end(JSON.stringify({
+                    RETCD: "OK",
+                }));
 
+                oAPP.fn.onAppRestart();
 
+                return;
 
+        }
+
+        if (!oData.PARAM.length) {
+            return;
+        }
 
         let aSnsData;
 
@@ -2171,9 +2182,8 @@
         // 화면 그리기
         oAPP.fn.attachInit();
 
-        // [배포시 주석] Tray 아이콘 만들고
+        // Tray 아이콘 만들기
         oAPP.fn.createTrayIcon();
-
 
         // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기        
         let bIsBackgroundMode = oAPP.isBackgroundMode();

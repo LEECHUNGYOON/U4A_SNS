@@ -88,7 +88,8 @@ function createWindow() {
     // browserWindowOpts.webPreferences.preload = path.join(app.getAppPath(), 'cdv-electron-preload.js');
     browserWindowOpts.webPreferences.contextIsolation = false;
     browserWindowOpts.backgroundColor = "#030303";
-
+    browserWindowOpts.autoHideMenuBar = true;
+    
     mainWindow = new BrowserWindow(browserWindowOpts);
     remote.enable(mainWindow.webContents);
 
@@ -100,10 +101,10 @@ function createWindow() {
     // const loadUrl = `${__dirname}\\intro.html`;
     mainWindow.loadURL(loadUrl, loadUrlOpts);
 
-    // Open the DevTools.
-    if (cdvElectronSettings.browserWindow.webPreferences.devTools) {
-        mainWindow.webContents.openDevTools();
-    }
+    // // Open the DevTools.
+    // if (cdvElectronSettings.browserWindow.webPreferences.devTools) {
+    //     mainWindow.webContents.openDevTools();
+    // }
 
     // Emitted when the window is closed.
     mainWindow.on('closed', () => {

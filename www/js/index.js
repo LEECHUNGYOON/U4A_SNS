@@ -30,6 +30,7 @@
      ************************************************************************/
     oAPP.remote = require('@electron/remote');
     oAPP.app = oAPP.remote.app;
+    oAPP.webCon = oAPP.remote.getCurrentWebContents();
     oAPP.tray = oAPP.remote.Tray;
     oAPP.dialog = oAPP.remote.dialog;
     oAPP.trayMenu = oAPP.remote.Menu;
@@ -71,12 +72,9 @@
     // build 된 상태에서만 자동 업데이트 체크를 한다.
     if (oAPP.app.isPackaged) {
         await oAPP.autoUpdate.checkUpdate();
-    }
-
-    // 콘솔창 닫기
-    let oWebCon = oAPP.remote.getCurrentWebContents();
-    if (oWebCon.isDevToolsOpened()) {
-        oWebCon.closeDevTools();
+    } else {
+        // no build일 경우 개발자도구 화면 실행
+        oAPP.webCon.openDevTools();
     }
 
     /************************************************************************
@@ -160,7 +158,7 @@
     oAPP.youtube = require(oAPP.path.join(oAPP.JsPath, "youtube.js"));
     oAPP.instagram = require(oAPP.path.join(oAPP.JsPath, "instagram.js"));
     oAPP.kakao = require(oAPP.path.join(oAPP.JsPath, "kakao.js"));
-    oAPP.telegram = require(oAPP.path.join(oAPP.JsPath, "telegram.js"));        
+    oAPP.telegram = require(oAPP.path.join(oAPP.JsPath, "telegram.js"));
 
     /************************************************************************
      * APP 구동 시작

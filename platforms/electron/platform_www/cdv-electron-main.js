@@ -29,6 +29,10 @@ const {
     protocol,
     ipcMain
 } = require('electron');
+
+app.disableHardwareAcceleration();
+app.commandLine.appendSwitch('disable-site-isolation-trials');
+
 // Electron settings from .json file.
 const cdvElectronSettings = require('./cdv-electron-settings.json');
 const reservedScheme = require('./cdv-reserved-scheme.json');

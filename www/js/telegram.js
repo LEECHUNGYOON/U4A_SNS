@@ -725,7 +725,9 @@ async function sendMessage(chat_id, sParams) {
 /* Export Module Function 
 /* ================================================================= */
 exports.send = function(sParams, oChoiceInfo, CB) {
-
+ //Callback 
+ CB(sParams);
+ return;
     // 임시 변수 초기화
     if(sParams.VIDEO.FILE_ID){ delete sParams.VIDEO.FILE_ID; }
     if(sParams.IMAGE.FILE_ID){ delete sParams.IMAGE.FILE_ID; }

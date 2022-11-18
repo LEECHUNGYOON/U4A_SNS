@@ -41,8 +41,13 @@
                 // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
                 oAPP.errorlog.writeLog("01", oErrMsg);
 
-                // 메시지 팝업 띄우기  
-                oAPP.dialog.showErrorBox("window onerror", sErrMsg);
+                let oCurrWin = oAPP.remote.getCurrentWindow(),
+                    bIsVisible = oCurrWin.isVisible();
+
+                // 아직 화면이 떠있다면 오류 메시지 출력
+                if (bIsVisible) {
+                    oAPP.dialog.showErrorBox("window onerror", sErrMsg);
+                }
 
             });
 
@@ -525,7 +530,7 @@
                                                 text: "{MODNM}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -648,7 +653,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -682,7 +687,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -772,7 +777,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -810,7 +815,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -1141,7 +1146,7 @@
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function() {
+        reader.onloadend = function () {
 
             var base64data = reader.result;
 
@@ -1433,7 +1438,9 @@
 
                         console.log("인스타그램 시작");
 
-                        oAPP.instagram.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                        oAPP.instagram.send(TY_IFDATA, oChoiceInfo, async (TY_IFDATA) => {
+
+                            debugger;
 
                             oAPP.setBusyMsg("Kakao Story 전송중...");
 
@@ -1441,15 +1448,26 @@
 
                             console.log("카카오 시작");
 
-                            oAPP.kakao.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+                            let aResult = await oAPP.kakaoStory.send(TY_IFDATA);
 
-                                console.log("카카오 종료");
+                            if(aResult.length !== 0){
 
-                                resolve();
+                                //오류
+                            }
 
-                                return;
 
-                            });
+                            resolve();
+
+                            return;
+                            // await oAPP.kakaoStory.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
+
+                            //     console.log("카카오 종료");
+
+                            //     resolve();
+
+                            //     return;
+
+                            // });
 
                         });
 
@@ -1572,7 +1590,7 @@
                 template: new sap.m.MessageItem({
                     title: "{RTMSG}",
                     description: "{RTMSG}",
-                }).bindProperty("type", "RETCD", function(RETCD) {
+                }).bindProperty("type", "RETCD", function (RETCD) {
 
                     switch (RETCD) {
                         case "S":
@@ -2184,7 +2202,7 @@
 
         // Tray 아이콘 만들기
         oAPP.fn.createTrayIcon();
-
+      
         // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기        
         let bIsBackgroundMode = oAPP.isBackgroundMode();
         if (!bIsBackgroundMode) {

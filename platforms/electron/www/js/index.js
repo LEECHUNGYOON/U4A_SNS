@@ -46,6 +46,8 @@
     oAPP.MongClinet = oAPP.remote.require('mongodb').MongoClient;
     oAPP.telegramBotAPI = oAPP.remote.require("node-telegram-bot-api");
 
+    
+
     /************************************************************************
      * [Util] Local Js Path
      ************************************************************************/
@@ -157,8 +159,9 @@
     oAPP.facebook = require(oAPP.path.join(oAPP.JsPath, "facebook.js"));
     oAPP.youtube = require(oAPP.path.join(oAPP.JsPath, "youtube.js"));
     oAPP.instagram = require(oAPP.path.join(oAPP.JsPath, "instagram.js"));
-    oAPP.kakao = require(oAPP.path.join(oAPP.JsPath, "kakao.js"));
+    // oAPP.kakao = require(oAPP.path.join(oAPP.JsPath, "kakao.js"));
     oAPP.telegram = require(oAPP.path.join(oAPP.JsPath, "telegram.js"));
+    oAPP.kakaoStory = require(oAPP.path.join(__dirname, 'js/kakaoStory.js'));
 
     /************************************************************************
      * APP 구동 시작

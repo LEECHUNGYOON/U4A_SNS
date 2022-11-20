@@ -282,7 +282,20 @@
                             text: "Restart",
                             press: () => {
 
-                                oAPP.fn.onAppRestart();
+                                let sMsg = "프로그램을 재시작 하시겠습니까?";
+                                sap.m.MessageBox.confirm(sMsg, {
+                                    onClose: (oAction) => {
+
+                                        if (oAction != "OK") {
+                                            return;
+                                        }
+
+                                        // 프로그램 재시작
+                                        oAPP.fn.onAppRestart();
+
+                                    }
+
+                                });
 
                             }
                         })
@@ -530,7 +543,7 @@
                                                 text: "{MODNM}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -653,7 +666,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -687,7 +700,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -777,7 +790,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -815,7 +828,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -1054,62 +1067,18 @@
                 }).addStyleClass("sapUiTinyMarginBottom"),
 
                 new sap.m.VBox({
+                    width: "100%",
                     renderType: sap.m.FlexRendertype.Bare,
+
                     layoutData: new sap.m.FlexItemData({
                         maxHeight: "500px",
                         maxWidth: "500px"
                     }),
-                    width: "100%",
                     items: [
-
                         new sap.m.Image({
                             src: "{/PREV/IMAGE/URL}"
                         })
-
-                        // new sap.m.Image({
-
-                        // }).bindProperty("src", {
-                        //     parts: [
-                        //         "/SNS/IMAGE/URL",
-                        //         "/SNS/IMAGE/DATA",
-                        //     ],
-                        //     formatter: (URL, DATA) => {
-
-                        //         // 둘다 없으면 빠져나감
-                        //         if (!URL && !DATA) {
-                        //             return;
-                        //         }
-
-                        //         // URL이 있을 경우
-                        //         if (URL) {
-
-                        //             console.log("URL 있다");
-
-                        //             return;
-
-                        //         }
-
-                        //         // Local PC 경로가 있을 경우
-                        //         if (DATA) {
-
-                        //             console.log("DATA 있다");
-
-                        //             oAPP.fn.readImageLocalDir(DATA, (oImgData) => {
-
-                        //                 
-
-                        //                 return oImgData;
-
-                        //             });
-
-                        //         }
-
-                        //     } // end of formatter
-
-                        // }), // end of bindProperty(src)
-
                     ]
-
                 }),
 
             ]
@@ -1134,6 +1103,12 @@
         // 파일이 진짜로 있는지 확인
         let bIsExists = oAPP.fs.existsSync(sImgPath);
         if (!bIsExists) {
+
+            fnCallback({
+                RETCD: "E",
+                RTMSG: "파일이 존재하지 않습니다."
+            });
+
             return;
         }
 
@@ -1144,14 +1119,27 @@
                 type: sMimeType
             });
 
+        // 파일 용량 체크
+        if (oAPP.fn.fnCheckFileSizeLimit(oImgFileBlob.size, 8)) {
+
+            fnCallback({
+                RETCD: "E",
+                RTMSG: "이미지 파일은 8MB 이하만 첨부 가능합니다."
+            });
+
+            return;
+
+        }
+
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function () {
+        reader.onloadend = function() {
 
             var base64data = reader.result;
 
             if (typeof fnCallback === "function") {
                 fnCallback({
+                    RETCD: "S",
                     base64data: base64data,
                     blob: oImgFileBlob
                 });
@@ -1253,12 +1241,31 @@
 
             let sFilePath = oPathInfo.filePaths[0];
 
-            oAPP.setModelProperty("/SNS/IMAGE/FPATH", sFilePath);
-
             // 현재 선택한 경로 저장
             oAPP._filedownPath = sFilePath;
 
+            // 파일을 읽어본다.
             oAPP.fn.readImageLocalDir(sFilePath, (oResult) => {
+
+                if (oResult.RETCD && oResult.RETCD == "E") {
+
+                    sap.m.MessageBox.error(oResult.RTMSG, {
+                        title: "Error", // default
+                        onClose: null, // default
+                        styleClass: "", // default
+                        actions: sap.m.MessageBox.Action.CLOSE, // default
+                        emphasizedAction: null, // default
+                        initialFocus: null, // default
+                        textDirection: sap.ui.core.TextDirection.Inherit // default
+                    });
+
+                    oAPP.setBusy(false);
+
+                    return;
+
+                }
+
+                oAPP.setModelProperty("/SNS/IMAGE/FPATH", sFilePath);
 
                 sap.ui.getCore().getModel().setProperty("/SNS/IMAGE/LURL", sFilePath);
 
@@ -1273,6 +1280,29 @@
         });
 
     }; // end of oAPP.fn.imageFileSelect
+
+    /************************************************************************
+     * 파일 용량 체크
+     ************************************************************************
+     * @param {Blob} size 
+     * - Blob 파일의 size
+     * 
+     * @param {Integer} iLimit 
+     * - 체크할 파일 사이즈 [단위: MB]
+     * 
+     * @return {Boolean}
+     ************************************************************************/
+    oAPP.fn.fnCheckFileSizeLimit = (size, iLimit) => {
+
+        var limitSize = iLimit * 1024 * 1024;
+
+        if (size > limitSize) {
+            return true;
+        }
+
+        return false;
+
+    }; // end of oAPP.fn.fnCheckFileSizeLimit
 
     /************************************************************************
      * 테이블에 추가한 해시태그 정보 구하기
@@ -1442,23 +1472,55 @@
 
                             debugger;
 
+                            let oErrLog = oAPP.errorlog;
+
                             oAPP.setBusyMsg("Kakao Story 전송중...");
 
                             console.log("인스타그램 종료");
 
                             console.log("카카오 시작");
 
+                            // 카카오 전송
                             let aResult = await oAPP.kakaoStory.send(TY_IFDATA);
 
-                            if(aResult.length !== 0){
+                            // 카카오 전송 결과가 하나도 없다면
+                            if (aResult.length !== 0) {
 
-                                //오류
+                                //오류                              
+                                oErrLog.addLog({
+                                    RETCD: "E",
+                                    RTMSG: `[ kakaoStory 전송 오류] : ???? `
+                                });
+
                             }
 
+                            // 카카오 전송 결과 Array 중 Error가 있을 경우 Log 수집
+                            let iKakaoResultLength = aResult.length;
+                            for (let index = 0; index < iKakaoResultLength; index++) {
+
+                                const oRes = aResult[index];
+
+                                if (!oRes.RETCD) {
+                                    continue;
+                                }
+
+                                if (oRes.RETCD && oRes.RETCD == "E") {
+
+                                    oErrLog.addLog({
+                                        RETCD: "E",
+                                        RTMSG: oRes.RTMSG || ""
+                                    });
+
+                                }
+
+                            }
+
+                            console.log("카카오 종료");
 
                             resolve();
 
                             return;
+
                             // await oAPP.kakaoStory.send(TY_IFDATA, oChoiceInfo, (TY_IFDATA) => {
 
                             //     console.log("카카오 종료");
@@ -1590,7 +1652,7 @@
                 template: new sap.m.MessageItem({
                     title: "{RTMSG}",
                     description: "{RTMSG}",
-                }).bindProperty("type", "RETCD", function (RETCD) {
+                }).bindProperty("type", "RETCD", function(RETCD) {
 
                     switch (RETCD) {
                         case "S":
@@ -1747,16 +1809,10 @@
 
     oAPP.fn.onPressEmoIcon = (oEvent) => {
 
-        // var oSnsData = jQuery.extend(true, {}, oAPP.getModelProperty("/SNS"));
-
         let oBtn = oEvent.getSource(),
             icon = oBtn.getText();
 
         oAPP.oCodeEditor.insert(icon);
-
-        // oSnsData.DESC += icon;
-
-        // oAPP.setModelProperty("/SNS", oSnsData);
 
     }; // end of oAPP.fn.onPressEmoIcon
 
@@ -2202,7 +2258,7 @@
 
         // Tray 아이콘 만들기
         oAPP.fn.createTrayIcon();
-      
+
         // pc 이름을 읽어서 백그라운드 모드로 할지 포그라운드로 할지 분기        
         let bIsBackgroundMode = oAPP.isBackgroundMode();
         if (!bIsBackgroundMode) {

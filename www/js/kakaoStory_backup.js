@@ -12,10 +12,7 @@ let CONFIG = {
     api_url_photo  : "https://kapi.kakao.com/v1/api/story/post/photo",
     api_url_note   : "https://kapi.kakao.com/v1/api/story/post/note",
     api_url_link   : "https://kapi.kakao.com/v1/api/story/post/link",
-    auth_service   : "http://u4arnd.iptime.org:9403/sns/kakaoStory.html",
-    //APP_TOKEN      : "10a4b0e1b6ceadaf8718cb812440a915",
-    APP_TOKEN      : "c770fa8a477874d91ed02398b8029ea1",
-    permission     : "A"  //F: 친구에게만 공개 , A: 전체 공개, M: 나만 보기
+    auth_service   : "http://u4arnd.iptime.org:9403/sns/kakaoStory.html"
 
 }
 
@@ -80,7 +77,7 @@ const _random = (length = 8) => {
 /*================================================= */
 async function _sendNOTE(TOKEN, PARAMS){
     return new Promise(async (resNOTE, rej) => {
-       
+        
         //이미지 전송 정보가 존재한다면 하위 수행 금지 !!!
         if((typeof PARAMS.IMAGE.FPATH !== "undefined") && PARAMS.IMAGE.FPATH !== ""){ resNOTE({RETCD:"S", RTMSG:""}); return; }
         if(PARAMS.IMAGE.URL != ""){ resNOTE({RETCD:"S", RTMSG:""}); return; }
@@ -88,6 +85,7 @@ async function _sendNOTE(TOKEN, PARAMS){
         //note 전송
         var xhttp = new XMLHttpRequest();
         xhttp.onload  = (e)=>{ 
+            debugger;
             var retcd = "S"; 
             var rtmsg = "";
             if(e.target.status != 200){ retcd = "E"; rtmsg = e.target.response; }
@@ -110,7 +108,7 @@ async function _sendNOTE(TOKEN, PARAMS){
 
             //SAMPLE URL
             if(PARAMS.SAMPLE_URL !== ""){
-                LCONTENT = LCONTENT + "🤩 U4A Sample URL \n" + PARAMS.SAMPLE_URL + " \n ";
+                LCONTENT = LCONTENT + "🐾 U4A Sample URL \n" + PARAMS.SAMPLE_URL + " \n ";
 
             }
 
@@ -139,9 +137,11 @@ async function _sendNOTE(TOKEN, PARAMS){
             }
 
 
+
         //QUERY STRING 전송 -  본문 문자열 2048 안으로만 가능
-        var sendDATA = "permission=" + CONFIG.permission  //A: 전체 공개 F: 친구에게만 공개 M: 나만 보기
-                     + "&content="   + encodeURIComponent(LCONTENT); //본문
+        var sendDATA = "permission=M" 
+                    + "&content=" 
+                    + encodeURIComponent(LCONTENT);
 
             xhttp.send(sendDATA);
 
@@ -153,20 +153,9 @@ async function _sendNOTE(TOKEN, PARAMS){
 /*================================================= */
 async function _sendPHOTO(TOKEN, PARAMS){
     return new Promise(async (resPHOTO, rej) => {
-
-        //샘플 URL 값이 존재한다면 하위 수행중지.
-        if(PARAMS.SAMPLE_URL !== ""){ resPHOTO({RETCD:"S", RTMSG:""}); return; }
-
-        //이미지 전송 정보가 존재여부 점검 
-        var isIMG = false;
-        if((typeof PARAMS.IMAGE.FPATH !== "undefined") && PARAMS.IMAGE.FPATH !== ""){ isIMG = true; }
-        if(PARAMS.IMAGE.URL !== ""){  isIMG = true; }
-
-        //만일 이미지 전송 정보가 미존재시 종료
-        if(!isIMG){
-            resPHOTO({RETCD:"S", RTMSG:""});
-            return;
-        }
+        //임시 
+        resPHOTO({RETCD:"S", RTMSG:""}); 
+        return;
 
         var xhttp = new XMLHttpRequest();
         xhttp.onload = (e)=>{ 
@@ -191,36 +180,10 @@ async function _sendPHOTO(TOKEN, PARAMS){
                 xhttp2.setRequestHeader("Authorization", herderToken);
                 xhttp2.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
 
-                //본문 구성 
-                var LCONTENT = "";
-                if(PARAMS.DESC !== ""){ LCONTENT = PARAMS.DESC + " \n "; }
-
-                //추가 이미지 LINK 
-                if(PARAMS.IMAGE.T_URL.length != 0){
-                    LCONTENT = LCONTENT + "\n 💚 \n";
-                    for (var i = 0; i < PARAMS.IMAGE.T_URL.length; i++) {
-                        LCONTENT = LCONTENT + PARAMS.IMAGE.T_URL[i] + " \n ";
-                    
-                    }
-                }          
-
-                //동영상 LINK
-                if(PARAMS.VIDEO.URL !== ""){
-                    LCONTENT = LCONTENT +  " \n ▶ \n" + PARAMS.VIDEO.URL + " \n ";
-                }
-                
-                //해시태그
-                if(PARAMS.HASHTAG.length != 0){
-                    LCONTENT = LCONTENT + "\n 💛 \n";
-                    for (var i = 0; i < PARAMS.HASHTAG.length; i++) {
-                        LCONTENT = LCONTENT + PARAMS.HASHTAG[i] + " ";
-                    }
-                }
-
                 //QUERY STRING 전송 -  본문 문자열 2048 안으로만 가능
-                var sendDATA = "permission=" + CONFIG.permission   //A: 전체 공개 F: 친구에게만 공개 M: 나만 보기 
+                var sendDATA = "permission=M" 
                              + "&image_url_list=" + encodeURIComponent(e.target.response) 
-                             + "&content="        + encodeURIComponent(LCONTENT) ;
+                             + "&content="        + "aaaaa";
 
                 xhttp2.send(sendDATA);
 
@@ -236,66 +199,32 @@ async function _sendPHOTO(TOKEN, PARAMS){
         //전송 form 객체 생성 
         let oformData = new FormData();
 
-        //이미지 정보가 웹서버 URL 방식일 경우 
-        if(PARAMS.IMAGE.URL !== ""){
+        var url_path = PARAMS.IMAGE.URL;
 
-            try {
-                var resData   = await fetch(PARAMS.IMAGE.URL);
-                var byteArray = await resData.arrayBuffer();
-        
-                let mimeTyp = MIME.lookup(PARAMS.IMAGE.URL);
-                if(!mimeTyp){mimeTyp = "";};
-        
-                let oBin = new Blob([byteArray], {type:mimeTyp});
+        //웹서버 OR URL 방식 
+        debugger;
+        try {
+            let resData   = await fetch(url_path);
+            let byteArray = await resData.arrayBuffer();
+    
+            let mimeTyp = MIME.lookup(url_path);
+            if(!mimeTyp){mimeTyp = "";};
+    
+            let oBin = new Blob([byteArray], {type:mimeTyp});
 
-                let ext  = oAPP.path.extname(PARAMS.IMAGE.URL);
-                if(ext == ""){ext = ".png";}
+            let ext  = oAPP.path.extname(url_path);
+            if(ext == ""){ext = ".png";}
 
-                let fname = _random(20) + ext;
-                oformData.append('file', oBin, fname);
-        
-                xhttp.send(oformData);
+            let fname = _random(20) + ext;
+            oformData.append('file', oBin, fname);
+    
+            xhttp.send(oformData);
 
-            } catch (err) {
-                resPHOTO({RETCD:"E", RTMSG:"링크방식 : " + err.toString()}); 
-                return;
-                
-            }
-
+        } catch (err) {
+            resPHOTO({RETCD:"E", RTMSG:"PHOTO : " + err.toString()}); 
             return;
-
-        } //if(PARAMS.IMAGE.URL !== ""){
-
-
-        //로컬 파일 일 경우 
-        if(PARAMS.IMAGE.FPATH !== ""){
-
-            try {
-                var resData   = oAPP.fs.readFileSync(PARAMS.IMAGE.FPATH , null).buffer;
-                var byteArray = new Uint8Array(resData);
-        
-                let mimeTyp = MIME.lookup(PARAMS.IMAGE.FPATH);
-                if(!mimeTyp){mimeTyp = "";};
-        
-                let oBin = new Blob([byteArray], {type:mimeTyp});
-
-                let ext  = oAPP.path.extname(PARAMS.IMAGE.FPATH);
-                if(ext == ""){ext = ".png";}
-
-                let fname = _random(20) + ext;
-                oformData.append('file', oBin, fname);
-        
-                xhttp.send(oformData);
-
-            } catch (err) {
-                resPHOTO({RETCD:"E", RTMSG:"링크방식 : " + err.toString()}); 
-                return;
-                
-            }
-
-            return;
-
-        } //if(PARAMS.IMAGE.FPATH !== ""){
+            
+        }
 
     });
 }
@@ -306,9 +235,6 @@ async function _sendPHOTO(TOKEN, PARAMS){
 /*================================================= */
 async function _sendLINKINFO(TOKEN, PARAMS){
     return new Promise(async (resLINKINFO, rej) => {
-
-        //샘플 URL 값이 누락이라면 하위 수행 금지 
-        if(PARAMS.SAMPLE_URL === ""){ resLINKINFO({RETCD:"S", RTMSG:""}); return; }
       
         //이미지 전송 정보가 존재여부 점검 
         var isIMG = false;
@@ -344,7 +270,7 @@ async function _sendLINKINFO(TOKEN, PARAMS){
                 xhttp2.open("POST", CONFIG.api_url_link, true);
                 xhttp2.setRequestHeader("Authorization", herderToken);
                 xhttp2.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
+                
                 //카카오스토링 링크 전송 값 구성 
                 var link_data = {};
 
@@ -365,20 +291,25 @@ async function _sendLINKINFO(TOKEN, PARAMS){
                         link_data.image.push("http://dn-l1-story.kakao.co.kr/dn" + T_IMGS[i]);
                     }
 
-                    //내역 = 문서유형
+                    //내역 = 문서유형 + 해시태그
                     link_data.description = PARAMS.TYPE;
+                    if(PARAMS.HASHTAG.length != 0){
+                        for (var i = 0; i < PARAMS.HASHTAG.length; i++) {
+                            link_data.description = link_data.description + PARAMS.HASHTAG + " ";
+                        }
+                          
+                    }
 
-                    //카카오톡스토리 전송 고정값 설정 
-                    link_data.type    = "website";
+                    link_data.type = "website";
                     link_data.section = "";
 
-                    //content = 본문 
+                    //content = 본문 + 추가 이미지 LINK 
                     var LCONTENT = "";
                     if(PARAMS.DESC !== ""){ LCONTENT = PARAMS.DESC + " \n "; }
 
                     //추가 이미지 LINK 
                     if(PARAMS.IMAGE.T_URL.length != 0){
-                        LCONTENT = LCONTENT + "\n 💚 \n";
+                        LCONTENT = LCONTENT + " \n "
                         for (var i = 0; i < PARAMS.IMAGE.T_URL.length; i++) {
                             LCONTENT = LCONTENT + PARAMS.IMAGE.T_URL[i] + " \n ";
                         
@@ -387,20 +318,18 @@ async function _sendLINKINFO(TOKEN, PARAMS){
                     
                     //동영상 LINK
                     if(PARAMS.VIDEO.URL !== ""){
-                        LCONTENT = LCONTENT +  " \n ▶ \n" + PARAMS.VIDEO.URL + " \n ";
+                        LCONTENT = LCONTENT + " \n " + PARAMS.VIDEO.URL + " \n ";
                     }
-                    
-                    //해시태그
+                
                     if(PARAMS.HASHTAG.length != 0){
-                        LCONTENT = LCONTENT + "\n 💛 \n";
+                        LCONTENT = LCONTENT + " \n "
                         for (var i = 0; i < PARAMS.HASHTAG.length; i++) {
                             LCONTENT = LCONTENT + PARAMS.HASHTAG[i] + " ";
                         }
                     }
 
                 var sendLinkData = JSON.stringify(link_data);
-                    sendLinkData = "permission=" + CONFIG.permission   //A: 전체 공개 F: 친구에게만 공개 M: 나만 보기
-                                 + "&link_info=" + encodeURIComponent(sendLinkData) 
+                    sendLinkData = "link_info=" + encodeURIComponent(sendLinkData)
                                  + "&content=" + encodeURIComponent(LCONTENT);
                
                 xhttp2.send(sendLinkData);
@@ -416,7 +345,9 @@ async function _sendLINKINFO(TOKEN, PARAMS){
 
         //전송 form 객체 생성 
         let oformData = new FormData();
- 
+
+        debugger;
+
         //이미지 정보가 웹서버 URL 방식일 경우 
         if(PARAMS.IMAGE.URL !== ""){
 
@@ -490,10 +421,10 @@ exports.send = async function(sParams){
 
     return new Promise((resolve, reject) => {
 
+        debugger;
+        
         //[펑션]자식 frame 통신 callback 함수
         async function onMsgCB(params){
-
-            debugger;
             
             //frame 통신 이벤트 제거 
             window.removeEventListener('message', onMsgCB);
@@ -505,15 +436,17 @@ exports.send = async function(sParams){
 
             var T_MSG = [];
 
+            debugger;
+
             /* note 전송 */
             var S_RET = await _sendNOTE(params.data.TOKEN, sParams);
                 T_MSG.push(S_RET);
 
-
             /* note + 사진 전송 */
+            /*
             var S_RET = await _sendPHOTO(params.data.TOKEN, sParams);
                 T_MSG.push(S_RET);
-     
+            */
 
             /* 카카오스토리 링크  */
             var S_RET = await _sendLINKINFO(params.data.TOKEN, sParams);
@@ -531,7 +464,7 @@ exports.send = async function(sParams){
 
         //카카오 스토리 처리 URL 호출
         OFRAME = document.getElementById("kakaologin");
-        
+
         //frame 로딩 정상 수행시 
         OFRAME.onload = function(e){
 
@@ -550,7 +483,7 @@ exports.send = async function(sParams){
                 return;
             }
 
-            var PARAMS = {"TOKEN":CONFIG.APP_TOKEN};
+            var PARAMS = {"TOKEN":"10a4b0e1b6ceadaf8718cb812440a915"};
             contentWin.gfn_Auth(PARAMS);
            
         };

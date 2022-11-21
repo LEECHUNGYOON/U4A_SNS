@@ -381,7 +381,7 @@ function sendVideo(sParams) {
 
         sParams.VIDEO.FPATH = "";
         sParams.VIDEO.URL = "https://api.telegram.org/file/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/" + sRET.data.result.file_path;
-
+        
         resolve();
 
     });
@@ -725,9 +725,7 @@ async function sendMessage(chat_id, sParams) {
 /* Export Module Function 
 /* ================================================================= */
 exports.send = function(sParams, oChoiceInfo, CB) {
- //Callback 
- CB(sParams);
- return;
+
     // 임시 변수 초기화
     if(sParams.VIDEO.FILE_ID){ delete sParams.VIDEO.FILE_ID; }
     if(sParams.IMAGE.FILE_ID){ delete sParams.IMAGE.FILE_ID; }

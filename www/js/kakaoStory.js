@@ -110,13 +110,13 @@ async function _sendNOTE(TOKEN, PARAMS){
 
             //SAMPLE URL
             if(PARAMS.SAMPLE_URL !== ""){
-                LCONTENT = LCONTENT + "🤩 U4A Sample URL \n" + PARAMS.SAMPLE_URL + " \n ";
+                LCONTENT = LCONTENT + "🤩 U4A Sample URL \n" + encodeURI(PARAMS.SAMPLE_URL) + " \n ";
 
             }
 
             //VIDEO URL
             if(PARAMS.VIDEO.URL !== ""){
-                LCONTENT = LCONTENT + " \n ▶ Video \n" + PARAMS.VIDEO.URL + " \n ";
+                LCONTENT = LCONTENT + " \n ▶ Video \n" + encodeURI(PARAMS.VIDEO.URL) + " \n ";
 
             }
 
@@ -124,7 +124,7 @@ async function _sendNOTE(TOKEN, PARAMS){
             if(PARAMS.IMAGE.T_URL.length != 0){
                 LCONTENT = LCONTENT + "\n 💚 \n";
                 for (var i = 0; i < PARAMS.IMAGE.T_URL.length; i++) {
-                    LCONTENT = LCONTENT + PARAMS.IMAGE.T_URL[i] + " \n ";
+                    LCONTENT = LCONTENT + encodeURI(PARAMS.IMAGE.T_URL[i].URL) + " \n ";
                     
                 }
             }
@@ -132,9 +132,12 @@ async function _sendNOTE(TOKEN, PARAMS){
             //해시태그
             if(PARAMS.HASHTAG.length != 0){
                 LCONTENT = LCONTENT + "\n 💛 \n";
-                for (var i = 0; i < PARAMS.HASHTAG.length; i++) {
-                    LCONTENT = LCONTENT + PARAMS.HASHTAG[i] + " ";
-                }
+
+                LCONTENT += oAPP.fn.getHashText(PARAMS.HASHTAG);
+
+                // for (var i = 0; i < PARAMS.HASHTAG.length; i++) {
+                //     LCONTENT = LCONTENT + PARAMS.HASHTAG[i] + " ";
+                // }
 
             }
 
@@ -153,6 +156,13 @@ async function _sendNOTE(TOKEN, PARAMS){
 /*================================================= */
 async function _sendPHOTO(TOKEN, PARAMS){
     return new Promise(async (resPHOTO, rej) => {
+
+
+        // 이미지 URL이 있다면 해당 url을 본문에 내용 추가
+        var LIMG_URL = PARAMS.IMAGE.URL;
+        if (LIMG_URL === "") {
+            LIMG_URL = PARAMS.ATTCH.IMG_URL;
+        }
 
         //샘플 URL 값이 존재한다면 하위 수행중지.
         if(PARAMS.SAMPLE_URL !== ""){ resPHOTO({RETCD:"S", RTMSG:""}); return; }
@@ -199,22 +209,31 @@ async function _sendPHOTO(TOKEN, PARAMS){
                 if(PARAMS.IMAGE.T_URL.length != 0){
                     LCONTENT = LCONTENT + "\n 💚 \n";
                     for (var i = 0; i < PARAMS.IMAGE.T_URL.length; i++) {
-                        LCONTENT = LCONTENT + PARAMS.IMAGE.T_URL[i] + " \n ";
+                        LCONTENT = LCONTENT + encodeURI(PARAMS.IMAGE.T_URL[i].URL) + " \n ";
                     
                     }
                 }          
 
                 //동영상 LINK
-                if(PARAMS.VIDEO.URL !== ""){
-                    LCONTENT = LCONTENT +  " \n ▶ \n" + PARAMS.VIDEO.URL + " \n ";
+                // 동영상 URL이 있다면 해당 url을 본문에 내용 추가
+                var LVDO_URL = PARAMS.VIDEO.URL;
+                if (LVDO_URL === "") {
+                    LVDO_URL = PARAMS.ATTCH.VIDEO_URL;
+                }
+
+                if(LVDO_URL !== ""){
+                    LCONTENT = LCONTENT +  " \n ▶ \n" + LVDO_URL + " \n ";
                 }
                 
                 //해시태그
                 if(PARAMS.HASHTAG.length != 0){
                     LCONTENT = LCONTENT + "\n 💛 \n";
-                    for (var i = 0; i < PARAMS.HASHTAG.length; i++) {
-                        LCONTENT = LCONTENT + PARAMS.HASHTAG[i] + " ";
-                    }
+
+                    LCONTENT += oAPP.fn.getHashText(PARAMS.HASHTAG);
+                    
+                    // for (var i = 0; i < PARAMS.HASHTAG.length; i++) {
+                    //     LCONTENT = LCONTENT + PARAMS.HASHTAG[i] + " ";
+                    // }
                 }
 
                 //QUERY STRING 전송 -  본문 문자열 2048 안으로만 가능
@@ -380,22 +399,32 @@ async function _sendLINKINFO(TOKEN, PARAMS){
                     if(PARAMS.IMAGE.T_URL.length != 0){
                         LCONTENT = LCONTENT + "\n 💚 \n";
                         for (var i = 0; i < PARAMS.IMAGE.T_URL.length; i++) {
-                            LCONTENT = LCONTENT + PARAMS.IMAGE.T_URL[i] + " \n ";
+                            LCONTENT = LCONTENT + encodeURI(PARAMS.IMAGE.T_URL[i].URL) + " \n ";
                         
                         }
                     }
                     
                     //동영상 LINK
-                    if(PARAMS.VIDEO.URL !== ""){
-                        LCONTENT = LCONTENT +  " \n ▶ \n" + PARAMS.VIDEO.URL + " \n ";
+                    // 동영상 URL이 있다면 해당 url을 본문에 내용 추가
+                    var LVDO_URL = PARAMS.VIDEO.URL;
+                    if (LVDO_URL === "") {
+                        LVDO_URL = PARAMS.ATTCH.VIDEO_URL;
+                    }
+
+                    if(LVDO_URL !== ""){
+                        LCONTENT = LCONTENT +  " \n ▶ \n" + LVDO_URL + " \n ";
                     }
                     
                     //해시태그
                     if(PARAMS.HASHTAG.length != 0){
                         LCONTENT = LCONTENT + "\n 💛 \n";
-                        for (var i = 0; i < PARAMS.HASHTAG.length; i++) {
-                            LCONTENT = LCONTENT + PARAMS.HASHTAG[i] + " ";
-                        }
+
+                        LCONTENT += oAPP.fn.getHashText(PARAMS.HASHTAG);
+
+                        // for (var i = 0; i < PARAMS.HASHTAG.length; i++) {
+                        //     LCONTENT = LCONTENT + PARAMS.HASHTAG[i] + " ";
+                        // }
+
                     }
 
                 var sendLinkData = JSON.stringify(link_data);
@@ -486,9 +515,19 @@ async function _sendLINKINFO(TOKEN, PARAMS){
 /* ================================================================= */
 /* Export Module Function 
 /* ================================================================= */
-exports.send = async function(sParams){
+exports.send = async function(sParams, oChoiceInfo){
 
     return new Promise((resolve, reject) => {
+
+        debugger;
+
+        if (!oChoiceInfo || !oChoiceInfo.KAKAO_STORY) {
+
+            //Callback 
+            resolve([]);
+            return;
+    
+        }
 
         //[펑션]자식 frame 통신 callback 함수
         async function onMsgCB(params){
@@ -526,8 +565,7 @@ exports.send = async function(sParams){
 
  
         //자식 frame 통신 이벤트 설정 
-        window.addEventListener('message', onMsgCB);
-  
+        window.addEventListener('message', onMsgCB);  
 
         //카카오 스토리 처리 URL 호출
         OFRAME = document.getElementById("kakaologin");

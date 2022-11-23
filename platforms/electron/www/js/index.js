@@ -45,8 +45,9 @@
     oAPP.octokit = oAPP.remote.require("@octokit/core").Octokit;
     oAPP.MongClinet = oAPP.remote.require('mongodb').MongoClient;
     oAPP.telegramBotAPI = oAPP.remote.require("node-telegram-bot-api");
+    oAPP.NodeSSH = require('node-ssh').NodeSSH;
 
-    
+
 
     /************************************************************************
      * [Util] Local Js Path
@@ -55,9 +56,11 @@
 
     oAPP.errorlog = require(oAPP.path.join(oAPP.JsPath, "errlog.js")); // 에러 로그 관련 util
     oAPP.mongdb = require(oAPP.path.join(oAPP.JsPath, "mongdb.js")); // 몽고 디비 연결 및 SNS별 Token Key 정보 구하기
-    oAPP.autoUpdate = require(oAPP.path.join(oAPP.JsPath, "autoUpdate.js"));
+    oAPP.autoUpdate = require(oAPP.path.join(oAPP.JsPath, "autoUpdate.js"));    
+    oAPP.oSnsAttachFile = require(oAPP.path.join(__dirname, 'js/sns_attchFiles.js')); 
+    oAPP.sendADMINnotice = require(oAPP.path.join(__dirname, 'js/sendADMINnotice.js')),
 
-    oAPP.aEmogiIcons = require(oAPP.path.join(oAPP.apppath, "json", "emogi.json"));
+    oAPP.aEmogiIcons = require(oAPP.path.join(oAPP.apppath, "json", "emogi.json"));    
     oAPP.emogiGroupIcons = require(oAPP.path.join(oAPP.apppath, "json", "emogi-group.json"));
 
     // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
@@ -162,10 +165,11 @@
     oAPP.telegram = require(oAPP.path.join(oAPP.JsPath, "telegram.js"));
     oAPP.kakaoStory = require(oAPP.path.join(__dirname, 'js/kakaoStory.js'));
 
+
     /************************************************************************
      * APP 구동 시작
      ************************************************************************/
-    oAPP.fn.onStart = () => {
+    oAPP.fn.onStart = async () => {
 
         let oFrame = document.getElementById("ws_frame");
         if (!oFrame) {
@@ -174,6 +178,27 @@
 
         let sUrl = oAPP.path.join(oAPP.apppath, "main.html");
         oFrame.src = sUrl;
+
+
+
+        // no build 상태일 경우 아래 로직 수행하지 않음.
+        if(!oAPP.app.isPackaged){
+            return;
+        }
+
+        // 컴퓨터 이름을 읽어서 서버일 경우에만 아래 로직 수행
+        if (process.env.COMPUTERNAME != process.env.SERVER_COMPUTERNAME) {
+            return;
+        }
+
+        // 앱이 구동 될 때 관리자 텔레그램으로 메시지를 전송한다.
+        var sendADMINnotice = require(oAPP.path.join(__dirname, 'js/sendADMINnotice.js')),
+            oRetData = await sendADMINnotice.send(oAPP.remote, "001");
+
+        // 전송 오류일 경우 오류 로그를 남긴다.
+        if (oRetData.RETCD == "E") {
+            oAPP.errorlog.writeLog("01", oRetData);
+        }
 
     }; // end of oAPP.onStart
 
@@ -256,15 +281,15 @@
             oAPP.dialog.showErrorBox("window onerror", sErrMsg);
         }
 
-        let oErrMsg = {
-            RETCD: "E",
-            RTMSG: sErrMsg
-        };
-
         // oAPP.errorlog가 있다면 
         if (!oAPP.errorlog) {
             return;
         }
+
+        let oErrMsg = {
+            RETCD: "E",
+            RTMSG: sErrMsg
+        };
 
         // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
         oAPP.errorlog.writeLog("01", oErrMsg);
@@ -285,15 +310,15 @@
             oAPP.dialog.showErrorBox("unhandledrejection Error:", sErrMsg);
         }
 
-        let oErrMsg = {
-            RETCD: "E",
-            RTMSG: sErrMsg
-        };
-
         // oAPP.errorlog가 있다면 
         if (!oAPP.errorlog) {
             return;
         }
+
+        let oErrMsg = {
+            RETCD: "E",
+            RTMSG: sErrMsg
+        };
 
         // 로그 폴더에 타임스탬프 찍어서 파일로 저장한다. (JSON 형태로..)
         oAPP.errorlog.writeLog("01", oErrMsg);

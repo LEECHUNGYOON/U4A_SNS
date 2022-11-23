@@ -58,6 +58,8 @@
      ************************************************************************/
     oAPP.server.onReq = async (oData, oReq, oRes) => {
 
+        let oErrLog = oAPP.errorlog;
+
         // 기존 오류 로그 다 지운다.
         oAPP.errorlog.clearAll();
 
@@ -71,11 +73,42 @@
                     RETCD: "OK",
                 }));
 
+                var oRetData = await oAPP.sendADMINnotice.send(oAPP.remote, "002");
+
+                // 전송 오류일 경우 오류 로그를 남긴다.
+                if (oRetData.RETCD == "E") {
+                    oAPP.errorlog.writeLog("01", oRetData);
+                }
+
                 oAPP.fn.onAppRestart();
 
                 return;
 
+            case "/sampleSNSsend":
+
+                break;
+
+            case "/favicon.ico" :
+            case "/favicon" :
+            case "favicon" :
+                
+                oRes.end("");
+                return;
+
+            default:
+                
+                oErrLog.writeLog("02", {
+                    RETCD: "E",
+                    RTMSG: `👿🚨🚨 비인가된 사용자가 접속시도를 하였습니다!!🚨🚨👿 [ ${sReqPath} ]`
+                });
+
+                let code = "<html><head><meta charset='utf-8'></head> <body>⛔ 👉🤙🖕👍 어떤 세끼냐? who are you? 👉🤙🖕👍 ⛔</body></html>";
+                oRes.end(code);
+
+                return;
+
         }
+
 
         if (!oData.PARAM.length) {
             return;
@@ -132,8 +165,6 @@
             await oAPP.fn.sendSNS(oSnsInfo, oChoiceInfo);
 
         }
-
-        let oErrLog = oAPP.errorlog;
 
         // SNS 전송시 오류가 있었다면 Log 파일 저장
         oErrLog.writeLog("02", oErrLog.getLog());
@@ -375,7 +406,6 @@
                                             }),
                                             new sap.m.CheckBox({
                                                 text: "Telegram",
-                                                editable: false,
                                                 selected: "{/PRC/CHOICE/TELEGRAM}"
                                             }),
                                             new sap.m.CheckBox({
@@ -436,7 +466,16 @@
                                 content: new sap.m.Page({
                                     title: "SNS Preview",
                                     content: aSNSPrevContent,
-                                    footer: new sap.m.Bar()
+                                    footer: new sap.m.Bar({
+                                        contentLeft: [
+                                            // new sap.m.Button({
+                                            //     text: "해시태그 테스트",
+                                            //     press: () => {
+                                            //         oAPP.fn.testHash();
+                                            //     }
+                                            // })
+                                        ]
+                                    })
 
                                 }).addStyleClass("sapUiContentPadding"),
 
@@ -456,7 +495,7 @@
 
         ];
 
-    }; // end of oAPP.fn.getPageContent
+    }; // end of oAPP.fn.getPageContent    
 
     /************************************************************************
      * SNS 입력 부분 페이지 Content 영역 UI 그리기
@@ -543,7 +582,7 @@
                                                 text: "{MODNM}"
                                             })
                                         }
-                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function(TYPEKEY) {
+                                    }).bindProperty("selectedKey", "/PRC/TYPEKEY", function (TYPEKEY) {
 
                                         let oModel = this.getModel(),
                                             aTypeList = oModel.getProperty("/PRC/TYPELIST");
@@ -666,7 +705,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -700,7 +739,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/VIDEO/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -747,6 +786,7 @@
 
                         new sap.m.Button({
                             icon: "sap-icon://sys-help",
+                            type: sap.m.ButtonType.Emphasized,
                             press: (oEvent) => {
 
                                 oAPP.fn.helpVideo(oEvent);
@@ -790,7 +830,7 @@
                                     })
 
                                 ]
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 0) {
 
@@ -828,7 +868,7 @@
 
                                 ]
 
-                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function(iIndex) {
+                            }).bindProperty("visible", "/PRC/IMAGE/RDBIDX", function (iIndex) {
 
                                 if (iIndex !== 1) {
 
@@ -884,6 +924,7 @@
 
                         new sap.m.Button({
                             icon: "sap-icon://sys-help",
+                            type: sap.m.ButtonType.Emphasized,
                             press: (oEvent) => {
 
                                 oAPP.fn.helpImage(oEvent);
@@ -1133,7 +1174,7 @@
 
         var reader = new FileReader();
         reader.readAsDataURL(oImgFileBlob);
-        reader.onloadend = function() {
+        reader.onloadend = function () {
 
             var base64data = reader.result;
 
@@ -1335,6 +1376,60 @@
     }; // end of oAPP.fn.getHashTagList
 
     /************************************************************************
+     * 해시태그 테이블에 있는 텍스트를 읽어서 '#' 이 없는 텍스트에 '#' 를 붙인다
+     ************************************************************************/
+    oAPP.fn.getHashText = (aHashTag) => {
+
+        if (!Array.isArray(aHashTag)) {
+            return "";
+        }
+
+        var iHashLength = aHashTag.length;
+        if (iHashLength <= 0) {
+            return "";
+        }
+
+        let sHashTag = "";
+
+        for (let index = 0; index < iHashLength; index++) {
+
+            let hash = aHashTag[index];
+            if (hash == "") {
+                continue;
+            }
+
+            let aHashLine = hash.split(" "),
+                iHashLineLength = aHashLine.length;
+
+            if (iHashLineLength <= 0) {
+                continue;
+            }
+
+            for (var j = 0; j < iHashLineLength; j++) {
+
+                let sTag = aHashLine[j];
+                if (!sTag) {
+                    continue;
+                }
+
+                if (!sTag.startsWith("#")) {
+                    sHashTag += "#" + sTag + " ";
+                    continue;
+                }
+
+                sHashTag += sTag + " ";
+
+            }
+
+            sHashTag += " \n ";
+
+        }
+
+        return sHashTag;
+
+    }; // end of oAPP.fn.getHashText
+
+    /************************************************************************
      * 게시글 SNS에 전송
      ************************************************************************/
     oAPP.fn.sendPost = () => {
@@ -1438,7 +1533,36 @@
      ************************************************************************/
     oAPP.fn.sendSNS = (TY_IFDATA, oChoiceInfo) => {
 
-        return new Promise((resolve) => {
+        return new Promise(async (resolve) => {
+
+            debugger;
+
+            let oErrLog = oAPP.errorlog;
+
+            oAPP.setBusyMsg("NAS 전송중...");
+
+            console.log("NAS 전송 시작");
+
+            var oReturn = await oAPP.oSnsAttachFile.put(TY_IFDATA);
+
+            // 오류 일 경우 올 스톱!!
+            if (oReturn.RETCD == "E") {
+
+                console.log("NAS 전송 오류!!");
+
+                //오류                              
+                oErrLog.addLog({
+                    RETCD: oReturn.RETCD,
+                    RTMSG: `[ NAS 전송 오류 ] : ${oReturn.RTMSG}`
+                });
+
+                resolve();
+
+                return;
+
+            }
+
+            console.log("NAS 전송 완료!!");
 
             oAPP.setBusyMsg("Youtube 전송중...");
 
@@ -1470,18 +1594,16 @@
 
                         oAPP.instagram.send(TY_IFDATA, oChoiceInfo, async (TY_IFDATA) => {
 
-                            debugger;
-
-                            let oErrLog = oAPP.errorlog;
-
                             oAPP.setBusyMsg("Kakao Story 전송중...");
 
                             console.log("인스타그램 종료");
 
                             console.log("카카오 시작");
 
+                            let oErrLog = oAPP.errorlog;
+
                             // 카카오 전송
-                            let aResult = await oAPP.kakaoStory.send(TY_IFDATA);
+                            let aResult = await oAPP.kakaoStory.send(TY_IFDATA, oChoiceInfo);
 
                             // 카카오 전송 결과가 하나도 없다면
                             if (aResult.length !== 0) {
@@ -1489,7 +1611,7 @@
                                 //오류                              
                                 oErrLog.addLog({
                                     RETCD: "E",
-                                    RTMSG: `[ kakaoStory 전송 오류] : ???? `
+                                    RTMSG: `[ kakaoStory 전송 오류] : 전송 결과가 하나도 없습니다. `
                                 });
 
                             }
@@ -1652,7 +1774,7 @@
                 template: new sap.m.MessageItem({
                     title: "{RTMSG}",
                     description: "{RTMSG}",
-                }).bindProperty("type", "RETCD", function(RETCD) {
+                }).bindProperty("type", "RETCD", function (RETCD) {
 
                     switch (RETCD) {
                         case "S":

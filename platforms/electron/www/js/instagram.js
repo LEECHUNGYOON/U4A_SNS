@@ -73,8 +73,14 @@ oInstagram.send = async (oParams, oChoiceInfo, cb) => {
 
     }
 
+    // 동영상 URL이 있다면 해당 url을 본문에 내용 추가
+    var LVDO_URL = oParams.VIDEO.URL;
+    if (LVDO_URL === "") {
+        LVDO_URL = oParams.ATTCH.VIDEO_URL;
+    }
+
     // 동영상 URL 경로가 있을 경우
-    if (oParams.VIDEO.URL && oParams.VIDEO.URL != "") {
+    if (LVDO_URL != "") {
 
         await fnSendVideo(oParams);
 
@@ -82,8 +88,14 @@ oInstagram.send = async (oParams, oChoiceInfo, cb) => {
 
     }
 
+    // 이미지 URL이 있다면 해당 url을 본문에 내용 추가
+    var LIMG_URL = oParams.IMAGE.URL;
+    if (LIMG_URL === "") {
+        LIMG_URL = oParams.ATTCH.IMG_URL;
+    }
+
     // 이미지 경로가 있을 경우
-    if (oParams.IMAGE.URL && oParams.IMAGE.URL != "") {
+    if (LIMG_URL != "") {
 
         await fnSendPhoto(oParams);
 
@@ -170,10 +182,16 @@ function sendVideo(oParams, oAccInfo, cb) {
         sPath = `${sInstaAccId}/media`, // 호출 API  
         sMethod = "POST";
 
+    // 동영상 URL이 있다면 해당 url을 본문에 내용 추가
+    var LVDO_URL = oParams.VIDEO.URL;
+    if (LVDO_URL === "") {
+        LVDO_URL = oParams.ATTCH.VIDEO_ORG_URL;
+    }
+
     let oFormData = new FormData();
     oFormData.append("access_token", PAGETOKEN);
     oFormData.append("media_type", "VIDEO");
-    oFormData.append("video_url", oParams.VIDEO.URL);
+    oFormData.append("video_url", LVDO_URL);
     oFormData.append("caption", sCaption);
 
     let sUrl = oAPP.fbApi + "/" + sPath;
@@ -233,9 +251,16 @@ function sendPost(oParams, oAccInfo, cb) {
         sPath = `${sInstaAccId}/media`, // 호출 API
         sMethod = "POST";
 
+
+    // 이미지 URL이 있다면 해당 url을 본문에 내용 추가
+    var LIMG_URL = oParams.IMAGE.URL;
+    if (LIMG_URL === "") {
+        LIMG_URL = oParams.ATTCH.IMG_ORG_URL;
+    }
+
     let oFormData = new FormData();
     oFormData.append("access_token", PAGETOKEN);
-    oFormData.append("image_url", oParams.IMAGE.URL);
+    oFormData.append("image_url", LIMG_URL);
     oFormData.append("caption", sCaption);
 
     let sUrl = oAPP.fbApi + "/" + sPath;
@@ -293,7 +318,7 @@ function sendStatus(oParams, oAccInfo, oRes, cb) {
         success: function (res) {
 
             debugger;
-            
+
             let oErr = {
                 RETCD: "",
                 RTMSG: ""
@@ -454,18 +479,20 @@ function getMessage(oParams) {
 
     sMsg += " \n\n\n ";
 
-    let iHashLength = oParams.HASHTAG.length;
-    if (iHashLength !== 0) {
+    // let iHashLength = oParams.HASHTAG.length;
+    // if (iHashLength !== 0) {
 
-        for (var i = 0; i < iHashLength; i++) {
+    //     for (var i = 0; i < iHashLength; i++) {
 
-            let sHash = oParams.HASHTAG[i];
+    //         let sHash = oParams.HASHTAG[i];
 
-            sMsg += sHash + " \n ";
+    //         sMsg += sHash + " \n ";
 
-        }
+    //     }
 
-    }
+    // }
+    // 해시태그 구성
+    sMsg += oAPP.fn.getHashText(oParams.HASHTAG);
 
     return sMsg;
 

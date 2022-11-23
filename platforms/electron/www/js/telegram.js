@@ -87,6 +87,12 @@ function Lfn_getBody(sParams) {
 
     }
 
+    if(sParams.HASHTAG.length != 0){
+
+        Lbody += oAPP.fn.getHashText(sParams.HASHTAG);
+
+    }
+
     return Lbody;
 
 }
@@ -115,9 +121,9 @@ async function Lfn_sendTelegramMsg(USER_INFO, sParams, CB) {
     // 메시지 본문
     var Lbody = Lfn_getBody(sParams);
 
-    if (sParams.VIDEO.FPATH && sParams.VIDEO.FPATH !== "") {
-        sParams.VIDEO.URL = "";
-    }
+    // if (sParams.VIDEO.FPATH && sParams.VIDEO.FPATH !== "") {
+    //     sParams.VIDEO.URL = "";
+    // }
 
     // URL 이 있으면 
     if (sParams.VIDEO.URL && sParams.VIDEO.URL !== "") {
@@ -258,7 +264,7 @@ function sendVideo(sParams) {
             //오류 메시지 수집
             oErrLog.addLog({
                 RETCD: "E",
-                RTMSG: "[ TELEGRAM Video 전송 오류 #2] "
+                RTMSG: `[ TELEGRAM Video 전송 오류 #2]: status : ${sRET.status}`
             });
 
             resolve();
@@ -317,70 +323,70 @@ function sendVideo(sParams) {
         }
 
 
-        // 실제 파일 경로
-        var LURL = "https://api.telegram.org/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/getFile?file_id=" + sFile_id
-        // sRET.data.result.video.file_id;
-        // sRET.data.result.document.file_id;
+        // // 실제 파일 경로
+        // var LURL = "https://api.telegram.org/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/getFile?file_id=" + sFile_id
+        // // sRET.data.result.video.file_id;
+        // // sRET.data.result.document.file_id;
 
-        // 임시 글로벌에 file id를 담는다.
-        // VIDEO_FILE_ID = sRET.data.result.video.file_id;
-        VIDEO_FILE_ID = sFile_id;
+        // // 임시 글로벌에 file id를 담는다.
+        // // VIDEO_FILE_ID = sRET.data.result.video.file_id;
+        // VIDEO_FILE_ID = sFile_id;
 
-        sParams.VIDEO.FILE_ID = sFile_id;
+        // sParams.VIDEO.FILE_ID = sFile_id;
 
-        try {
-            var sRET = await axios.get(LURL, {
-                validateStatus: false
-            });
-        } catch (error) {
+        // try {
+        //     var sRET = await axios.get(LURL, {
+        //         validateStatus: false
+        //     });
+        // } catch (error) {
 
-            //오류 메시지 수집
-            oErrLog.addLog({
-                RETCD: "E",
-                RTMSG: "[ TELEGRAM Video 전송 오류 #6] "
-            });
-            resolve();
-            return;
+        //     //오류 메시지 수집
+        //     oErrLog.addLog({
+        //         RETCD: "E",
+        //         RTMSG: "[ TELEGRAM Video 전송 오류 #6] "
+        //     });
+        //     resolve();
+        //     return;
 
-        }
+        // }
 
-        //오류 
-        if (sRET.status != 200) {
-            //오류 메시지 수집
-            oErrLog.addLog({
-                RETCD: "E",
-                RTMSG: "[ TELEGRAM Video 전송 오류 #7] "
-            });
-            resolve();
-            return;
-        }
+        // //오류 
+        // if (sRET.status != 200) {
+        //     //오류 메시지 수집
+        //     oErrLog.addLog({
+        //         RETCD: "E",
+        //         RTMSG: "[ TELEGRAM Video 전송 오류 #7] "
+        //     });
+        //     resolve();
+        //     return;
+        // }
 
-        //오류
-        if (typeof sRET.data === "undefined") {
-            //오류 메시지 수집
-            oErrLog.addLog({
-                RETCD: "E",
-                RTMSG: "[ TELEGRAM Video 전송 오류 #8] "
-            });
-            resolve();
-            return;
+        // //오류
+        // if (typeof sRET.data === "undefined") {
+        //     //오류 메시지 수집
+        //     oErrLog.addLog({
+        //         RETCD: "E",
+        //         RTMSG: "[ TELEGRAM Video 전송 오류 #8] "
+        //     });
+        //     resolve();
+        //     return;
 
-        }
+        // }
 
-        //오류
-        if (typeof sRET.data.result === "undefined") {
-            //오류 메시지 수집
-            oErrLog.addLog({
-                RETCD: "E",
-                RTMSG: "[ TELEGRAM Video 전송 오류 #9] "
-            });
-            resolve();
-            return;
+        // //오류
+        // if (typeof sRET.data.result === "undefined") {
+        //     //오류 메시지 수집
+        //     oErrLog.addLog({
+        //         RETCD: "E",
+        //         RTMSG: "[ TELEGRAM Video 전송 오류 #9] "
+        //     });
+        //     resolve();
+        //     return;
 
-        }
+        // }
 
-        sParams.VIDEO.FPATH = "";
-        sParams.VIDEO.URL = "https://api.telegram.org/file/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/" + sRET.data.result.file_path;
+        // sParams.VIDEO.FPATH = "";
+        // sParams.VIDEO.URL = "https://api.telegram.org/file/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/" + sRET.data.result.file_path;
         
         resolve();
 
@@ -449,15 +455,13 @@ function sendImage(sParams) {
 
         }
 
-
-
         //오류 
         if (sRET.status != 200) {
 
             //오류 메시지 수집
             oErrLog.addLog({
                 RETCD: "E",
-                RTMSG: "[ TELEGRAM Image 전송 오류 #2] "
+                RTMSG: `[ TELEGRAM Image 전송 오류 #2]: status: ${sRET.status} `
             });
 
             resolve();
@@ -515,68 +519,68 @@ function sendImage(sParams) {
             return;
         }
 
-        // 실제 파일 경로
-        var LURL = "https://api.telegram.org/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/getFile?file_id=" + sFile_id;
-        // sRET.data.result.document.file_id;
+        // // 실제 파일 경로
+        // var LURL = "https://api.telegram.org/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/getFile?file_id=" + sFile_id;
+        // // sRET.data.result.document.file_id;
 
-        // IMAGE_FILE_ID = sRET.data.result.document.file_id;
-        IMAGE_FILE_ID = sFile_id;
+        // // IMAGE_FILE_ID = sRET.data.result.document.file_id;
+        // IMAGE_FILE_ID = sFile_id;
 
-        sParams.IMAGE.FILE_ID = sFile_id;
+        // sParams.IMAGE.FILE_ID = sFile_id;
 
-        try {
-            var sRET = await axios.get(LURL, {
-                validateStatus: false
-            });
-        } catch (error) {
+        // try {
+        //     var sRET = await axios.get(LURL, {
+        //         validateStatus: false
+        //     });
+        // } catch (error) {
 
-            //오류 메시지 수집
-            oErrLog.addLog({
-                RETCD: "E",
-                RTMSG: "[ TELEGRAM Image 전송 오류 #6] "
-            });
-            resolve();
-            return;
+        //     //오류 메시지 수집
+        //     oErrLog.addLog({
+        //         RETCD: "E",
+        //         RTMSG: "[ TELEGRAM Image 전송 오류 #6] "
+        //     });
+        //     resolve();
+        //     return;
 
-        }
+        // }
 
-        //오류 
-        if (sRET.status != 200) {
-            //오류 메시지 수집
-            oErrLog.addLog({
-                RETCD: "E",
-                RTMSG: "[ TELEGRAM Image 전송 오류 #7] "
-            });
-            resolve();
-            return;
-        }
+        // //오류 
+        // if (sRET.status != 200) {
+        //     //오류 메시지 수집
+        //     oErrLog.addLog({
+        //         RETCD: "E",
+        //         RTMSG: "[ TELEGRAM Image 전송 오류 #7] "
+        //     });
+        //     resolve();
+        //     return;
+        // }
 
-        //오류
-        if (typeof sRET.data === "undefined") {
-            //오류 메시지 수집
-            oErrLog.addLog({
-                RETCD: "E",
-                RTMSG: "[ TELEGRAM Image 전송 오류 #8] "
-            });
-            resolve();
-            return;
+        // //오류
+        // if (typeof sRET.data === "undefined") {
+        //     //오류 메시지 수집
+        //     oErrLog.addLog({
+        //         RETCD: "E",
+        //         RTMSG: "[ TELEGRAM Image 전송 오류 #8] "
+        //     });
+        //     resolve();
+        //     return;
 
-        }
+        // }
 
-        //오류
-        if (typeof sRET.data.result === "undefined") {
-            //오류 메시지 수집
-            oErrLog.addLog({
-                RETCD: "E",
-                RTMSG: "[ TELEGRAM Image 전송 오류 #10] "
-            });
-            resolve();
-            return;
+        // //오류
+        // if (typeof sRET.data.result === "undefined") {
+        //     //오류 메시지 수집
+        //     oErrLog.addLog({
+        //         RETCD: "E",
+        //         RTMSG: "[ TELEGRAM Image 전송 오류 #10] "
+        //     });
+        //     resolve();
+        //     return;
 
-        }
+        // }
 
-        sParams.IMAGE.FPATH = "";
-        sParams.IMAGE.URL = "https://api.telegram.org/file/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/" + sRET.data.result.file_path;
+        // sParams.IMAGE.FPATH = "";
+        // sParams.IMAGE.URL = "https://api.telegram.org/file/bot5462273470:AAFtKZ14L-EBxyH84KF7tunAYxf_AFVbpTQ/" + sRET.data.result.file_path;
 
         resolve();
 
@@ -726,6 +730,8 @@ async function sendMessage(chat_id, sParams) {
 /* ================================================================= */
 exports.send = function(sParams, oChoiceInfo, CB) {
 
+    debugger;
+    
     // 임시 변수 초기화
     if(sParams.VIDEO.FILE_ID){ delete sParams.VIDEO.FILE_ID; }
     if(sParams.IMAGE.FILE_ID){ delete sParams.IMAGE.FILE_ID; }

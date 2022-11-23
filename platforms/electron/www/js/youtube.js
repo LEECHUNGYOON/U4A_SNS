@@ -93,10 +93,16 @@ function Lfn_setSendBody(sParams) {
     var LHASHTAG = "";
 
     //해시 태그
-    for (var i = 0; i < sParams.HASHTAG.length; i++) {
-        var Lhash = sParams.HASHTAG[i];
-        LHASHTAG += " \n " + Lhash;
+    if(sParams.HASHTAG.length != 0){
+
+        LHASHTAG += oAPP.fn.getHashText(sParams.HASHTAG);
+
     }
+
+    // for (var i = 0; i < sParams.HASHTAG.length; i++) {
+    //     var Lhash = sParams.HASHTAG[i];
+    //     LHASHTAG += " \n " + Lhash;
+    // }
 
     //추가 이미지가 존재한다면 ..
     for (var i = 0; i < sParams.IMAGE.T_URL.length; i++) {
@@ -160,6 +166,8 @@ let oErrLog = oAPP.errorlog;
 /* ================================================================= */
 exports.send = function(sParams, oChoiceInfo, CB) {
 
+    debugger;
+    
     // Youtube Url이 있다면 지우고 시작한다.
     if (sParams.VIDEO.YOUTUBE_URL) {
         delete sParams.VIDEO.YOUTUBE_URL;
@@ -185,14 +193,14 @@ exports.send = function(sParams, oChoiceInfo, CB) {
 
     }
 
-    // Link 동영상 URL 존재하는 경우는 현재 프로세스를 종료한다 
-    if (sParams.VIDEO.URL && sParams.VIDEO.URL !== "") {
+    // // Link 동영상 URL 존재하는 경우는 현재 프로세스를 종료한다 
+    // if (sParams.VIDEO.URL && sParams.VIDEO.URL !== "") {
 
-        //Callback 
-        CB(sParams);
-        return;
+    //     //Callback 
+    //     CB(sParams);
+    //     return;
 
-    }
+    // }
 
     const
         remote = oAPP.remote,

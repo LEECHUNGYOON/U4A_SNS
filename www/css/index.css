@@ -26,3 +26,8 @@ body {
 .u4aSnsHelpPopover .sapUiFormContainerToolbar .sapMIBar {
     background-color: var(--sapIllus_Layering1);
 }
+
+.u4aSnsHelpPopover .sapUiForm .sapUiRespGrid .sapMLabel {
+    font-size: 1rem;
+    color: #9ba4aa;
+}

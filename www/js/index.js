@@ -1,5 +1,5 @@
 (async () => {
-    "use strict";
+    "use strict";   
 
     window.oAPP = {};
 
@@ -56,12 +56,19 @@
 
     oAPP.errorlog = require(oAPP.path.join(oAPP.JsPath, "errlog.js")); // 에러 로그 관련 util
     oAPP.mongdb = require(oAPP.path.join(oAPP.JsPath, "mongdb.js")); // 몽고 디비 연결 및 SNS별 Token Key 정보 구하기
-    oAPP.autoUpdate = require(oAPP.path.join(oAPP.JsPath, "autoUpdate.js"));    
-    oAPP.oSnsAttachFile = require(oAPP.path.join(__dirname, 'js/sns_attchFiles.js')); 
-    oAPP.sendADMINnotice = require(oAPP.path.join(__dirname, 'js/sendADMINnotice.js')),
+    oAPP.autoUpdate = require(oAPP.path.join(oAPP.JsPath, "autoUpdate.js"));
+    oAPP.oSnsAttachFile = require(oAPP.path.join(__dirname, 'js/sns_attchFiles.js'));
+    oAPP.sendADMINnotice = require(oAPP.path.join(__dirname, 'js/sendADMINnotice.js'));
 
-    oAPP.aEmogiIcons = require(oAPP.path.join(oAPP.apppath, "json", "emogi.json"));    
-    oAPP.emogiGroupIcons = require(oAPP.path.join(oAPP.apppath, "json", "emogi-group.json"));
+
+    /************************************************************************
+     * JSON
+     ************************************************************************/
+    let sJsonPath = oAPP.path.join(oAPP.apppath, "json");
+
+    oAPP.aEmogiIcons = require(oAPP.path.join(sJsonPath, "emogi.json"));
+    oAPP.emogiGroupIcons = require(oAPP.path.join(sJsonPath, "emogi-group.json"));
+    oAPP.snsHelp = require(oAPP.path.join(sJsonPath, "SnsHelp.json"));
 
     // 컴퓨터 이름을 읽어서 백그라운드 모드일지 아닐지 판단
     if (process.env.COMPUTERNAME === process.env.SERVER_COMPUTERNAME) {
@@ -182,7 +189,7 @@
 
 
         // no build 상태일 경우 아래 로직 수행하지 않음.
-        if(!oAPP.app.isPackaged){
+        if (!oAPP.app.isPackaged) {
             return;
         }
 
@@ -325,7 +332,7 @@
 
     } // end of onunhandledrejection       
 
-})().then(() => {
+})().then(async () => {
 
     // APP 구동 시작
     oAPP.fn.onStart();

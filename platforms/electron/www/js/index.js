@@ -29,6 +29,7 @@
      * Electron & NPM Library
      ************************************************************************/
     oAPP.remote = require('@electron/remote');
+    oAPP.remoteMain = require('@electron/remote/main');
     oAPP.app = oAPP.remote.app;
     oAPP.webCon = oAPP.remote.getCurrentWebContents();
     oAPP.tray = oAPP.remote.Tray;

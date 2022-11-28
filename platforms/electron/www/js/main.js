@@ -467,13 +467,16 @@
                                     title: "SNS Preview",
                                     content: aSNSPrevContent,
                                     footer: new sap.m.Bar({
+                                        visible: false,
                                         contentLeft: [
-                                            // new sap.m.Button({
-                                            //     text: "해시태그 테스트",
-                                            //     press: () => {
-                                            //         oAPP.fn.testHash();
-                                            //     }
-                                            // })
+
+                                            new sap.m.Button({
+                                                text: "업데이트 팝업",
+                                                press: () => {
+                                                    oAPP.fn.testPopup();
+                                                }
+                                            })
+
                                         ]
                                     })
 
@@ -496,6 +499,86 @@
         ];
 
     }; // end of oAPP.fn.getPageContent    
+
+
+
+    oAPP.fn.testPopup = () => {
+
+        const BrowserWindow = oAPP.remote.require('electron').BrowserWindow;
+
+        let oCurrWin = oAPP.remote.getCurrentWindow();
+       
+
+        let loadUrl = oAPP.path.join(oAPP.apppath, "update.html"),
+            appIcon = oAPP.path.join(oAPP.apppath, "/img/logo.png");
+
+        let browserWindowOpts = {
+            "icon": appIcon,
+            "height": 150,
+            "width": 400,
+            "frame": false,
+            "alwaysOnTop": true,
+            // "transparent": true,
+            "autoHideMenuBar": true,
+            "backgroundColor": "#030303",
+            "webPreferences": {
+                "devTools": true,
+                "nodeIntegration": true,
+                "enableRemoteModule": true,
+                "contextIsolation": false,
+                "backgroundThrottling": false,
+                "nativeWindowOpen": true,
+                "webSecurity": false
+            }
+        };
+
+        let oBrowserWindow = new BrowserWindow(browserWindowOpts);
+        oAPP.remoteMain.enable(oBrowserWindow.webContents);
+
+        oBrowserWindow.loadURL(loadUrl, browserWindowOpts);
+
+        oBrowserWindow.webContents.on('did-finish-load', function () {
+
+            oCurrWin.hide();
+            
+            let intValue = 10;
+
+            let Interval = setInterval(() => {                
+
+                // 메타 정보를 보낸다.
+                oBrowserWindow.webContents.send('if-update-info', intValue);
+
+                intValue += 10;
+
+
+            }, 1000);
+
+            setTimeout(() => {
+
+                clearInterval(Interval);
+                Interval = null;
+
+                oBrowserWindow.close();
+
+            }, 10000);
+
+
+        });
+
+
+        // Open the DevTools.
+        oBrowserWindow.webContents.openDevTools();
+
+        // Emitted when the window is closed.
+        oBrowserWindow.on('closed', () => {
+
+            oCurrWin.show();
+
+            oBrowserWindow = null;
+
+        });
+
+    };
 
     /************************************************************************
      * SNS 입력 부분 페이지 Content 영역 UI 그리기
@@ -1908,8 +1991,6 @@
 
         });
 
-
-
         return oSplitApp;
 
     };
@@ -2202,7 +2283,9 @@
         let oHelpdata = oAPP.snsHelp.video,
             oJsonModel = new sap.ui.model.json.JSONModel();
 
-        oJsonModel.setData({video: oHelpdata});
+        oJsonModel.setData({
+            video: oHelpdata
+        });
         oPopup.setModel(oJsonModel);
 
         oPopup.openBy(oBtn);

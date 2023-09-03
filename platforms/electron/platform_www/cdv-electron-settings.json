@@ -1,6 +1,8 @@
 {
     "browserWindow": {
         "height": 800,
+        "width": 1200,
+        "backgroundColor": "#030303",
         "webPreferences": {
             "devTools": true,
             "nodeIntegration": true,
@@ -9,7 +11,6 @@
             "backgroundThrottling": false,
             "nativeWindowOpen": true,
             "webSecurity": false
-        },
-        "width": 800
+        }        
     }
 }

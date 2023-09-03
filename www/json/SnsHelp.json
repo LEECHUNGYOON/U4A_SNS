@@ -1,0 +1,103 @@
+{
+    "video": [{
+            "title": "Youtube",
+            "items": [{
+                    "name": "일일 전송 한도",
+                    "value": "대략 5회"
+                }, {
+                    "name": "최대 파일 크기",
+                    "value": "64GB"
+                },
+                {
+                    "name": "허용된 미디어 MIME 유형",
+                    "value": "video/*, application/octet-stream"
+                }
+            ]
+        },
+        {
+            "title": "Facebook",
+            "items": [{
+                "name": "제약사항",
+                "value": "Youtube 동영상 링크로 업로드하기 때문에 별도 제약은 없음"
+            }]
+        },
+        {
+            "title": "Instagram",
+            "items": [{
+                    "name": "컨테이너",
+                    "value": "MOV 또는 MP4(MPEG-4 Part 14), 편집 리스트 없음, 파일 시작 부분의 moov atom"
+                },
+                {
+                    "name": "오디오 코덱",
+                    "value": "AAC, 최대 샘플 속도 48khz, 1 또는 2채널(모노 또는 스테레오)"
+                }, {
+                    "name": "동영상 코덱",
+                    "value": "HEVC 또는 H264, 프로그레시브 스캔, 폐쇄 GOP, 4:2:0 크로마 서브샘플링"
+                }, {
+                    "name": "프레임 속도",
+                    "value": "23~60FPS"
+                }, {
+                    "name": "사진 크기",
+                    "value": "최대 열(수평 픽셀): 1,920 \n 최소 가로세로비[열/행]: 4/5 \n 최대 가로세로비[열/행]: 16/9 \n "
+                }, {
+                    "name": "동영상 비트 전송률",
+                    "value": "VBR, 최대 25Mbps"
+                }, {
+                    "name": "오디오 비트 전송률",
+                    "value": "128kbps"
+                }, {
+                    "name": "지속 시간",
+                    "value": "최대 60초, 최소 3초"
+                }, {
+                    "name": "파일 크기",
+                    "value": "최대 100MB"
+                }
+            ]
+        }
+    ],
+    "image": [{
+            "title": "Facebook",
+            "items": [{
+                    "name": "지원되는 형식",
+                    "value": "JPEG, BMP, PNG, GIF, TIFF"
+                },
+                {
+                    "name": "파일 크기",
+                    "value": "파일 크기는 4MB 이하여야 합니다. \n\n PNG 파일의 경우 파일 크기를 1MB 미만으로 유지하십시오. \n\n 1MB보다 큰 PNG 파일은 업로드 후 모자이크 처리되어 나타날 수 있습니다."
+                }
+            ]
+        },
+        {
+            "title": "Instagram",
+            "items": [{
+                    "name": "게시 제한 횟수",
+                    "value": "24시간 이내에 게시할 수 있는 게시물 수가 25개로 제한"
+                },
+                {
+                    "name": "지원되는 형식",
+                    "value": "JPEG"
+                },
+                {
+                    "name": "파일 크기",
+                    "value": "최대 8MB"
+                }, {
+                    "name": "가로세로비",
+                    "value": "4:5~1.91:1 범위 이내"
+                }, {
+                    "name": "최소 너비",
+                    "value": "320(필요한 경우 최솟값으로 확대)"
+                }, {
+                    "name": "최대 너비",
+                    "value": "1,440(필요한 경우 최댓값으로 축소)"
+                }, {
+                    "name": "높이",
+                    "value": "너비와 가로세로비에 따라 다름"
+                }, {
+                    "name": "컬러 스페이스",
+                    "value": "sRGB. 다른 컬러 스페이스를 사용하는 이미지는 컬러 스페이스가 sRGB로 전환됩니다"
+                }
+            ]
+        }
+
+    ]
+}

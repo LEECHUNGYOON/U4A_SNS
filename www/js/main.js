@@ -30,6 +30,19 @@
             },
             (error) => { // error
 
+
+                /**
+                 * 2023-09-03
+                 * http server error 오류 로그 수집 중지
+                 * 사유: 텔레그램으로 과도한 오류 메시지가 발송됨
+                 */
+
+                if(!error){
+                    return;
+                }
+
+                return console.error(error);
+
                 // 오류 메시지 띄우기
                 let sErrMsg = `[http server error] : ${error.toString()}`;
 
